@@ -1,0 +1,14 @@
+{
+    "name": "wanderis/chat-websocket",
+    "description": "WebSocket server for Wanderis hashtag chat system",
+    "type": "project",
+    "require": {
+        "cboden/ratchet": "^0.4.4",
+        "php": ">=7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Wanderis\\Chat\\": "src/"
+        }
+    }
+} 

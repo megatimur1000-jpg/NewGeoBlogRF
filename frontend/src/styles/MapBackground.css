@@ -1,0 +1,156 @@
+/* 🗺️ Картографические фоны для постов и активности */
+
+/* Вариант 1: Продолжение карты (если карта открыта) */
+.map-background-extension {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 0;
+  background: transparent;
+}
+
+/* Вариант 2: Насыщенный картографический паттерн (когда карта не открыта) */
+.map-pattern-background {
+  background-image: 
+    /* Горизонтальные линии (широта) - более насыщенные */
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 39px,
+      rgba(76, 201, 240, 0.25) 39px,
+      rgba(76, 201, 240, 0.25) 40px
+    ),
+    /* Вертикальные линии (долгота) - более насыщенные */
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 39px,
+      rgba(76, 201, 240, 0.25) 39px,
+      rgba(76, 201, 240, 0.25) 40px
+    ),
+    /* Точки на пересечениях */
+    radial-gradient(circle, rgba(76, 201, 240, 0.3) 2px, transparent 2px),
+    /* Градиентный фон - нейтральный */
+    linear-gradient(135deg, rgba(240, 248, 255, 0.95) 0%, rgba(230, 240, 250, 0.9) 100%);
+  background-size: 100% 40px, 40px 100%, 40px 40px, 100% 100%;
+  background-position: 0 0, 0 0, 0 0, 0 0;
+  position: relative;
+}
+
+/* Вариант 3: Насыщенный SVG паттерн с картографической сеткой */
+.map-grid-background {
+  background-image: 
+    url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='40' height='40' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 40 0 L 0 0 0 40' fill='none' stroke='%234cc9f0' stroke-width='1' opacity='0.3'/%3E%3Ccircle cx='0' cy='0' r='2' fill='%234cc9f0' opacity='0.4'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23grid)'/%3E%3C/svg%3E"),
+    linear-gradient(135deg, rgba(240, 248, 255, 0.95) 0%, rgba(230, 240, 250, 0.9) 100%);
+  background-size: 40px 40px, 100% 100%;
+}
+
+/* Вариант 4: Насыщенная текстура карты с точками и линиями */
+.map-texture-background {
+  background-image: 
+    /* Точки на пересечениях - более заметные */
+    radial-gradient(circle, rgba(76, 201, 240, 0.4) 2px, transparent 2px),
+    /* Горизонтальные линии - более насыщенные */
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 29px,
+      rgba(76, 201, 240, 0.2) 29px,
+      rgba(76, 201, 240, 0.2) 30px
+    ),
+    /* Вертикальные линии - более насыщенные */
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 29px,
+      rgba(76, 201, 240, 0.2) 29px,
+      rgba(76, 201, 240, 0.2) 30px
+    ),
+    /* Градиент - нейтральный */
+    linear-gradient(135deg, rgba(240, 248, 255, 0.95) 0%, rgba(230, 240, 250, 0.9) 100%);
+  background-size: 30px 30px, 100% 30px, 30px 100%, 100% 100%;
+}
+
+/* Вариант 5: Насыщенный минималистичный паттерн (используется по умолчанию) */
+.map-minimal-background {
+  background-image: 
+    /* Более заметные линии */
+    linear-gradient(rgba(76, 201, 240, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(76, 201, 240, 0.15) 1px, transparent 1px),
+    /* Точки на пересечениях */
+    radial-gradient(circle, rgba(76, 201, 240, 0.3) 1.5px, transparent 1.5px),
+    /* Градиент - нейтральный */
+    linear-gradient(135deg, rgba(240, 248, 255, 0.95) 0%, rgba(230, 240, 250, 0.9) 100%);
+  background-size: 35px 35px, 35px 35px, 35px 35px, 100% 100%;
+}
+
+/* Вариант 6: Географический паттерн с контурами */
+.map-geographic-background {
+  background-image: 
+    /* Контурные линии */
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(76, 201, 240, 0.03) 10px,
+      rgba(76, 201, 240, 0.03) 11px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 10px,
+      rgba(76, 201, 240, 0.03) 10px,
+      rgba(76, 201, 240, 0.03) 11px
+    ),
+    /* Градиент */
+    linear-gradient(135deg, rgba(200, 255, 220, 0.2) 0%, rgba(180, 240, 200, 0.15) 100%);
+  background-size: 20px 20px, 20px 20px, 100% 100%;
+}
+
+/* Применение к контейнерам постов и активности */
+.posts-map-background,
+.activity-map-background {
+  position: relative;
+  z-index: 0;
+}
+
+/* Режим продолжения карты - когда карта открыта */
+.map-extension-mode::before {
+  display: none; /* Убираем сетчатый паттерн, карта показывается через компонент */
+}
+
+/* Режим паттерна - когда карта не открыта (теперь используется случайная карта через компонент) */
+.map-pattern-mode::before {
+  display: none; /* Убираем сетчатый паттерн, случайная карта показывается через компонент */
+}
+
+.posts-map-background::before,
+.activity-map-background::before {
+  display: none; /* Убираем сетчатый паттерн, фон показывается через компонент MapBackgroundExtension */
+}
+
+/* Классы для разных вариантов */
+.posts-map-background.pattern-grid::before {
+  background-image: 
+    url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='50' height='50' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 50 0 L 0 0 0 50' fill='none' stroke='%234cc9f0' stroke-width='0.5' opacity='0.15'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23grid)'/%3E%3C/svg%3E"),
+    linear-gradient(135deg, rgba(200, 255, 220, 0.2) 0%, rgba(180, 240, 200, 0.15) 100%);
+  background-size: 50px 50px, 100% 100%;
+}
+
+.posts-map-background.pattern-texture::before {
+  background-image: 
+    radial-gradient(circle, rgba(76, 201, 240, 0.2) 1px, transparent 1px),
+    repeating-linear-gradient(0deg, transparent, transparent 24px, rgba(76, 201, 240, 0.08) 24px, rgba(76, 201, 240, 0.08) 25px),
+    repeating-linear-gradient(90deg, transparent, transparent 24px, rgba(76, 201, 240, 0.08) 24px, rgba(76, 201, 240, 0.08) 25px),
+    linear-gradient(135deg, rgba(200, 255, 220, 0.2) 0%, rgba(180, 240, 200, 0.15) 100%);
+  background-size: 25px 25px, 100% 25px, 25px 100%, 100% 100%;
+}
+
+.posts-map-background.pattern-minimal::before {
+  display: none; /* Убираем сетчатый паттерн */
+}
+

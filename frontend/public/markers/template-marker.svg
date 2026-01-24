@@ -1,0 +1,43 @@
+<svg width="50" height="74" viewBox="-3 -3 50 74" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Градиент: сверху насыщенный цвет → снизу светлый оттенок -->
+    <linearGradient id="markerGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FF2A2A"/>
+      <stop offset="100%" stop-color="#FF99AA"/>
+    </linearGradient>
+    
+    <!-- Тень -->
+    <filter id="markerShadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <g filter="url(#markerShadow)">
+    <!-- Капля: плавный переход от круга к бокам -->
+    <path d="M22 0 
+             C14 0, 0 8, 0 26 
+             C0 42, 14 56, 22 68 
+             C30 56, 44 42, 44 26 
+             C44 8, 30 0, 22 0 Z"
+          fill="url(#markerGradient)"
+          stroke="#000000"
+          stroke-width="1"/>
+    
+    <!-- Прозрачный круг — поднят выше, чтобы отступ сверху = отступу сбоку -->
+    <circle cx="22" cy="20" r="14" fill="white"/>
+    
+    <!-- ИКОНКА: здесь будет вставляться SVG иконка для категории -->
+    <!-- Пример: сердце (для healthcare) -->
+    <path d="M22 14 
+             C20.5 12, 18 12, 16.5 14 
+             C14 16.5, 14 20, 16.5 22.5 
+             L22 28 
+             L27.5 22.5 
+             C30 20, 30 16.5, 27.5 14 
+             C26 12, 23.5 12, 22 14 Z"
+          fill="#FF6B6B"
+          stroke="#CC3344"
+          stroke-width="1"/>
+  </g>
+</svg>
+

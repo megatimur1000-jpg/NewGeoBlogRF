@@ -1,0 +1,174 @@
+/* Обертка для input */
+.glass-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.glass-input-wrapper-full-width {
+  width: 100%;
+}
+
+/* Label */
+.glass-input-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.8);
+  margin-bottom: 4px;
+}
+
+/* Контейнер для input и иконок */
+.glass-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Базовые стили input - в стиле стекла */
+.glass-input {
+  width: 100%;
+  padding: 12px 16px;
+  padding-left: 16px;
+  padding-right: 16px;
+  
+  /* Стеклянный эффект */
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  
+  color: rgba(0, 0, 0, 0.9);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  
+  outline: none;
+}
+
+/* Если backdrop-filter не поддерживается */
+@supports not (backdrop-filter: blur(10px)) {
+  .glass-input {
+    background: rgba(255, 255, 255, 0.8);
+  }
+}
+
+/* Placeholder */
+.glass-input::placeholder {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* Focus состояние */
+.glass-input:focus {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  transform: scale(1.01);
+}
+
+/* Error состояние */
+.glass-input-error {
+  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.glass-input-error:focus {
+  border-color: rgba(239, 68, 68, 0.7);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+/* Иконки */
+.glass-input-icon {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.glass-input-icon-left {
+  left: 12px;
+}
+
+.glass-input-icon-right {
+  right: 12px;
+}
+
+.glass-input-container:has(.glass-input-icon-left) .glass-input {
+  padding-left: 40px;
+}
+
+.glass-input-container:has(.glass-input-icon-right) .glass-input {
+  padding-right: 40px;
+}
+
+/* Текст ошибки */
+.glass-input-error-text {
+  font-size: 12px;
+  color: rgba(239, 68, 68, 1);
+  margin-top: -4px;
+}
+
+/* Disabled состояние */
+.glass-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Полная ширина */
+.glass-input-full-width {
+  width: 100%;
+}
+
+/* Темная тема */
+.glass-input.dark {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.glass-input.dark::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.glass-input.dark:focus {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(59, 130, 246, 0.6);
+}
+
+.glass-input.dark .glass-input-icon {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .glass-input {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  
+  .glass-input-icon-left {
+    left: 10px;
+  }
+  
+  .glass-input-icon-right {
+    right: 10px;
+  }
+  
+  .glass-input-container:has(.glass-input-icon-left) .glass-input {
+    padding-left: 36px;
+  }
+  
+  .glass-input-container:has(.glass-input-icon-right) .glass-input {
+    padding-right: 36px;
+  }
+}
+

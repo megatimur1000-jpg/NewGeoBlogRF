@@ -1,0 +1,140 @@
+/* DynamicLayout.css - basic layout helpers for DynamicLayout */
+.dynamic-layout {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.dynamic-layout .main-view {
+  width: 100%;
+  height: 100%;
+}
+
+.side-panel-content {
+  padding: 12px;
+}
+
+/* small utilities */
+.side-panel-placeholder {
+  padding: 16px;
+}
+
+/* Вставленная панель справа (posts/activity) при открытой карте */
+.panel-inset {
+  position: absolute;
+  /* Use 1cm margins as requested */
+  top: 1cm;
+  /* Левая граница панели должна совпадать с центральной вертикалью экрана */
+  left: calc(50%);
+  bottom: 1cm;
+  right: 1cm; /* 1см от правого края экрана */
+  border-radius: 12px;
+  overflow: hidden;
+  z-index: 80;
+  display: flex;
+  /* Allow width to be fluid but cap it */
+  max-width: min(720px, calc(50% - 3cm));
+  box-shadow: 0 14px 48px rgba(0,0,0,0.25);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  /* делаем фон прозрачным — главный glass-эффект применяется к .page-main-panel */
+  background: transparent;
+  border: none;
+  color: inherit;
+  transition: transform 240ms cubic-bezier(.22,.9,.32,1), opacity 180ms ease;
+}
+
+.panel-inset .page-main-panel {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  /* Glass panel like FavoritesPanel */
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+}
+
+.panel-inset .page-body {
+  padding: 12px 16px;
+  /* Скрываем нативную полосу прокрутки, но позволяем внутренний скролл */
+  overflow: hidden;
+}
+
+/* Внутренний скроллируемый контейнер внутри панели (если требуется) */
+.panel-inset .page-body .content-scroll {
+  height: 100%;
+  overflow-y: auto;
+  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.panel-inset .page-body .content-scroll::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
+/* Лёгкие подсказки-призраки сверху/снизу для логики продолжения списка */
+.panel-inset .page-body .content-scroll:before,
+.panel-inset .page-body .content-scroll:after {
+  content: '';
+  position: sticky;
+  pointer-events: none;
+  left: 0;
+  right: 0;
+  height: 28px;
+}
+.panel-inset .page-body .content-scroll:before { top: 0; background: linear-gradient(180deg, rgba(8,10,12,0.8), transparent); }
+.panel-inset .page-body .content-scroll:after { bottom: 0; background: linear-gradient(0deg, rgba(8,10,12,0.6), transparent); }
+
+/* Убрано: глобальное скрытие скроллбаров — будем скрывать только у целевого контейнера `.content-scroll` */
+
+.panel-inset.entering {
+  transform: translateX(12px) scale(0.995);
+  opacity: 0;
+}
+
+.panel-inset.entered {
+  transform: translateX(0) scale(1);
+  opacity: 1;
+}
+
+.panel-inset.exiting {
+  transform: translateX(8px) scale(0.998);
+  opacity: 0.0;
+}
+
+.panel-inset .glass-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.posts-compact, .activity-compact {
+  padding: 8px 12px;
+}
+
+/* Ensure map sits behind and fills area */
+.left-panel-map { z-index: 0; position: relative; }
+
+/* Compact modifiers for posts/activity when shown as inset */
+.posts-compact .page-main-panel,
+.activity-compact .page-main-panel,
+.compact-mode .page-main-panel {
+  padding: 8px !important;
+}
+
+.posts-compact .page-content-wrapper,
+.activity-compact .page-content-wrapper,
+.compact-mode {
+  padding: 8px !important;
+}
+
+.activity-compact .map-content-header h1,
+.posts-compact .text-2xl {
+  font-size: 14px !important;
+}
+
+.activity-compact .full-height-content,
+.posts-compact .full-height-content {
+  padding: 8px !important;
+}

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест входа - WayAtom</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 500px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .form-group {
+            margin-bottom: 25px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 14px;
+        }
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.2s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            font-size: 14px;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        .test-accounts {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        .test-accounts h3 {
+            margin-top: 0;
+            color: #495057;
+            font-size: 16px;
+        }
+        .account-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+        .account-item strong {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Тест входа в систему</h1>
+        
+        <div class="test-accounts">
+            <h3>📋 Доступные тестовые аккаунты:</h3>
+            <div class="account-item">
+                <strong>Аккаунт 1:</strong><br>
+                Email: Testuser@example.com<br>
+                Password: test123
+            </div>
+            <div class="account-item">
+                <strong>Аккаунт 2:</strong><br>
+                Email: test@example.com<br>
+                Password: password123
+            </div>
+            <div class="account-item">
+                <strong>Аккаунт 3:</strong><br>
+                Email: newuser@example.com<br>
+                Password: password123
+            </div>
+        </div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" value="Testuser@example.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Пароль:</label>
+                <input type="password" id="password" name="password" value="test123" required>
+            </div>
+            
+            <button type="submit">🚀 Войти в систему</button>
+        </form>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerHTML = '<div class="info">⏳ Отправляем запрос на сервер...</div>';
+            
+            try {
+                console.log('Отправляем данные:', { email, password: password ? '***' : 'пустой' });
+                
+                const response = await fetch('/api/users/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                console.log('Статус ответа:', response.status);
+                console.log('Заголовки ответа:', response.headers);
+                
+                const data = await response.json();
+                console.log('Данные ответа:', data);
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+✅ Вход успешен!
+👤 Пользователь: ${data.user.username}
+📧 Email: ${data.user.email}
+🔑 Токен: ${data.token ? 'Получен' : 'Не получен'}
+📊 Статус: ${response.status}
+⏰ Время: ${new Date().toLocaleString()}
+                        </div>
+                    `;
+                    
+                    // Сохраняем токен для тестирования
+                    localStorage.setItem('test_token', data.token);
+                    localStorage.setItem('test_user', JSON.stringify(data.user));
+                    
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+❌ Ошибка входа
+💬 Сообщение: ${data.message}
+📊 Статус: ${response.status}
+⏰ Время: ${new Date().toLocaleString()}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Ошибка сети:', error);
+                resultDiv.innerHTML = `
+                    <div class="error">
+❌ Ошибка сети
+💬 Сообщение: ${error.message}
+⏰ Время: ${new Date().toLocaleString()}
+                    </div>
+                `;
+            }
+        });
+        
+        // Добавляем кнопку для тестирования профиля
+        const testProfileButton = document.createElement('button');
+        testProfileButton.textContent = '🔍 Тест профиля';
+        testProfileButton.style.marginTop = '10px';
+        testProfileButton.style.backgroundColor = '#28a745';
+        testProfileButton.onclick = async () => {
+            const token = localStorage.getItem('test_token');
+            if (!token) {
+                alert('Сначала войдите в систему!');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/users/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                document.getElementById('result').innerHTML = `
+                    <div class="info">
+🔍 Тест профиля:
+📊 Статус: ${response.status}
+📄 Данные: ${JSON.stringify(data, null, 2)}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <div class="error">
+❌ Ошибка получения профиля: ${error.message}
+                    </div>
+                `;
+            }
+        };
+        
+        document.getElementById('loginForm').appendChild(testProfileButton);
+    </script>
+</body>
+</html> 

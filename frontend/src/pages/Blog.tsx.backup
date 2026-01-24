@@ -1,0 +1,1348 @@
+
+import { MirrorGradientContainer, usePanelRegistration } from '../components/MirrorGradientProvider';
+import '../styles/GlobalStyles.css';
+import '../styles/PageLayout.css';
+import React, { useState, useEffect } from 'react';
+import BlogSection, { BlogForm } from '../components/Blog/BlogSection';
+import BlogConstructor from '../components/Blog/BlogConstructor';
+import ParagraphCreator from '../components/Blog/ParagraphCreator';
+import StateSelector from '../components/Blog/StateSelector';
+import PhotoGallery from '../components/Blog/PhotoGallery';
+import MiniPreview from '../components/Blog/MiniPreview';
+import BlogPreviewModal from '../components/Blog/BlogPreview';
+import ContentAddMenu from '../components/Blog/ContentAddMenu';
+import { FaPlus as _FaPlus, FaCog as _FaCog, FaTimes as _FaTimes } from 'react-icons/fa';
+import { BookOpen, X } from 'lucide-react';
+import { Blog, BlogConstructor as BlogConstructorType, BlogParagraph, StateType, EventData } from '../types/blog';
+import { MarkerData } from '../types/marker';
+import { Route as RouteData } from '../types/route';
+import { useLayoutState } from '../contexts/LayoutContext';
+import useFavoriteRoutes from '../hooks/useFavoriteRoutes';
+import { getBlogs, createBlog, getUserDrafts } from '../api/blogs';
+import { markerService } from '../services/markerService';
+import { activityService } from '../services/activityService';
+import { useFavorites } from '../contexts/FavoritesContext';
+import { blogDraftBus } from '../utils/blogDraftBus';
+import BookView from '../components/Blog/BookView';
+import BookCreator from '../components/Blog/BookCreator';
+import BookDraftsList from '../components/Blog/BookDraftsList';
+import BooksList from '../components/Blog/BooksList';
+import BlogsGrid from '../components/Blog/BlogsGrid';
+import BooksGrid from '../components/Blog/BooksGrid';
+import { Book } from '../types/blog';
+import { bookService } from '../services/bookService';
+
+const BlogPage: React.FC = () => {
+  const isUuid = (value: unknown): value is string =>
+    typeof value === 'string' &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89abAB][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+  // const { registerPanel, unregisterPanel } = usePanelRegistration();
+  const layoutContext = useLayoutState();
+  const [leftPanelOpen, setLeftPanelOpen] = useState(false);
+  const [rightPanelOpen, setRightPanelOpen] = useState(false);
+
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
+  const [currentView, setCurrentView] = useState<'list' | 'view' | 'constructor' | 'books'>('list');
+  
+  // Состояние конструктора
+  const [constructor, setConstructor] = useState<BlogConstructorType>({
+    paragraphs: [],
+    photos: [],
+    links: [],
+    title: '',
+    preview: '',
+    segments: []
+  });
+  
+  // Состояние данных обложки
+  const [blogCoverData, setBlogCoverData] = useState<{
+    title: string;
+    description: string;
+    gradient: string;
+    textColor: string;
+    titleFont: string;
+    descriptionFont: string;
+  } | null>(null);
+  const [editingParagraph, setEditingParagraph] = useState<BlogParagraph | null>(null);
+  const [showStateSelector, setShowStateSelector] = useState(false);
+  const [showPhotoGallery, setShowPhotoGallery] = useState(false);
+  const [showBlogPreview, setShowBlogPreview] = useState(false);
+  const [showMiniPreview, setShowMiniPreview] = useState(false);
+  const [selectedStateType, setSelectedStateType] = useState<StateType>(null);
+  const [showContentAddMenu, setShowContentAddMenu] = useState(false);
+  const [availableMarkers, setAvailableMarkers] = useState<MarkerData[]>([]);
+  const [availableEvents, setAvailableEvents] = useState<EventData[]>([]);
+  const [showBookCreator, setShowBookCreator] = useState(false);
+  const [selectedBlogForBook, setSelectedBlogForBook] = useState<Blog | null>(null);
+  const [showBookDrafts, setShowBookDrafts] = useState(false);
+  
+  // Состояние поиска и фильтрации
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterBy, setFilterBy] = useState('all');
+  
+  // Книжное представление всегда используется для чтения блога
+  
+  const favoritesContext = useFavorites();
+  const { favoriteRoutes } = useFavoriteRoutes();
+  
+  // Тестовые маршруты для проверки (Владимир)
+  const [testRoutes] = useState<RouteData[]>([
+    {
+      id: '550e8400-e29b-41d4-a716-446655440001',
+      title: 'Исторический центр Владимира',
+      description: 'Пешеходный маршрут по историческому центру Владимира',
+      waypoints: [
+        { marker_id: '550e8400-e29b-41d4-a716-446655440002', order_index: 0, notes: 'Золотые ворота' },
+        { marker_id: '550e8400-e29b-41d4-a716-446655440003', order_index: 1, notes: 'Успенский собор' }
+      ],
+      points: [
+        { id: 'point-1', title: 'Золотые ворота', latitude: 56.1286, longitude: 40.4066 },
+        { id: 'point-2', title: 'Успенский собор', latitude: 56.1290, longitude: 40.4070 }
+      ],
+      is_user_modified: false,
+      used_in_blogs: false
+    }
+  ]);
+
+  // Загружаем данные для интерактивных элементов
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        // Загружаем маркеры
+        const markers = await markerService.getAllMarkers();
+        setAvailableMarkers(markers);
+        
+        // Загружаем события из избранного
+        if (favoritesContext) {
+          // Преобразуем FavoriteEvent в EventData
+          const events = (favoritesContext.favoriteEvents || []).map(event => ({
+            id: event.id,
+            title: event.title,
+            description: '',
+            date: event.date.toISOString(),
+            location: event.location || '',
+            is_public: false,
+            creator_id: 'user',
+            hashtags: [],
+            is_user_modified: false,
+            used_in_blogs: false
+          }));
+          setAvailableEvents(events);
+        }
+      } catch (error) {
+        }
+    };
+    
+    loadData();
+  }, [favoritesContext]);
+
+  // Функция для парсинга блога с использованием реальных крючков
+  const parseBlogContent = (blog: Blog) => {
+    if (!blog.content) return [];
+
+    // Разбиваем на абзацы
+    const paragraphs = blog.content.split('\n\n').filter(p => p.trim());
+    // Получаем связанные элементы из блога
+    const relatedMarkers = blog.related_markers || [];
+    const relatedRoute = blog.related_route_id;
+    
+    return paragraphs.map((paragraph, index) => {
+      const paragraphText = paragraph.trim();
+      
+      // Определяем крючок для этого абзаца на основе связанных элементов
+      let hook = undefined;
+      
+      // Сначала проверяем, есть ли крючок в constructor_data
+      if (blog.constructor_data?.paragraphs?.[index]?.state) {
+        hook = blog.constructor_data.paragraphs[index].state;
+        }
+      // Если нет крючка в constructor_data, создаем на основе связанных элементов
+      else if (index === 0 && relatedMarkers.length > 0) {
+        const marker = availableMarkers.find(m => m.id === relatedMarkers[0]);
+        if (marker) {
+          hook = { type: 'marker' as const, data: { id: marker.id } };
+        }
+      }
+      // Если есть связанный маршрут, используем для второго абзаца
+      else if (index === 1 && relatedRoute) {
+        const route = [...(favoriteRoutes || []), ...testRoutes].find(r => r.id === relatedRoute);
+        if (route) {
+          hook = { type: 'route' as const, data: { id: route.id } };
+        }
+      }
+      // Для третьего абзаца ищем событие по упоминанию
+      else if (index === 2) {
+        const foundEvent = availableEvents.find(event => 
+          event.title && paragraphText.toLowerCase().includes(event.title.toLowerCase())
+        );
+        if (foundEvent) {
+          hook = { type: 'event' as const, data: { id: foundEvent.id } };
+        }
+      }
+
+      return {
+        id: `paragraph-${index}`,
+        text: paragraphText,
+        state: hook ? { type: hook.type, data: hook.data } : undefined,
+        photos: [],
+        links: [],
+        order: index
+      };
+
+      return {
+        id: `paragraph-${index}`,
+        text: paragraphText,
+        state: hook ? { type: hook.type, data: hook.data } : undefined,
+        photos: [],
+        links: [],
+        order: index
+      };
+    });
+  };
+
+  // Рендер для чтения: оборачиваем выбранный блог в объект книги
+
+  // Проверяем, что LayoutContext загружен (теперь всегда возвращает заглушку)
+  // if (!layoutContext) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center">
+  //       <div className="text-center">
+  //         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+  //         <p className="text-gray-600">Загрузка макета...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
+
+  const { routeDataForBlog, markerDataForBlog, setRouteDataForBlog, setMarkerDataForBlog } = layoutContext;
+
+  // useEffect(() => {
+  //   registerPanel();
+  //   registerPanel();
+    
+  //   return () => {
+  //     unregisterPanel();
+  //     unregisterPanel();
+  //   };
+  // }, []); // Убираем функции из зависимостей, так как они стабильны
+
+  // Загружаем блоги из API
+  useEffect(() => {
+    const loadBlogs = async () => {
+      try {
+        const blogsData = await getBlogs();
+        setBlogs(blogsData);
+        
+        // Добавляем тестовый блог для проверки
+        const testBlog: Blog = {
+            id: 'test-blog-1',
+            title: 'Город Владимир',
+            content: `Первый абзац про место. Я посетил Золотые ворота во Владимире. Это исторический памятник XII века.
+
+Второй абзац про маршрут. Мы прошли по маршруту "Исторический центр Владимира" и увидели много интересного.
+
+Третий абзац про событие. На фестивале "Золотые ворота" было очень весело и интересно.
+
+Четвертый абзац про собор. Успенский собор поражает своей красотой и историей.
+
+Пятый абзац без упоминаний. Просто обычный текст без крючков.`,
+            excerpt: 'Тестовый блог для проверки интерактивности во Владимире',
+            author_name: 'Тестовый автор',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            status: 'published',
+            tags: ['тест', 'владимир'],
+            related_route_id: '550e8400-e29b-41d4-a716-446655440001',
+            related_markers: ['550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440003'],
+            related_events: ['550e8400-e29b-41d4-a716-446655440004', '550e8400-e29b-41d4-a716-446655440005'],
+            constructor_data: {
+              paragraphs: [
+                {
+                  id: 'p1',
+                  text: 'Первый абзац про место. Я посетил Золотые ворота во Владимире. Это исторический памятник XII века.',
+                  state: { type: 'marker', data: { id: '550e8400-e29b-41d4-a716-446655440002' } },
+                  photos: [],
+                  links: [],
+                  order: 0
+                },
+                {
+                  id: 'p2',
+                  text: 'Второй абзац про маршрут. Мы прошли по маршруту "Исторический центр Владимира" и увидели много интересного.',
+                  state: { type: 'route', data: { id: '550e8400-e29b-41d4-a716-446655440001' } },
+                  photos: [],
+                  links: [],
+                  order: 1
+                },
+                {
+                  id: 'p3',
+                  text: 'Третий абзац про событие. На фестивале "Золотые ворота" было очень весело и интересно.',
+                  state: { type: 'event', data: { id: '550e8400-e29b-41d4-a716-446655440005' } },
+                  photos: [],
+                  links: [],
+                  order: 2
+                },
+                {
+                  id: 'p4',
+                  text: 'Четвертый абзац про собор. Успенский собор поражает своей красотой и историей.',
+                  state: { type: 'marker', data: { id: 'test-marker-2' } },
+                  photos: [],
+                  links: [],
+                  order: 3
+                },
+                {
+                  id: 'p5',
+                  text: 'Пятый абзац без упоминаний. Просто обычный текст без крючков.',
+                  state: { type: null, data: null },
+                  photos: [],
+                  links: [],
+                  order: 4
+                }
+              ],
+              photos: [],
+              links: [],
+              title: 'Город Владимир',
+              preview: 'Тестовый блог для проверки интерактивности во Владимире'
+            }
+          };
+          setBlogs([testBlog, ...blogsData]);
+        
+        // Добавляем тестовые данные для проверки (Владимир)
+        setAvailableMarkers([
+          {
+            id: '550e8400-e29b-41d4-a716-446655440002',
+            title: 'Золотые ворота',
+            description: 'Исторический памятник Владимира',
+            latitude: 56.1286,
+            longitude: 40.4066,
+            category: 'monument',
+            rating: 4.8,
+            rating_count: 15,
+            photo_urls: [],
+            hashtags: ['история', 'памятник'],
+            is_user_modified: false,
+            used_in_blogs: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            creator_id: 'test-user',
+            author_name: 'Тестовый автор',
+            likes_count: 0,
+            comments_count: 0,
+            shares_count: 0
+          },
+          {
+            id: '550e8400-e29b-41d4-a716-446655440003',
+            title: 'Успенский собор',
+            description: 'Древний собор Владимира',
+            latitude: 56.1290,
+            longitude: 40.4070,
+            category: 'church',
+            rating: 4.6,
+            rating_count: 12,
+            photo_urls: [],
+            hashtags: ['собор', 'религия'],
+            is_user_modified: false,
+            used_in_blogs: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            creator_id: 'test-user',
+            author_name: 'Тестовый автор',
+            likes_count: 0,
+            comments_count: 0,
+            shares_count: 0
+          }
+        ]);
+        
+        setAvailableEvents([
+          {
+            id: '550e8400-e29b-41d4-a716-446655440004',
+            title: 'День города Владимира',
+            description: 'Праздничные мероприятия в честь дня города Владимира',
+            date: new Date().toISOString(),
+            location: 'Центр Владимира',
+            is_user_modified: false,
+            used_in_blogs: false
+          },
+          {
+            id: '550e8400-e29b-41d4-a716-446655440005',
+            title: 'Фестиваль "Золотые ворота"',
+            description: 'Культурный фестиваль у Золотых ворот',
+            date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            location: 'Золотые ворота',
+            is_user_modified: false,
+            used_in_blogs: false
+          }
+        ]);
+      } catch (error) {
+        setBlogs([]);
+      }
+    };
+    
+    loadBlogs();
+  }, []);
+
+  // Загружаем доступные метки и события
+  useEffect(() => {
+    const loadAvailableData = async () => {
+      try {
+        // Загружаем метки
+        const markers = await markerService.getAllMarkers();
+        setAvailableMarkers(markers);
+        
+        // TODO: Загрузить события из API
+        setAvailableEvents([]);
+      } catch (error) {
+        }
+    };
+    
+    loadAvailableData();
+  }, []);
+
+  const handleCreate = async (newBlog: Blog) => {
+    try {
+      const token = localStorage.getItem('token') || localStorage.getItem('authToken') || localStorage.getItem('jwt');
+      if (!token) {
+        alert('Для публикации войдите в аккаунт.');
+        return;
+      }
+
+      // Получаем ID пользователя из токена
+      let userId = 'current_user';
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        userId = payload.user_id || payload.id || payload.sub || 'current_user';
+      } catch (e) {
+        }
+
+      // Создаем блог через API
+      const createdBlog = await createBlog({
+        title: newBlog.title,
+        content: newBlog.content,
+        excerpt: newBlog.preview || '',
+        cover_image_url: newBlog.cover_image_url || '',
+        tags: newBlog.category ? [newBlog.category] : [],
+        related_route_id: null, // Не отправляем маршруты, так как они могут не существовать в БД
+        related_markers: [], // Не отправляем маркеры, так как они могут не существовать в БД
+        status: 'published'
+      });
+      
+      // Создаем активность для создания блога
+      await activityService.createActivityHelper(
+        'blog_created',
+        'blog',
+        createdBlog.id,
+        {
+          title: createdBlog.title,
+          category: newBlog.category,
+          excerpt: createdBlog.excerpt
+        }
+      );
+
+      // Создаем активность о модерации контента
+      await activityService.createActivityHelper(
+        'content_published',
+        'blog',
+        createdBlog.id,
+        {
+          title: createdBlog.title,
+          userId,
+          moderationStatus: 'approved',
+          category: newBlog.category
+        }
+      );
+      
+      // Добавляем новый блог в список
+      setBlogs(prev => [createdBlog, ...prev]);
+      setLeftPanelOpen(false);
+      // Очищаем данные маршрута и метки после создания блога
+      setRouteDataForBlog(null);
+      setMarkerDataForBlog(null);
+    } catch (error: any) {
+      const message = error?.response?.data?.error || error?.message || 'Неизвестная ошибка';
+      alert(`Не удалось сохранить блог: ${message}`);
+    }
+  };
+
+  const handleViewBlog = (blog: Blog) => {
+    // Если у блога есть constructor_data, используем его
+    if (blog.constructor_data) {
+    setSelectedBlog(blog);
+      setCurrentView('view');
+      return;
+    }
+    
+    // Если у блога нет constructor_data, создаем его из parseBlogContent
+    const blogWithConstructor = {
+      ...blog,
+      constructor_data: {
+        paragraphs: parseBlogContent(blog)
+      }
+    };
+    
+    setSelectedBlog(blogWithConstructor);
+    setCurrentView('view');
+  };
+  
+  const handleBackToList = () => {
+    setCurrentView('list');
+    setSelectedBlog(null);
+  };
+
+  // Функции конструктора
+  const handleAddParagraph = () => {
+    const newParagraph: BlogParagraph = {
+      id: Date.now().toString(),
+      text: '',
+      state: { type: null, data: null },
+      photos: [],
+      links: [],
+      order: constructor.paragraphs.length
+    };
+    setEditingParagraph(newParagraph);
+  };
+
+  const handleSaveParagraph = (paragraph: BlogParagraph) => {
+    setConstructor(prev => ({
+      ...prev,
+      paragraphs: [...prev.paragraphs.filter(p => p.id !== paragraph.id), paragraph]
+        .sort((a, b) => a.order - b.order)
+    }));
+    setEditingParagraph(null);
+  };
+
+  const handleCancelParagraph = () => {
+    setEditingParagraph(null);
+  };
+
+  const handleAddPhoto = () => {
+    setShowPhotoGallery(true);
+  };
+
+  const handleAddPhotoGroup = () => {
+    setShowPhotoGallery(true);
+  };
+
+  const handleAddLink = () => {
+    const link = prompt('Введите URL ссылки:');
+    if (link) {
+      setConstructor(prev => ({
+        ...prev,
+        links: [...prev.links, link]
+      }));
+    }
+  };
+
+  const handleAddContent = () => {
+    setShowContentAddMenu(true);
+  };
+
+  const handleAddMarkerToBlog = async (marker: MarkerData) => {
+    // Обновляем состояние маркера в базе данных
+    try {
+      await markerService.updateMarker(marker.id, { used_in_blogs: true });
+    } catch (error) {
+      }
+
+    const newParagraph: BlogParagraph = {
+      id: Date.now().toString(),
+      text: `📍 **${marker.title}**\n\n${marker.description || ''}\n\n*Категория: ${marker.category}*`,
+      type: 'content',
+      state: {
+        type: 'marker',
+        data: marker
+      },
+      content: marker,
+      photos: [],
+      links: [],
+      order: constructor.paragraphs.length
+    };
+    
+    setConstructor(prev => ({
+      ...prev,
+      paragraphs: [...prev.paragraphs, newParagraph]
+    }));
+  };
+
+  const handleAddRouteToBlog = async (route: RouteData) => {
+    // Обновляем состояние маршрута в базе данных
+    try {
+      // Здесь нужно будет добавить API для обновления маршрутов
+      // await routeService.updateRoute(route.id, { used_in_blogs: true });
+      } catch (error) {
+      }
+
+    const newParagraph: BlogParagraph = {
+      id: Date.now().toString(),
+      text: `🛣️ **${route.title}**\n\n${route.description || ''}\n\n*Расстояние: ${route.totalDistance || 0} км*`,
+      type: 'content',
+      state: {
+        type: 'route',
+        data: route
+      },
+      content: route,
+      photos: [],
+      links: [],
+      order: constructor.paragraphs.length
+    };
+    
+    setConstructor(prev => ({
+      ...prev,
+      paragraphs: [...prev.paragraphs, newParagraph]
+    }));
+  };
+
+  const handleAddEventToBlog = async (event: EventData) => {
+    // Обновляем состояние события в базе данных
+    try {
+      // Здесь нужно будет добавить API для обновления событий
+      // await eventService.updateEvent(event.id, { used_in_blogs: true });
+      } catch (error) {
+      }
+
+    const newParagraph: BlogParagraph = {
+      id: Date.now().toString(),
+      text: `📅 **${event.title}**\n\n${event.description || ''}\n\n*Дата: ${event.date}*`,
+      type: 'content',
+      state: {
+        type: 'event',
+        data: event
+      },
+      content: event,
+      photos: [],
+      links: [],
+      order: constructor.paragraphs.length
+    };
+    
+    setConstructor(prev => ({
+      ...prev,
+      paragraphs: [...prev.paragraphs, newParagraph]
+    }));
+  };
+
+  // Функции для работы с создателем книг
+  const handleOpenBookCreator = (blog: Blog) => {
+    setSelectedBlogForBook(blog);
+    setShowBookCreator(true);
+  };
+
+  const handleCloseBookCreator = () => {
+    setShowBookCreator(false);
+    setSelectedBlogForBook(null);
+  };
+
+  const handleSaveBookDraft = (bookData: any) => {
+    console.log('💾 Сохраняем черновик книги в localStorage:', bookData);
+    // Сохраняем черновик книги в localStorage
+    const drafts = JSON.parse(localStorage.getItem('book_drafts') || '[]');
+    const newDraft = {
+      id: Date.now().toString(),
+      ...bookData,
+      created_at: new Date().toISOString()
+    };
+    drafts.push(newDraft);
+    localStorage.setItem('book_drafts', JSON.stringify(drafts));
+    console.log('✅ Черновик сохранен в localStorage. Всего черновиков:', drafts.length);
+  };
+
+  const handlePublishBook = (bookData: any) => {
+    // Публикуем книгу через сервис
+    (async () => {
+      try {
+        // Сначала инициализируем таблицу книг (если нужно)
+        try {
+          await bookService.initBooksTable();
+        } catch (initError) {
+          console.log('Таблица книг уже существует или ошибка инициализации:', initError);
+        }
+
+        console.log('📚 Создаем книгу через API...');
+        const created = await bookService.createBook({
+          title: bookData.title,
+          category: bookData.category,
+          blogIds: bookData.blogs,
+          cover: bookData.cover,
+          segments: bookData.segments
+        });
+        
+        console.log('✅ Книга создана:', created);
+        alert(`Книга "${created.title}" успешно опубликована!`);
+        setShowBookCreator(false);
+        setSelectedBlogForBook(null);
+        
+        // Обновляем список блогов, убирая те, что вошли в книгу
+        const blogsData = await getBlogs();
+        const remainingBlogs = blogsData.filter(blog => !bookData.blogs.includes(blog.id));
+        setBlogs(remainingBlogs);
+        
+        // Принудительно обновляем компонент BooksGrid
+        window.dispatchEvent(new CustomEvent('booksUpdated'));
+      } catch (e: any) {
+        const message = e?.response?.data?.error || e?.message || 'Не удалось опубликовать книгу';
+        alert(`Ошибка: ${message}`);
+        console.error('Ошибка создания книги:', e);
+      }
+    })();
+  };
+
+  // Функции для работы с черновиками книг
+  const handleEditDraft = (draft: any) => {
+    console.log('✏️ Редактируем черновик:', draft);
+    setSelectedBlogForBook(null);
+    setShowBookCreator(true);
+    // TODO: Загрузить данные черновика в BookCreator
+  };
+
+  const handleDeleteDraft = (draftId: string) => {
+    console.log('🗑️ Удаляем черновик:', draftId);
+    // Черновик уже удален в BookDraftsList
+  };
+
+  const handlePublishDraft = (draft: any) => {
+    console.log('🚀 Публикуем черновик:', draft);
+    handlePublishBook(draft);
+  };
+
+  const handleCloseConstructor = () => {
+    setCurrentView('list');
+    setEditingParagraph(null);
+  };
+
+  const handleStateSelect = (data: any) => {
+    if (editingParagraph) {
+      const updatedParagraph = {
+        ...editingParagraph,
+        state: {
+          type: selectedStateType,
+          data
+        }
+      };
+      setEditingParagraph(updatedParagraph);
+    }
+    setShowStateSelector(false);
+  };
+
+  // Функции для работы с черновиками
+  const handleSaveDraft = async (constructor: BlogConstructorType) => {
+    try {
+      // Сохраняем в localStorage для автосохранения
+      localStorage.setItem('blog_draft', JSON.stringify(constructor));
+      
+      // Сохраняем в БД
+      
+      // Показываем уведомление
+      alert('Черновик сохранен в БД!');
+    } catch (error) {
+      alert('Ошибка при сохранении черновика');
+    }
+  };
+
+  const handleLoadDraft = async () => {
+    try {
+      // Сначала пробуем загрузить из localStorage
+      const savedDraft = localStorage.getItem('blog_draft');
+      if (savedDraft) {
+        const parsedDraft = JSON.parse(savedDraft);
+        setConstructor(parsedDraft);
+        alert('Черновик загружен из localStorage!');
+        return;
+      }
+      
+      // Если в localStorage нет, загружаем из БД
+      const drafts = await getUserDrafts();
+      if (drafts.length > 0) {
+        // Показываем список черновиков для выбора
+        const latestDraft = drafts[0]; // Берем последний
+        if (latestDraft.constructor_data) {
+          setConstructor(latestDraft.constructor_data);
+          } else {
+          // Если нет constructor_data, создаем базовую структуру
+          setConstructor({
+            title: latestDraft.title || '',
+            preview: latestDraft.excerpt || '',
+            category: latestDraft.tags?.[0] || 'other',
+            geoType: 'point',
+            tools: [],
+            paragraphs: [],
+            photos: [],
+            links: []
+          });
+        }
+        alert('Черновик загружен из БД!');
+      } else {
+        alert('Черновики не найдены');
+      }
+    } catch (error) {
+      alert('Ошибка при загрузке черновика');
+    }
+  };
+
+  // Обработчик сохранения данных обложки
+  const handleCoverSave = (coverData: {
+    title: string;
+    description: string;
+    gradient: string;
+    textColor: string;
+    titleFont: string;
+    descriptionFont: string;
+  }) => {
+    setBlogCoverData(coverData);
+    console.log('💾 Данные обложки сохранены:', coverData);
+  };
+
+  const handlePublish = async (ctor: BlogConstructorType) => {
+    if (!ctor.title.trim()) {
+      alert('Введите заголовок блога');
+      return;
+    }
+    if (ctor.paragraphs.length === 0 && editingParagraph) {
+      // Если открыт незасохранённый абзац — подхватываем его в публикацию
+      const temp: BlogParagraph = {
+        id: editingParagraph.id || Date.now().toString(),
+        text: editingParagraph.text,
+        state: editingParagraph.state,
+        photos: editingParagraph.photos || [],
+        links: editingParagraph.links || [],
+        order: 0
+      } as any;
+      ctor = { ...ctor, paragraphs: [temp] };
+    }
+    if (ctor.paragraphs.length === 0) {
+      alert('Добавьте хотя бы один абзац');
+      return;
+    }
+
+    try {
+      const content = ctor.paragraphs
+        .sort((a, b) => a.order - b.order)
+        .map(p => (p.text || '').replace(/<[^>]*>/g, '')) // Убираем HTML-теги
+        .join('\n\n');
+
+      // Собираем крючки из абзацев
+      const relatedMarkers: string[] = [];
+      const relatedRoutes: string[] = [];
+      const relatedEvents: string[] = [];
+      
+      ctor.paragraphs.forEach(paragraph => {
+        if (paragraph.state?.type === 'marker' && paragraph.state.data?.id) {
+          if (isUuid(paragraph.state.data.id)) relatedMarkers.push(paragraph.state.data.id);
+        } else if (paragraph.state?.type === 'route' && paragraph.state.data?.id) {
+          if (isUuid(paragraph.state.data.id)) relatedRoutes.push(paragraph.state.data.id);
+        } else if (paragraph.state?.type === 'event' && paragraph.state.data?.id) {
+          relatedEvents.push(paragraph.state.data.id);
+        }
+      });
+
+      // Не добавляем тестовые ID, так как они не существуют в базе данных
+      // Крючки будут работать только с реальными данными из БД
+
+      const created = await createBlog({
+        title: ctor.title,
+        content,
+        excerpt: ctor.preview || '',
+        tags: [],
+        related_route_id: null, // Не отправляем маршруты, так как они могут не существовать в БД
+        related_markers: [], // Не отправляем маркеры, так как они могут не существовать в БД
+        status: 'published',
+        constructor_data: ctor,
+        cover_data: blogCoverData || undefined // Сохраняем данные обложки
+      });
+
+      setBlogs(prev => [created, ...prev]);
+      setSelectedBlog(created);
+      setCurrentView('view'); // Переключаемся на просмотр блога
+      setConstructor({ paragraphs: [], photos: [], links: [], title: '', preview: '', segments: [] });
+    alert('Блог опубликован!');
+    } catch (err) {
+      alert('Ошибка публикации блога');
+    }
+  };
+
+  // Автосохранение каждые 30 секунд
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Получаем актуальное состояние constructor через замыкание
+      setConstructor(currentConstructor => {
+        if (currentConstructor.title || currentConstructor.paragraphs.length > 0) {
+          localStorage.setItem('blog_autosave', JSON.stringify(currentConstructor));
+        }
+        return currentConstructor; // Не изменяем состояние, только сохраняем
+      });
+    }, 30000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, []); // Убираем constructor из зависимостей
+
+  return (
+    <MirrorGradientContainer className="page-layout-container page-container blogs-mode">
+      <div className="page-main-area">
+        <div className="page-content-wrapper">
+          <div className="page-main-panel relative">
+            {/* Кнопка конструктора блогов слева */}
+            <button
+              className="page-side-button left"
+              onClick={() => setCurrentView('constructor')}
+              title="Конструктор блогов"
+            >
+              <_FaPlus className="text-blue-600" size={20} />
+            </button>
+
+            {/* Кнопка создания книги справа */}
+            <button
+              className="page-side-button right"
+              onClick={() => {
+                setSelectedBlogForBook(null);
+                setShowBookCreator(true);
+              }}
+              title="Создать книгу"
+            >
+              <BookOpen className="text-green-600" size={20} />
+            </button>
+
+            {/* Основной контент */}
+            <div className="h-full relative">
+              <div className="map-content-container">
+                {/* Заголовок */}
+                <div className="map-content-header">
+                  <div className="flex items-center justify-between w-full">
+                    <h1 className="text-lg font-semibold text-slate-800">Блоги</h1>
+                  </div>
+                </div>
+
+                {/* Область контента */}
+                <div className="map-area">
+                  <div className="full-height-content p-0">
+                    <div className="relative">
+              {currentView === 'constructor' ? (
+                <div className="flex gap-6">
+                  {/* Левая панель - Конструктор */}
+                  <div className="w-80 border-r border-gray-200 pr-6">
+                    <BlogConstructor
+                      onAddParagraph={handleAddParagraph}
+                      onAddPhoto={handleAddPhoto}
+                      onAddPhotoGroup={handleAddPhotoGroup}
+                      onAddLink={handleAddLink}
+                      onAddContent={handleAddContent}
+                      onPreview={() => setShowMiniPreview(true)}
+                      onClose={handleCloseConstructor}
+                      constructor={constructor}
+                      paragraphs={constructor.paragraphs}
+                      onUpdateConstructor={(updates) =>
+                        setConstructor(prev => ({ ...prev, ...updates }))
+                      }
+                      onPublish={() => handlePublish(constructor)}
+                      onCoverSave={handleCoverSave}
+                    />
+                  </div>
+
+                  {/* Правая панель - Создание абзацев */}
+                  <div className="flex-1 overflow-y-auto">
+                    {editingParagraph ? (
+                      <ParagraphCreator
+                        onSave={handleSaveParagraph}
+                        onCancel={handleCancelParagraph}
+                        initialParagraph={editingParagraph}
+                        order={constructor.paragraphs.length + 1}
+                        onStateTypeSelect={(type) => {
+                          setSelectedStateType(type);
+                          if (type) {
+                            setShowStateSelector(true);
+                          }
+                        }}
+                        onPublish={() => handlePublish(constructor)}
+                        onSaveDraft={() => handleSaveDraft(constructor)}
+                        onLoadDraft={handleLoadDraft}
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full">
+                        <div className="text-center">
+                          <div className="text-gray-500 mb-4">
+                            <_FaPlus className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                            <div className="text-lg font-medium">Начните создавать блог</div>
+                            <div className="text-sm">Нажмите "Добавить абзац" в левой панели</div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : currentView === 'view' && selectedBlog ? (
+                <BookView
+                  book={{
+                    id: `book-${selectedBlog.id}`,
+                    title: selectedBlog.title,
+                    description: selectedBlog.excerpt,
+                    author_id: selectedBlog.author || 'unknown',
+                    author_name: selectedBlog.author_name,
+                    author_avatar: selectedBlog.author_avatar,
+                    cover_image_url: selectedBlog.cover_image_url,
+                    category: 'mixed',
+                    blogs: [{ ...selectedBlog }],
+                    rating: 4.8,
+                    ratings_count: 1,
+                    views_count: 0,
+                    likes_count: 0,
+                    is_favorite: false,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                    status: 'published'
+                  } as Book}
+                  onClose={handleBackToList}
+                />
+              ) : (
+                <div className="flex gap-6">
+                  {/* Левая панель - Блоги */}
+                  <div className="w-1/2 border-r border-gray-200 flex flex-col pr-6">
+                    <div className="bg-white border-b border-gray-200 px-4 py-2">
+                      <h2 className="text-lg font-bold text-gray-900 mb-2">БЛОГИ</h2>
+                      <div className="flex space-x-4">
+                        <div className="flex-1 relative">
+                          <input
+                            type="text"
+                            placeholder="Поиск по блогам..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-3 pr-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                          />
+                        </div>
+                        <select 
+                          value={filterBy}
+                          onChange={(e) => setFilterBy(e.target.value)}
+                          className="px-2 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                        >
+                          <option value="all">Все</option>
+                          <option value="rating">По рейтингу</option>
+                          <option value="date">По дате</option>
+                          <option value="views">По просмотрам</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="flex-1 p-2">
+                      <BlogsGrid 
+                        blogs={blogs}
+                        onViewBlog={handleViewBlog}
+                        searchQuery={searchQuery}
+                        filterBy={filterBy}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Правая панель - Книги */}
+                  <div className="w-1/2 flex flex-col">
+                    <div className="bg-white border-b border-gray-200 px-4 py-2">
+                      <h2 className="text-lg font-bold text-gray-900 mb-2">КНИГИ</h2>
+                      <div className="flex space-x-4">
+                        <div className="flex-1 relative">
+                          <input
+                            type="text"
+                            placeholder="Поиск по книгам..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-3 pr-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                          />
+                        </div>
+                        <select 
+                          value={filterBy}
+                          onChange={(e) => setFilterBy(e.target.value)}
+                          className="px-2 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                        >
+                          <option value="all">Все</option>
+                          <option value="rating">По рейтингу</option>
+                          <option value="date">По дате</option>
+                          <option value="views">По просмотрам</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="flex-1 p-2">
+                      <BooksGrid 
+                        onBookOpen={(book) => handleViewBlog(book.blogs[0] || selectedBlog!)} 
+                        searchQuery={searchQuery}
+                        filterBy={filterBy}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {leftPanelOpen && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
+                    <h2 className="text-xl font-semibold text-gray-900">Создать блог</h2>
+                    <button
+                      onClick={() => setLeftPanelOpen(false)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      <_FaTimes size={20} />
+                    </button>
+                  </div>
+                  <BlogForm
+                    onSave={handleCreate}
+                    onCancel={() => setLeftPanelOpen(false)}
+                  />
+                </div>
+              </div>
+            )}
+
+            {rightPanelOpen && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                  <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
+                    <h2 className="text-xl font-semibold text-gray-900">Настройки блогов</h2>
+                    <button
+                      onClick={() => setRightPanelOpen(false)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      <_FaTimes size={20} />
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    <p className="text-gray-600">Настройки блогов будут здесь</p>
+                  </div>
+                </div>
+              </div>
+            )}
+        </div>
+      </div>
+
+      {/* Модальные окна */}
+      {showStateSelector && (
+        <StateSelector
+          stateType={selectedStateType}
+          onSelect={handleStateSelect}
+          onClose={() => setShowStateSelector(false)}
+          favorites={(function() {
+            // Если контекст избранного недоступен, используем пустые списки
+            if (!favoritesContext) {
+              return { markers: [], routes: [], events: [] };
+            }
+            const snapshot = blogDraftBus.getSnapshot();
+            // Метки: берём только включённые тумблером (blogDraftBus)
+            const markerList = favoritesContext.favoritePlaces
+              .filter(p => snapshot.markers.has(p.id))
+              .map(p => ({
+                id: p.id,
+                name: p.name,
+                coordinates: [
+                  Number(Array.isArray(p.coordinates) ? p.coordinates[0] : (p.coordinates as any)?.[0]),
+                  Number(Array.isArray(p.coordinates) ? p.coordinates[1] : (p.coordinates as any)?.[1])
+                ] as [number, number],
+                description: p.location,
+                category: p.type
+              }));
+            // Маршруты: берём только включённые тумблером
+            const routeList = favoritesContext.favoriteRoutes
+              .filter(r => snapshot.routes.has(r.id))
+              .map(r => ({
+                id: r.id,
+                name: r.title || 'Без названия',
+                waypoints: [],
+                distance: r.distance,
+                duration: r.duration,
+                description: ''
+              }));
+            // События: берём только включённые тумблером
+            const eventList = favoritesContext.favoriteEvents
+              .filter(e => snapshot.events.has(e.id))
+              .map(e => ({
+                id: e.id,
+                title: e.title,
+                date: (e.date instanceof Date ? e.date : new Date(e.date)).toISOString(),
+                location: e.location,
+                description: ''
+              }));
+            return { markers: markerList, routes: routeList, events: eventList };
+          })()}
+        />
+      )}
+
+      {showPhotoGallery && (
+        <PhotoGallery
+          photos={constructor.photos}
+          onClose={() => setShowPhotoGallery(false)}
+          onAddPhoto={(url) => {
+            setConstructor(prev => ({
+              ...prev,
+              photos: [...prev.photos, url]
+            }));
+          }}
+          onRemovePhoto={(index) => {
+            setConstructor(prev => ({
+              ...prev,
+              photos: prev.photos.filter((_, i) => i !== index)
+            }));
+          }}
+        />
+      )}
+
+      {showBlogPreview && (
+        <BlogPreviewModal
+          constructor={constructor}
+          onClose={() => setShowBlogPreview(false)}
+        />
+      )}
+
+      {/* Мини-предпросмотр */}
+      <MiniPreview
+        constructor={constructor}
+        isVisible={showMiniPreview}
+        onClose={() => setShowMiniPreview(false)}
+      />
+
+      {/* Меню добавления контента */}
+      <ContentAddMenu
+        isOpen={showContentAddMenu}
+        onClose={() => setShowContentAddMenu(false)}
+        onAddMarker={handleAddMarkerToBlog}
+        onAddRoute={handleAddRouteToBlog}
+        onAddEvent={handleAddEventToBlog}
+        availableMarkers={availableMarkers}
+        availableRoutes={favoriteRoutes as any}
+        availableEvents={availableEvents}
+      />
+
+      {/* Создатель книг */}
+      <BookCreator
+        isOpen={showBookCreator}
+        onClose={handleCloseBookCreator}
+        blog={selectedBlogForBook}
+        availableBlogs={blogs}
+        availableRoutes={[...(favoriteRoutes || []), ...testRoutes]}
+        availableMarkers={availableMarkers}
+        onSaveDraft={handleSaveBookDraft}
+        onPublish={handlePublishBook}
+      />
+
+      {/* Модальное окно черновиков книг */}
+      {showBookDrafts && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-full max-w-4xl h-5/6 overflow-hidden">
+            <div className="flex justify-between items-center p-6 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900">Черновики книг</h2>
+              <button
+                onClick={() => setShowBookDrafts(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto h-full">
+              <BookDraftsList
+                onEditDraft={handleEditDraft}
+                onDeleteDraft={handleDeleteDraft}
+                onPublishDraft={handlePublishDraft}
+              />
+            </div>
+          </div>
+        </div>
+              )}
+                    </div>
+
+                    {/* Модальные окна */}
+                    {showPhotoGallery && (
+                      <PhotoGallery
+                        photos={constructor.photos}
+                        onClose={() => setShowPhotoGallery(false)}
+                        onAddPhoto={(url) => {
+                          setConstructor(prev => ({
+                            ...prev,
+                            photos: [...prev.photos, url]
+                          }));
+                        }}
+                        onRemovePhoto={(index) => {
+                          setConstructor(prev => ({
+                            ...prev,
+                            photos: prev.photos.filter((_, i) => i !== index)
+                          }));
+                        }}
+                      />
+                    )}
+
+                    {showBlogPreview && (
+                      <BlogPreviewModal
+                        constructor={constructor}
+                        onClose={() => setShowBlogPreview(false)}
+                      />
+                    )}
+
+                    {/* Мини-предпросмотр */}
+                    <MiniPreview
+                      constructor={constructor}
+                      isVisible={showMiniPreview}
+                      onClose={() => setShowMiniPreview(false)}
+                    />
+
+                    {/* Меню добавления контента */}
+                    <ContentAddMenu
+                      isOpen={showContentAddMenu}
+                      onClose={() => setShowContentAddMenu(false)}
+                      onAddMarker={handleAddMarkerToBlog}
+                      onAddRoute={handleAddRouteToBlog}
+                      onAddEvent={handleAddEventToBlog}
+                      availableMarkers={availableMarkers}
+                      availableRoutes={favoriteRoutes as any}
+                      availableEvents={availableEvents}
+                    />
+
+                    {/* Создатель блогов */}
+                    <BlogSection
+                      isOpen={showBlogCreator}
+                      onClose={handleCloseBlogCreator}
+                      onSave={handleSaveBlog}
+                      onAddMarker={handleAddMarkerToBlog}
+                      onAddRoute={handleAddRouteToBlog}
+                      onAddEvent={handleAddEventToBlog}
+                      availableMarkers={availableMarkers}
+                      availableRoutes={favoriteRoutes as any}
+                      availableEvents={availableEvents}
+                    />
+
+                    {/* Создатель книг */}
+                    <BookCreator
+                      isOpen={showBookCreator}
+                      onClose={handleCloseBookCreator}
+                      blog={selectedBlogForBook}
+                      availableBlogs={blogs}
+                      availableRoutes={[...(favoriteRoutes || []), ...testRoutes]}
+                      availableMarkers={availableMarkers}
+                      onSaveDraft={handleSaveBookDraft}
+                      onPublish={handlePublishBook}
+                    />
+
+                    {/* Модальное окно черновиков книг */}
+                    {showBookDrafts && (
+                      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg w-full max-w-4xl h-5/6 overflow-hidden">
+                          <div className="flex justify-between items-center p-6 border-b border-gray-200">
+                            <h2 className="text-xl font-semibold text-gray-900">Черновики книг</h2>
+                            <button
+                              onClick={() => setShowBookDrafts(false)}
+                              className="text-gray-500 hover:text-gray-700"
+                            >
+                              <X className="w-6 h-6" />
+                            </button>
+                          </div>
+                          <div className="p-6 overflow-y-auto h-full">
+                            <BookDraftsList
+                              onEditDraft={handleEditDraft}
+                              onDeleteDraft={handleDeleteDraft}
+                              onPublishDraft={handlePublishDraft}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </MirrorGradientContainer>
+  );
+};
+
+export default BlogPage;

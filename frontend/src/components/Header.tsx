@@ -1,0 +1,63 @@
+import './TopPanel.css';
+import { Search, Settings, MessageCircle, Bell, MapPin } from 'lucide-react';
+import { useActivityStats } from '../hooks/useActivityStats';
+import { useNavigate } from 'react-router-dom';
+
+const Header = ({
+  avatar = "https://via.placeholder.com/40/29BFB5/FFFFFF?text=A",
+  hasNewMessages = true,
+  openSearch = () => {},
+  openSettings = () => {},
+  openChat = () => {},
+  quickAddMarker = () => {},
+  goToProfile = () => {},
+  showUserTooltip = () => {}
+}) => {
+  const { stats } = useActivityStats();
+  const navigate = useNavigate();
+  
+  const handleNotificationsClick = () => {
+    navigate('/activity');
+  };
+  return (
+    <header className="top-controls">
+      <button className="icon-button" onClick={openSearch} aria-label="Поиск (/)">
+        <Search size={20} strokeWidth={2.5} />
+      </button>
+
+      <button className="icon-button" onClick={openSettings} aria-label="Настройки">
+        <Settings size={20} strokeWidth={2.5} />
+      </button>
+
+      <button className="icon-button" onClick={openChat} aria-label="Новые сообщения">
+        <MessageCircle size={20} strokeWidth={2.5} />
+        {hasNewMessages && <span className="pulse-badge" />}
+      </button>
+
+      <button className="icon-button" onClick={handleNotificationsClick} aria-label="Уведомления">
+        <Bell size={20} strokeWidth={2.5} />
+        {stats && stats.unread_activities > 0 && (
+          <span className="alert-dot" title={`${stats.unread_activities} непрочитанных активностей`}>
+            {stats.unread_activities > 99 ? '99+' : stats.unread_activities}
+          </span>
+        )}
+      </button>
+
+      <button className="icon-button highlight" onClick={quickAddMarker} aria-label="Добавить метку">
+        <MapPin size={20} strokeWidth={2.5} />
+      </button>
+
+      <div
+        className="user-avatar"
+        onClick={goToProfile}
+        onMouseEnter={showUserTooltip}
+        aria-label="Профиль"
+      >
+        <img src={avatar} alt="Профиль" className="avatar-image" />
+        <div className="level-badge" title="До следующего уровня: 15 очков">🌟12</div>
+      </div>
+    </header>
+  );
+};
+
+export default Header;

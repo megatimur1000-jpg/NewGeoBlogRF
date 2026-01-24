@@ -1,0 +1,41 @@
+// Скрипт для выполнения SQL миграций
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import pool from '../../db.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+async function runMigration() {
+  const client = await pool.connect();
+  
+  try {
+    console.log('🚀 Начинаем выполнение миграции...');
+    
+    // Читаем SQL файл миграции
+    const migrationPath = join(__dirname, 'add_posts_likes_comments_counts.sql');
+    const sql = readFileSync(migrationPath, 'utf-8');
+    
+    // Выполняем миграцию
+    await client.query('BEGIN');
+    await client.query(sql);
+    await client.query('COMMIT');
+    
+    console.log('✅ Миграция успешно выполнена!');
+    console.log('   - Добавлена колонка likes_count в таблицу posts');
+    console.log('   - Добавлена колонка comments_count в таблицу posts');
+    console.log('   - Созданы индексы для оптимизации');
+    
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('❌ Ошибка при выполнении миграции:', error);
+    process.exit(1);
+  } finally {
+    client.release();
+    await pool.end();
+  }
+}
+
+runMigration();
+

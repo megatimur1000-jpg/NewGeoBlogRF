@@ -1,0 +1,22 @@
+{
+  "name": "wayatom-parser",
+  "version": "1.0.0",
+  "description": "Парсер для заполнения карты WayAtom метками из OpenStreetMap и Wikipedia",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "parse": "node index.js --city",
+    "progress": "node utils/progress.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "pg": "^8.11.0",
+    "dotenv": "^16.3.1",
+    "chalk": "^4.1.2",
+    "inquirer": "^8.2.6",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

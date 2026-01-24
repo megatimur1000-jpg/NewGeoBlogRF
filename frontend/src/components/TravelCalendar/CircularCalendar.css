@@ -1,0 +1,292 @@
+/* Круговой календарь - стили в матовом стекле */
+.circular-calendar {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Segoe UI', sans-serif;
+  color: #000000;
+  position: relative;
+  padding: 20px;
+}
+
+/* Заголовок с навигацией */
+.circular-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 0 10px;
+}
+
+.circular-calendar-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #000000;
+  text-align: center;
+  flex: 1;
+}
+
+.circular-calendar-nav-btn {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #000000;
+  padding: 8px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 40px;
+}
+
+.circular-calendar-nav-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: scale(1.05);
+}
+
+.circular-calendar-nav-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Круговая карусель месяцев */
+.circular-calendar-carousel {
+  width: 100%;
+  height: 200px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  perspective: 1000px;
+}
+
+.circular-calendar-carousel-inner {
+  width: 300px;
+  height: 200px;
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+/* Карточка месяца в карусели */
+.circular-calendar-month-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120px;
+  height: 70px;
+  margin-left: -60px;
+  margin-top: -35px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  user-select: none;
+  text-align: center;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #000000;
+}
+
+.circular-calendar-month-card:hover {
+  transform: scale(1.1) !important;
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+  z-index: 20 !important;
+}
+
+.circular-calendar-month-card.active {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(59, 130, 246, 0.6);
+  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.3);
+  z-index: 15 !important;
+  transform: scale(1.15) !important;
+}
+
+.circular-calendar-month-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.circular-calendar-month-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.circular-calendar-month-events {
+  font-size: 12px;
+  color: rgba(59, 130, 246, 1);
+  font-weight: 600;
+  background: rgba(59, 130, 246, 0.2);
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+
+/* Сетка дней */
+.circular-calendar-days {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.circular-calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.circular-calendar-weekday {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #000000;
+  padding: 8px 0;
+}
+
+.circular-calendar-days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  flex: 1;
+  padding: 0 4px;
+  min-height: 0;
+}
+
+.circular-calendar-day-item {
+  min-height: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 4px;
+  position: relative;
+  color: #000000;
+}
+
+.circular-calendar-day-item:hover:not(.empty) {
+  background: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.circular-calendar-day-item.empty {
+  background: transparent;
+  border: none;
+  cursor: default;
+}
+
+.circular-calendar-day-item.empty:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.circular-calendar-day-item.has-events {
+  border-color: rgba(59, 130, 246, 0.4);
+  background: rgba(227, 242, 253, 0.4);
+}
+
+.circular-calendar-day-item.selected {
+  background: rgba(227, 242, 253, 0.8);
+  border: 2px solid rgba(59, 130, 246, 0.8);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  font-weight: 700;
+}
+
+.circular-calendar-day-item.today {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(34, 197, 94, 0.6);
+  font-weight: 700;
+}
+
+.circular-calendar-day-item.today::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  background: rgba(34, 197, 94, 1);
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(34, 197, 94, 0.6);
+}
+
+.circular-calendar-day-number {
+  font-size: 14px;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 2px;
+}
+
+.circular-calendar-day-events {
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.circular-calendar-day-event-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .circular-calendar {
+    padding: 10px;
+  }
+
+  .circular-calendar-carousel {
+    height: 150px;
+  }
+
+  .circular-calendar-month-card {
+    width: 100px;
+    height: 60px;
+    margin-left: -50px;
+    margin-top: -30px;
+  }
+
+  .circular-calendar-month-name {
+    font-size: 14px;
+  }
+
+  .circular-calendar-day-item {
+    min-height: 35px;
+    padding: 2px;
+  }
+
+  .circular-calendar-day-number {
+    font-size: 12px;
+  }
+}
+

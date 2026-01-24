@@ -1,0 +1,27 @@
+.particle-background {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.floating-particles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: url('../assets/particles.png') repeat;
+  animation: float 20s infinite linear;
+}
+
+.nebula-glow {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(0, 255, 136, 0.2), transparent);
+  opacity: 0.3;
+}
+
+@keyframes float {
+  0% { background-position: 0 0; }
+  100% { background-position: 1000px 1000px; }
+}

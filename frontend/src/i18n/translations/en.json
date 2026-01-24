@@ -1,0 +1,10 @@
+{
+  "map": {
+    "loading": "Loading map...",
+    "error": {
+      "initialization": "Error initializing map",
+      "markers": "Error updating markers",
+      "retry": "Retry"
+    }
+  }
+} 

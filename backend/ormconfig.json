@@ -1,0 +1,22 @@
+{
+  "type": "postgres",
+  "host": "localhost",
+  "port": 5432,
+  "username": "postgres",
+  "password": "77777",
+  "database": "bestsite",
+  "synchronize": false,
+  "logging": true,
+  "entities": ["dist/src/database/entities/**/*.js"],
+  "migrations": ["dist/src/database/migrations/**/*.js"],
+  "subscribers": ["src/database/subscribers/**/*.ts"],
+  "cli": {
+    "entitiesDir": "src/database/entities",
+    "migrationsDir": "src/database/migrations",
+    "subscribersDir": "src/database/subscribers"
+  },
+  "scripts": {
+    "migration:run": "node ./node_modules/typeorm/cli.js migration:run -d ./dist/src/database/config/database.config.js",
+    "postbuild": "ren dist\\database\\config\\database.config.js database.config.cjs"
+  }
+}

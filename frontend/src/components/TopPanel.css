@@ -1,0 +1,91 @@
+.top-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0.5rem 1rem;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  gap: 0.75rem;
+  position: relative;
+  z-index: 102; /* выше выдвижных панелей (101) и боковых (30..) */
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.1s ease;
+}
+
+.icon-button:hover {
+  transform: scale(1.1);
+}
+
+.highlight {
+  color: #e63946;
+}
+
+.pulse-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 10px;
+  height: 10px;
+  background-color: #00c896;
+  border-radius: 50%;
+  animation: pulse 1.5s ease-out 3;
+}
+
+.alert-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 8px;
+  height: 8px;
+  background-color: #ff4d4f;
+  border-radius: 50%;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.user-avatar {
+  position: relative;
+  cursor: pointer;
+}
+
+.avatar-image {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+.level-badge {
+  position: absolute;
+  bottom: -6px;
+  right: -6px;
+  background: #ffd700;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.user-avatar:hover .level-badge {
+  transform: scale(1.1);
+}

@@ -1,0 +1,114 @@
+/* Custom CSS Variables */
+:root {
+  --primary-blue: #2B3D4D;
+  --accent-teal: #29BFB5;
+  --accent-orange: #FF9F1C;
+  --light-gray: #F0F2F5;
+  --medium-gray: #D1D8E0;
+  --dark-text: #333333;
+  --white: #FFFFFF;
+
+  --soft-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  --light-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --deep-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Custom Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Custom Components */
+.header {
+  @apply fixed top-0 left-0 w-full h-[70px] bg-primary text-white flex items-center justify-between px-8 z-50;
+  box-shadow: var(--soft-shadow);
+}
+
+.header .search-bar input {
+  @apply bg-white/20 text-white rounded-full px-4 py-2 w-[300px] pr-10;
+}
+
+.header .search-bar input::placeholder {
+  @apply text-white/70;
+}
+
+.header .nav-icons .badge {
+  @apply absolute -top-1 -right-2 bg-accent-teal text-white rounded-full px-1.5 min-w-[20px] text-xs text-center;
+  box-shadow: var(--light-shadow);
+}
+
+.user-avatar {
+  @apply w-10 h-10 rounded-full bg-accent-teal bg-cover bg-center cursor-pointer ml-2;
+  box-shadow: 0 0 0 2px var(--white);
+}
+
+.profile-header {
+  @apply relative w-full h-[250px] bg-cover bg-center rounded-2xl overflow-hidden mb-20;
+  box-shadow: var(--soft-shadow);
+}
+
+.profile-avatar {
+  @apply absolute -bottom-[60px] left-1/2 w-[150px] h-[150px] rounded-full border-4 border-white bg-cover bg-center;
+  transform: translateX(-50%);
+  box-shadow: var(--deep-shadow);
+}
+
+.stat-card {
+  @apply bg-white p-6 rounded-xl text-center shadow-sm transition-transform duration-200 flex flex-col items-center;
+}
+
+.stat-card:hover {
+  @apply -translate-y-1;
+}
+
+.badge-item {
+  @apply bg-light-gray p-4 rounded-xl shadow-sm transition-transform duration-200 flex flex-col items-center justify-center min-h-[180px];
+}
+
+.badge-item:hover {
+  @apply -translate-y-1;
+}
+
+.badge-item img {
+  @apply w-20 h-20 object-contain mb-2 grayscale opacity-70 transition-all duration-300;
+}
+
+.badge-item.unlocked {
+  @apply bg-gradient-to-r from-accent-teal to-[#FFC371] text-white;
+}
+
+.badge-item.unlocked img {
+  @apply grayscale-0 opacity-100;
+}
+
+/* Media Queries */
+@media (max-width: 1024px) {
+  .header .search-bar {
+    @apply w-[250px];
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    @apply px-4 h-[60px];
+  }
+
+  .header .search-bar {
+    @apply hidden;
+  }
+
+  .profile-header {
+    @apply h-[180px] mb-[60px];
+  }
+
+  .profile-avatar {
+    @apply w-[120px] h-[120px] -bottom-[40px] border-2;
+  }
+}
+
+@media (max-width: 480px) {
+  .badge-grid {
+    @apply grid-cols-2 gap-4;
+  }
+} 

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Тест кодировки UTF-8</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background: #fafafa; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 14px; }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        .success { color: #28a745; font-weight: bold; }
+        .error { color: #dc3545; font-weight: bold; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Тест кодировки UTF-8 для русского текста</h1>
+    
+    <div class="section">
+        <h3>1️⃣ Получаем токен авторизации</h3>
+        <button onclick="login()">🔑 Войти в систему</button>
+        <div id="token-result"></div>
+    </div>
+
+    <div class="section">
+        <h3>2️⃣ Создаем событие с русским текстом</h3>
+        <button onclick="createEventCustom()">📝 Создать событие</button>
+        <div id="create-result"></div>
+    </div>
+
+    <div class="section">
+        <h3>3️⃣ Получаем список всех событий</h3>
+        <button onclick="getEvents()">📋 Получить события</button>
+        <div id="events-result"></div>
+    </div>
+
+    <div class="section">
+        <h3>4️⃣ Проверяем конкретное событие</h3>
+        <input type="text" id="event-id" placeholder="ID события для проверки">
+        <button onclick="getSpecificEvent()">🔍 Найти событие</button>
+        <div id="specific-event-result"></div>
+    </div>
+
+    <script>
+        let authToken = '';
+
+        async function login() {
+            const resultDiv = document.getElementById('token-result');
+            resultDiv.innerHTML = '<p>⏳ Выполняется вход...</p>';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/users/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json; charset=utf-8'
+                    },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'password123'
+                    })
+                });
+
+                const data = await response.json();
+                if (data.token) {
+                    authToken = data.token;
+                    resultDiv.innerHTML = `
+                        <p class="success">✅ Токен получен успешно!</p>
+                        <p><strong>Токен:</strong> ${authToken.substring(0, 30)}...</p>
+                        <p><strong>Пользователь:</strong> ${data.user?.username || 'Неизвестно'}</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p class="error">❌ Ошибка входа: ${data.message || 'Неизвестная ошибка'}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <p class="error">❌ Ошибка сети: ${error.message}</p>
+                `;
+            }
+        }
+
+        async function createEventCustom() {
+            if (!authToken) {
+                alert('⚠️ Сначала получите токен авторизации!');
+                return;
+            }
+
+            const resultDiv = document.getElementById('create-result');
+            resultDiv.innerHTML = '<p>⏳ Создаем событие...</p>';
+
+            try {
+                const eventData = {
+                    title: "Встреча путешественников в Москве",
+                    description: "Увлекательная встреча для обмена опытом путешествий по России. Обсудим интересные места, поделимся маршрутами и планами на будущие поездки.",
+                    event_type: "meetup",
+                    start_datetime: "2024-01-25T15:00:00.000Z",
+                    end_datetime: "2024-01-25T17:00:00.000Z",
+                    timezone: "UTC",
+                    max_participants: 25,
+                    price: "0.00",
+                    is_recurring: false,
+                    is_public: true,
+                    requires_approval: false,
+                    category: "meetup",
+                    location: "Москва, ул. Тверская, 1",
+                    hashtags: ["#путешествия", "#москва", "#встреча", "#россия"]
+                };
+
+                const response = await fetch('http://localhost:3000/api/events', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json; charset=utf-8',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(eventData)
+                });
+
+                const data = await response.json();
+                if (data.id) {
+                    resultDiv.innerHTML = `
+                        <p class="success">✅ Событие создано успешно!</p>
+                        <h4>📋 Детали созданного события:</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p class="error">❌ Ошибка создания события: ${data.message || 'Неизвестная ошибка'}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <p class="error">❌ Ошибка сети: ${error.message}</p>
+                `;
+            }
+        }
+
+        async function getEvents() {
+            const resultDiv = document.getElementById('events-result');
+            resultDiv.innerHTML = '<p>⏳ Получаем список событий...</p>';
+
+            try {
+                const response = await fetch('http://localhost:3000/api/events', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json; charset=utf-8'
+                    }
+                });
+
+                const data = await response.json();
+                resultDiv.innerHTML = `
+                    <p class="success">✅ Получено ${data.length} событий</p>
+                    <h4>📋 Список всех событий:</h4>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <p class="error">❌ Ошибка получения событий: ${error.message}</p>
+                `;
+            }
+        }
+
+        async function getSpecificEvent() {
+            const eventId = document.getElementById('event-id').value.trim();
+            if (!eventId) {
+                alert('⚠️ Введите ID события!');
+                return;
+            }
+
+            const resultDiv = document.getElementById('specific-event-result');
+            resultDiv.innerHTML = '<p>⏳ Ищем событие...</p>';
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/events/${eventId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json; charset=utf-8'
+                    }
+                });
+
+                const data = await response.json();
+                if (data.id) {
+                    resultDiv.innerHTML = `
+                        <p class="success">✅ Событие найдено!</p>
+                        <h4>📋 Детали события:</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p class="error">❌ Событие не найдено</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <p class="error">❌ Ошибка поиска события: ${error.message}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

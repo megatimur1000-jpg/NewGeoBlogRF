@@ -1,0 +1,42 @@
+{
+  "name": "Horizon Explorer",
+  "short_name": "Horizon",
+  "description": "Ваш Путеводитель в Мир Открытий",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["travel", "navigation", "lifestyle"],
+  "lang": "ru",
+  "dir": "ltr",
+  "scope": "/",
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Карта",
+      "short_name": "Карта",
+      "description": "Открыть карту",
+      "url": "/map",
+      "icons": [{ "src": "/vite.svg", "sizes": "96x96" }]
+    },
+    {
+      "name": "Планировщик",
+      "short_name": "Планировщик",
+      "description": "Создать маршрут",
+      "url": "/planner",
+      "icons": [{ "src": "/vite.svg", "sizes": "96x96" }]
+    }
+  ]
+}
+

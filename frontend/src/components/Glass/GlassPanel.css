@@ -1,0 +1,365 @@
+/* Overlay - полупрозрачный фон */
+.glass-panel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1999;
+  opacity: 0;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.glass-panel-overlay-open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Базовые стили панели - ОРИГИНАЛЬНЫЕ стили для map.tsx и planner.tsx */
+.glass-panel {
+  position: fixed;
+  z-index: 2000;
+  
+  /* Fallback для старых браузеров */
+  background: rgba(255, 255, 255, 0.1);
+  
+  /* Стеклянный эффект - точно как в MapActionButtons */
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%); /* Для Safari */
+  
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  
+  /* Градиент для читаемости */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  
+  /* Анимация появления */
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Начальное состояние - скрыто */
+  opacity: 0;
+  transform: scale(0.95);
+  pointer-events: none;
+  
+  /* Максимальные размеры */
+  max-width: 90vw;
+  max-height: 90vh;
+  
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Если backdrop-filter не поддерживается */
+@supports not (backdrop-filter: blur(10px)) {
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.85); /* Более непрозрачный фон */
+  }
+}
+
+/* Специальный стиль для панелей календаря - ПРОЗРАЧНОЕ стекло как в map.tsx и planner.tsx */
+.calendar-panel.glass-panel {
+  /* Fallback для старых браузеров */
+  background: rgba(255, 255, 255, 0.1) !important;
+  
+  /* Стеклянный эффект - точно как в MapActionButtons и обычных панелях */
+  backdrop-filter: blur(10px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(180%) !important;
+  
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  
+  /* Градиент для читаемости - ПРОЗРАЧНЫЙ */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  ) !important;
+}
+
+/* Открытое состояние */
+.glass-panel-open {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: all;
+}
+
+/* Позиции панели */
+.glass-panel-left {
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 400px;
+  border-radius: 0 20px 20px 0;
+  transform: translateX(-100%) scale(0.95);
+}
+
+.glass-panel-left.glass-panel-open {
+  transform: translateX(0) scale(1);
+}
+
+.glass-panel-right {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 400px;
+  border-radius: 20px 0 0 20px;
+  transform: translateX(100%) scale(0.95);
+}
+
+.glass-panel-right.glass-panel-open {
+  transform: translateX(0) scale(1);
+}
+
+.glass-panel-top {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 300px;
+  border-radius: 0 0 20px 20px;
+  transform: translateY(-100%) scale(0.95);
+}
+
+.glass-panel-top.glass-panel-open {
+  transform: translateY(0) scale(1);
+}
+
+.glass-panel-bottom {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 300px;
+  border-radius: 20px 20px 0 0;
+  transform: translateY(100%) scale(0.95);
+}
+
+.glass-panel-bottom.glass-panel-open {
+  transform: translateY(0) scale(1);
+}
+
+.glass-panel-center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, calc(-50% + 60px)) scale(0.95);
+  width: 500px;
+  max-width: 90vw;
+  max-height: 80vh;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.glass-panel-center.glass-panel-open {
+  transform: translate(-50%, calc(-50% + 60px)) scale(1);
+}
+
+/* Специальный класс для формы добавления метки - позиционирование под меткой */
+.add-marker-panel.glass-panel-center {
+  /* Форма подтягивается к метке, метка выше формы */
+  /* Форма смещается вниз от центра на половину высоты формы + отступ */
+  transform: translate(-50%, calc(-50% + 6vh + 4px)) scale(0.95);
+  max-height: 42vh;
+  width: 220px !important;
+  max-width: 220px !important;
+  top: 50% !important; /* Центрируем по вертикали */
+  left: 50% !important; /* Центрируем по горизонтали */
+}
+
+.add-marker-panel.glass-panel-center.glass-panel-open {
+  transform: translate(-50%, calc(-50% + 6vh + 4px)) scale(1);
+}
+
+/* Стеклянный блок для информации о культуре меток - над меткой */
+.culture-info-glass.glass-panel-center {
+  /* Метка поднята выше на 4 см, блок культуры тоже поднимается выше */
+  transform: translate(-50%, calc(-50% - 12vh - 90px)) scale(0.95);
+  width: 220px !important;
+  max-width: 220px !important;
+  max-height: auto !important;
+  top: 50% !important;
+  left: 50% !important;
+}
+
+.culture-info-glass.glass-panel-center.glass-panel-open {
+  transform: translate(-50%, calc(-50% - 12vh - 90px)) scale(1);
+}
+
+/* Header панели */
+.glass-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+}
+
+.glass-panel-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.9);
+  line-height: 1.2;
+}
+
+/* Кнопка закрытия */
+.glass-panel-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  color: rgba(0, 0, 0, 0.8);
+  padding: 0;
+  margin: 0;
+  
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.glass-panel-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.glass-panel-close:active {
+  transform: scale(0.95);
+}
+
+/* Контент панели */
+.glass-panel-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  
+  /* Кастомный скроллбар в стиле стекла */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+.glass-panel-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.glass-panel-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.glass-panel-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  backdrop-filter: blur(10px);
+}
+
+.glass-panel-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Темная тема */
+.glass-panel.dark {
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.2) 0%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+}
+
+@supports not (backdrop-filter: blur(10px)) {
+  .glass-panel.dark {
+    background: rgba(0, 0, 0, 0.75);
+  }
+}
+
+.glass-panel.dark .glass-panel-title {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.glass-panel.dark .glass-panel-close {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.glass-panel.dark .glass-panel-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .glass-panel-left,
+  .glass-panel-right {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 0;
+  }
+  
+  .glass-panel-center {
+    width: 95vw;
+    max-width: 95vw;
+  }
+  
+  .glass-panel-header {
+    padding: 16px 20px;
+  }
+  
+  .glass-panel-title {
+    font-size: 20px;
+  }
+  
+  .glass-panel-content {
+    padding: 20px;
+  }
+}
+
+
+/* ===== ДВУХОКОННЫЙ РЕЖИМ =====
+   Констрейн панели в активную зону карты (левая половина экрана) */
+.glass-panel-constrained.glass-panel-right {
+  right: calc(50% + 1cm) !important;
+  left: auto;
+  transform: translateX(100%) scale(0.95);
+}
+
+.glass-panel-constrained.glass-panel-right.glass-panel-open {
+  transform: translateX(0) scale(1);
+}
+
+.glass-panel-constrained.glass-panel-center {
+  left: 25% !important;
+  right: auto !important;
+  transform: translate(-50%, calc(-50% + 60px)) scale(0.95);
+}
+
+.glass-panel-constrained.glass-panel-center.glass-panel-open {
+  transform: translate(-50%, calc(-50% + 60px)) scale(1);
+}
+
+/* Левая панель в констрейн режиме - остается слева, но не выходит за центр */
+.glass-panel-constrained.glass-panel-left {
+  max-width: calc(50% - 2cm) !important;
+}

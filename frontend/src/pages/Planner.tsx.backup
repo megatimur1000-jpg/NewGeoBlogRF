@@ -1,0 +1,878 @@
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { MirrorGradientContainer, usePanelRegistration } from '../components/MirrorGradientProvider';
+import { FaStar, FaRoute, FaHeart, FaCog } from 'react-icons/fa';
+import FivePointStar from '../components/Map/FivePointStar';
+import LazyYandexMap from '../components/YandexMap/LazyYandexMap';
+import { getAllZones, checkRoute } from '../services/zoneService';
+import PlannerAccordion from '../components/Planner/PlannerAccordion';
+import FavoritesPanel from '../components/FavoritesPanel';
+import RouteRebuildModal from '../components/Planner/RouteRebuildModal';
+// import RouteOrderPanel from '../components/Planner/RouteOrderPanel'; // Убрано - функциональность перенесена в настройки
+import RouteCategoryModal, { RouteCreationData } from '../components/Planner/RouteCategoryModal';
+import RouteCategorySelector from '../components/Planner/RouteCategorySelector';
+import CoordinateInput from '../components/Planner/CoordinateInput';
+
+import { MarkerData } from '../types/marker';
+import { RouteData } from '../types/route';
+import { getRoutePolyline } from '../services/routingService';
+import { createRoute, deleteRoute } from '../api/routes';
+import apiClient from '../api/apiClient';
+import { useAuth } from '../contexts/AuthContext';
+import { useFavorites } from '../contexts/FavoritesContext';
+import { useRoutePlanner } from '../contexts/RoutePlannerContext';
+import { useRouteBuilder } from '../hooks/useRouteBuilder';
+import { RoutePoint as UnifiedRoutePoint, PointSource } from '../types/routeBuilder';
+import { useLayoutState } from '../contexts/LayoutContext';
+import '../styles/GlobalStyles.css';
+import '../styles/PageLayout.css';
+import '../styles/FireMarkers.css';
+
+// Стабильный компонент карты - НЕ ПЕРЕСОЗДАЕТСЯ
+const StableMap = React.memo(({ 
+  onMapReady, 
+  onMapClick, 
+  markers, 
+  routeLine,
+  displayedRoutePolylines,
+  shouldCenterOnRoute,
+  zones,
+  suppressAutoFit
+}: {
+  onMapReady: () => void;
+  onMapClick: (coordinates: [number, number]) => void;
+  markers: Array<{ id: string; coordinates: [number, number]; title: string; description?: string; source?: string }>;
+  routeLine: [number, number][];
+  displayedRoutePolylines: Array<{id: string, polyline: [number, number][], color: string}>;
+  shouldCenterOnRoute: boolean;
+  zones: Array<{ severity?: string; polygons: number[][][]; name?: string; type?: string }>;
+  suppressAutoFit: boolean;
+}) => {
+  // Динамически определяем центр карты на основе маркеров
+  const getMapCenter = () => {
+    // Если нужно центрироваться на маршруте и есть маркеры - принудительно центрируем
+    if (shouldCenterOnRoute && markers.length > 0) {
+      if (markers.length === 1) {
+        return markers[0].coordinates;
+      } else {
+        // Вычисляем центр между всеми маркерами маршрута
+        const latitudes = markers.map(m => m.coordinates[0]);
+        const longitudes = markers.map(m => m.coordinates[1]);
+        
+        const centerLat = (Math.min(...latitudes) + Math.max(...latitudes)) / 2;
+        const centerLon = (Math.min(...longitudes) + Math.max(...longitudes)) / 2;
+        
+        return [centerLat, centerLon] as [number, number];
+      }
+    }
+    
+    // Если есть маршрут (полилиния) - центрируем на нем
+    if (routeLine && routeLine.length > 0) {
+      const routeLatitudes = routeLine.map(point => point[0]);
+      const routeLongitudes = routeLine.map(point => point[1]);
+      
+      const centerLat = (Math.min(...routeLatitudes) + Math.max(...routeLatitudes)) / 2;
+      const centerLon = (Math.min(...routeLongitudes) + Math.max(...routeLongitudes)) / 2;
+      
+      return [centerLat, centerLon] as [number, number];
+    }
+    
+    // Обычная логика центрирования
+    if (markers.length === 0) {
+      // Если нет маркеров - возвращаем null, чтобы карта использовала свои настройки
+      return null;
+    } else if (markers.length === 1) {
+      // Если только одна точка и не нужно центрироваться на маршруте — не трогаем центр,
+      // чтобы избежать прыжков при добавлении первой метки
+      return null;
+    } else {
+      // Если несколько маркеров - вычисляем центр между всеми маркерами
+      const latitudes = markers.map(m => m.coordinates[0]);
+      const longitudes = markers.map(m => m.coordinates[1]);
+      
+      const centerLat = (Math.min(...latitudes) + Math.max(...latitudes)) / 2;
+      const centerLon = (Math.min(...longitudes) + Math.max(...longitudes)) / 2;
+      
+      return [centerLat, centerLon] as [number, number];
+    }
+  };
+
+  // Динамически определяем зум на основе маркеров
+  const getMapZoom = () => {
+    // Если нужно центрироваться на маршруте и есть маркеры - принудительно масштабируем
+    if (shouldCenterOnRoute && markers.length > 0) {
+      if (markers.length === 1) {
+        return 12; // Детальный вид одной точки
+      } else {
+        // Вычисляем подходящий зум для охвата всех точек маршрута
+        const latitudes = markers.map(m => m.coordinates[0]);
+        const longitudes = markers.map(m => m.coordinates[1]);
+        
+        const latDiff = Math.max(...latitudes) - Math.min(...latitudes);
+        const lonDiff = Math.max(...longitudes) - Math.min(...longitudes);
+        const maxDiff = Math.max(latDiff, lonDiff);
+        
+        // Адаптивный зум для восстановленного маршрута
+        if (maxDiff > 5) return 6;      // Большие расстояния (между городами)
+        if (maxDiff > 1) return 8;      // Средние расстояния
+        if (maxDiff > 0.1) return 10;   // Малые расстояния
+        return 12;                       // Очень близкие точки
+      }
+    }
+    
+    // Если есть маршрут - масштабируем под него
+    if (routeLine && routeLine.length > 0) {
+      const routeLatitudes = routeLine.map(point => point[0]);
+      const routeLongitudes = routeLine.map(point => point[1]);
+      
+      const latDiff = Math.max(...routeLatitudes) - Math.min(...routeLatitudes);
+      const lonDiff = Math.max(...routeLongitudes) - Math.min(...routeLongitudes);
+      const maxDiff = Math.max(latDiff, lonDiff);
+      
+      // Адаптивный зум для маршрута
+      if (maxDiff > 5) return 6;      // Большие расстояния (между городами)
+      if (maxDiff > 1) return 8;      // Средние расстояния
+      if (maxDiff > 0.1) return 10;   // Малые расстояния
+      return 12;                       // Очень близкие точки
+    }
+    
+    // Обычная логика зума
+    if (markers.length === 0) {
+      return 10; // дефолтный зум при отсутствии точек
+    } else if (markers.length === 1) {
+      // Если только одна точка и не нужно центрироваться — возвращаем стандартный зум,
+      // чтобы избежать эффекта "пульсации" при добавлении первой метки
+      return 10;
+    } else {
+      // Если несколько маркеров - вычисляем подходящий зум для охвата всех точек
+      const latitudes = markers.map(m => m.coordinates[0]);
+      const longitudes = markers.map(m => m.coordinates[1]);
+      
+      const latDiff = Math.max(...latitudes) - Math.min(...latitudes);
+      const lonDiff = Math.max(...longitudes) - Math.min(...longitudes);
+      const maxDiff = Math.max(latDiff, lonDiff);
+      
+      // Адаптивный зум на основе расстояния между точками
+      if (maxDiff > 5) return 6;      // Большие расстояния (между городами)
+      if (maxDiff > 1) return 8;      // Средние расстояния
+      if (maxDiff > 0.1) return 10;   // Малые расстояния
+      return 12;                       // Очень близкие точки
+    }
+  };
+
+  return (
+    <LazyYandexMap
+      key="planner-map-stable-component"
+      center={getMapCenter()}
+      zoom={getMapZoom()}
+      markers={markers}
+      onMapClick={onMapClick}
+      routeLine={routeLine}
+      displayedRoutePolylines={displayedRoutePolylines}
+      onMapReady={onMapReady}
+      autoFitBounds={Boolean(!suppressAutoFit && (shouldCenterOnRoute || routeLine.length > 1 || markers.length > 1))}
+      zones={zones}
+    />
+  );
+});
+
+// Стабильный заголовок - НЕ ДЕРГАЕТСЯ
+const StableHeader = React.memo(({ showZonesLayer, setShowZonesLayer }: { showZonesLayer: boolean; setShowZonesLayer: (show: boolean) => void }) => {
+  return (
+    <div className="map-content-header">
+      <div className="flex items-center justify-between w-full">
+        <div className="flex items-center space-x-2">
+          <FaRoute className="w-5 h-5 text-slate-400" />
+          <h1 className="text-lg font-semibold text-slate-800">Планировщик маршрутов</h1>
+        </div>
+        
+        <div className="flex items-center space-x-3 justify-center flex-1">
+          {/* Переключатель слоя запрещённых зон */}
+          <button
+            onClick={() => setShowZonesLayer(!showZonesLayer)}
+            className={`flex items-center space-x-2 px-3 py-1 rounded-full transition-colors ${
+              showZonesLayer 
+                ? 'bg-red-100 text-red-700 border border-red-200' 
+                : 'bg-gray-100 text-gray-600 border border-gray-200'
+            }`}
+            title={showZonesLayer ? 'Скрыть запрещённые зоны' : 'Показать запрещённые зоны'}
+          >
+            <span className="text-sm">🚫</span>
+            <span className="text-sm font-medium">
+              {showZonesLayer ? 'Зоны скрыты' : 'Запрещённые зоны'}
+            </span>
+          </button>
+          
+          {/* Статус пользователя - стабилизирован */}
+          <div className="flex items-center space-x-2 px-3 py-1 bg-gray-100 rounded-full">
+            <span className="text-lg">🎒</span>
+            <span className="text-sm font-medium text-green-600">Путешественник</span>
+          </div>
+        </div>
+      </div>
+      
+      {/* Вдохновляющее сообщение - стабилизировано */}
+      <div className="text-sm text-gray-600 italic text-center mt-2 px-20">
+        "Создайте маршрут, который расскажет историю"
+      </div>
+    </div>
+  );
+});
+
+// Компонент выбора слоя карты
+
+interface PlannerProps {
+  selectedRouteId?: string;
+  showOnlySelected?: boolean;
+}
+
+const Planner: React.FC<PlannerProps> = () => {
+  const { registerPanel, unregisterPanel } = usePanelRegistration();
+  const [zones, setZones] = useState<Array<{ severity?: string; polygons: number[][][]; name?: string; type?: string }>>([]);
+  const [showZonesLayer, setShowZonesLayer] = useState(false);
+  
+  // Единая система построения маршрутов
+  const {
+    routeState,
+    pointManager,
+    activePoints,
+    routePolyline: unifiedRoutePolyline,
+    isBuilding,
+    canBuild,
+    stats
+  } = useRouteBuilder();
+
+  // Регистрируем панели при монтировании компонента
+  // Состояние для выдвигающихся панелей (из FavoritesContext)
+  const favoritesCtx = useFavorites();
+  const favoritesOpen = (favoritesCtx as any)?.favoritesOpen ?? false;
+  const setFavoritesOpen = (favoritesCtx as any)?.setFavoritesOpen ?? (() => {});
+  useEffect(() => {
+    registerPanel(); // Левая панель с настройками
+    registerPanel(); // Правая панель с избранным
+    return () => {
+      unregisterPanel(); // Левая панель
+      unregisterPanel(); // Правая панель
+    };
+  }, [registerPanel, unregisterPanel]);
+
+  // Глобальный обработчик ошибок message channel
+  useEffect(() => {
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      // Игнорируем ошибки message channel (обычно от расширений браузера)
+      if (event.reason && event.reason.message && 
+          event.reason.message.includes('message channel closed')) {
+        event.preventDefault();
+        return;
+      }
+    };
+
+    const handleError = (event: ErrorEvent) => {
+      // Игнорируем ошибки message channel
+      if (event.message && event.message.includes('message channel closed')) {
+        event.preventDefault();
+        return;
+      }
+    };
+
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    window.addEventListener('error', handleError);
+
+    return () => {
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      window.removeEventListener('error', handleError);
+    };
+  }, []);
+
+  // Загрузка запрещенных зон для отрисовки
+  useEffect(() => {
+    getAllZones().then(setZones).catch(() => {});
+  }, []);
+
+  // Состояние для выдвигающихся панелей
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  
+  // Панели порядка следования
+  const [isRebuildModalOpen, setIsRebuildModalOpen] = useState(false);
+  // const [isOrderPanelOpen, setIsOrderPanelOpen] = useState(false); // Убрано - функциональность перенесена в настройки
+  
+  // Состояние для центрирования карты на маршруте при восстановлении
+  const [shouldCenterOnRoute, setShouldCenterOnRoute] = useState(false);
+  const autoCenterTimerRef = useRef<number | null>(null);
+  const triggerAutoCenter = (durationMs: number = 800) => {
+    try {
+      if (autoCenterTimerRef.current) {
+        clearTimeout(autoCenterTimerRef.current);
+        autoCenterTimerRef.current = null;
+      }
+      setShouldCenterOnRoute(true);
+      autoCenterTimerRef.current = window.setTimeout(() => {
+        setShouldCenterOnRoute(false);
+        autoCenterTimerRef.current = null;
+      }, durationMs);
+    } catch {}
+  };
+  
+  const [selectedRoute, setSelectedRoute] = useState<RouteData | null>(null);
+  const [routePolyline, setRoutePolyline] = useState<[number, number][]>([]);
+  const [isMapReady, setIsMapReady] = useState(false);
+  
+  // Состояние для отображения выбранных маршрутов на карте
+  const [selectedRouteIds, setSelectedRouteIds] = useState<string[]>([]);
+  const [displayedRoutePolylines, setDisplayedRoutePolylines] = useState<Array<{id: string, polyline: [number, number][], color: string}>>([]);
+  
+  // Состояние для отладочных уведомлений
+  const [debugInfo, setDebugInfo] = useState<string>('');
+  
+  // Состояние для предотвращения повторного построения маршрута
+  const [lastBuiltRoute, setLastBuiltRoute] = useState<string>('');
+  
+  // Новые состояния для построения маршрута
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [showCoordinateInput, setShowCoordinateInput] = useState(false);
+  const [showSearchForm, setShowSearchForm] = useState(false);
+  const [pendingRouteData, setPendingRouteData] = useState<{
+    title: string;
+    points: any[];
+  } | null>(null);
+  
+  // Упрощенные состояния - убираем лишнее
+  const [lastRouteCreated, setLastRouteCreated] = useState<string | null>(null);
+
+  const auth = useAuth();
+  const layoutContext = useLayoutState();
+  const [favoritesTab] = useState<'places' | 'routes'>('places');
+  const [favoritesPanelKey, setFavoritesPanelKey] = useState(0);
+  const favoritesContext = useFavorites();
+  const routePlannerContext = useRoutePlanner();
+  const { selectedMarkerIds = [], setSelectedMarkerIds = () => {} } = (favoritesContext as any) || {};
+
+  // Контекст хранит открытую панель и выбранные чекбоксы; локальная гидратация не нужна
+  useEffect(() => {}, []);
+
+  // Открытость синхронизируется внутри FavoritesContext
+
+  // Выбор синхронизируется внутри FavoritesContext
+
+  // Проверяем, что все контексты загружены
+  if (!auth || !layoutContext || !favoritesContext || !routePlannerContext) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Загрузка планировщика...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const { token } = auth;
+  const { setLeftContent, setRightContent } = layoutContext;
+  const { favoritePlaces, removeFavoritePlace, favoriteRoutes } = favoritesContext || {
+    favoritePlaces: [],
+    removeFavoritePlace: () => {},
+    favoriteRoutes: []
+  };
+
+  // Санитизация выбранных ID: удаляем те, которых нет в текущем списке избранного
+  useEffect(() => {
+    if (!Array.isArray(selectedMarkerIds)) return;
+    const validIds = new Set(favoritePlaces.map(p => p.id));
+    const filtered = selectedMarkerIds.filter(id => validIds.has(id));
+    if (filtered.length !== selectedMarkerIds.length) {
+      setSelectedMarkerIds(filtered as string[]);
+    }
+  }, [favoritePlaces, selectedMarkerIds, setSelectedMarkerIds]);
+
+  // Преобразуем FavoritePlace в MarkerData для совместимости
+  const favorites: MarkerData[] = favoritePlaces.map((place): MarkerData => ({
+    id: place.id,
+    latitude: place.coordinates[0],
+    longitude: place.coordinates[1],
+    title: place.name,
+    description: place.type,
+    address: place.location,
+    category: place.type,
+    rating: place.rating,
+    rating_count: 0,
+    photo_urls: [],
+    hashtags: [],
+    author_name: 'User',
+    created_at: place.addedAt.toISOString(),
+    updated_at: place.addedAt.toISOString(),
+    likes_count: 0,
+    comments_count: 0,
+    shares_count: 0
+  }));
+
+  // Добавляем состояние для меток, добавленных прямо на карту
+  const [mapClickMarkers, setMapClickMarkers] = useState<Array<{
+    id: string;
+    coordinates: [number, number];
+    title: string;
+    description?: string;
+  }>>([]);
+
+  // Отладка состояния
+  useEffect(() => {
+    console.log('🔧 Состояние маршрутов обновлено:', {
+      selectedRouteIds,
+      displayedPolylinesCount: displayedRoutePolylines.length
+    });
+  }, [selectedRouteIds, displayedRoutePolylines]);
+  
+  // Обработчик переключения отображения маршрутов
+  const handleRouteToggle = async (route: RouteData, checked: boolean, mode: 'map' | 'planner') => {
+    const info = `🔧 handleRouteToggle: ${route.title} (${checked ? 'включить' : 'выключить'}), точек: ${route.points?.length || 0} | waypoints: ${route.waypoints?.length || 0} | route_data: ${(route as any).route_data ? 'есть' : 'нет'}`;
+    setDebugInfo(info);
+    
+    // Очищаем отладочную информацию через 5 секунд
+    setTimeout(() => setDebugInfo(''), 5000);
+    console.log('🔧 handleRouteToggle вызван:', { 
+      routeId: route.id, 
+      routeTitle: route.title,
+      checked, 
+      mode,
+      pointsCount: route.points?.length || 0,
+      points: route.points?.map(p => ({ lat: p.latitude, lon: p.longitude, title: p.title })),
+      fullRoutePoints: route.points
+    });
+    if (mode !== 'planner') return;
+    
+    if (checked) {
+      // Проверяем лимит в 3 маршрута
+      if (selectedRouteIds.length >= 3) {
+        alert('⚠️ Можно отображать не более 3 маршрутов одновременно');
+        return;
+      }
+      
+      setSelectedRouteIds(prev => prev.includes(route.id) ? prev : [...prev, route.id]);
+      
+      // ПРИНУДИТЕЛЬНАЯ ГИДРАЦИЯ: если route.points пустой, но есть waypoints или route_data
+      let hydratedRoute = route;
+      if ((!route.points || route.points.length === 0) && ((route.waypoints && route.waypoints.length > 0) || (route as any).route_data)) {
+        console.log('🔧 Принудительная гидратация маршрута:', route.id);
+        
+        // Пытаемся восстановить точки из waypoints
+        if (route.waypoints && route.waypoints.length > 0) {
+          const byFavId = new Map(favoritePlaces.map(fp => [String(fp.id), fp]));
+          const hydratedPoints = route.waypoints
+            .map((wp: any) => byFavId.get(String(wp.marker_id)))
+            .filter(Boolean)
+            .map((m: any, idx: number) => ({
+              id: m.id,
+              title: m.title || `Точка ${idx + 1}`,
+              description: m.description || '',
+              latitude: Number(m.coordinates?.[0] ?? NaN),
+              longitude: Number(m.coordinates?.[1] ?? NaN)
+            }))
+            .filter((p: any) => Number.isFinite(p.latitude) && Number.isFinite(p.longitude));
+          
+          if (hydratedPoints.length > 0) {
+            hydratedRoute = { ...route, points: hydratedPoints };
+            console.log('🔧 Гидратация из waypoints успешна:', hydratedPoints.length, 'точек');
+          }
+        }
+        
+        // Если не получилось из waypoints, пытаемся из route_data
+        if ((!hydratedRoute.points || hydratedRoute.points.length === 0) && (route as any).route_data) {
+          try {
+            const rdRaw: any = (route as any).route_data;
+            const rd = typeof rdRaw === 'string' ? (JSON.parse(rdRaw) || {}) : (rdRaw || {});
+            if (Array.isArray(rd.points) && rd.points.length > 0) {
+              const hydratedPoints = rd.points
+                .map((p: any, idx: number) => ({
+                  id: String(p?.id || `pt-${idx}`),
+                  title: p?.title || `Точка ${idx + 1}`,
+                  description: p?.description || '',
+                  latitude: Number(p?.latitude ?? NaN),
+                  longitude: Number(p?.longitude ?? NaN)
+                }))
+                .filter((p: any) => Number.isFinite(p.latitude) && Number.isFinite(p.longitude));
+              
+              if (hydratedPoints.length > 0) {
+                hydratedRoute = { ...route, points: hydratedPoints };
+                console.log('🔧 Гидратация из route_data успешна:', hydratedPoints.length, 'точек');
+              }
+            }
+          } catch (e) {
+            console.error('Ошибка парсинга route_data:', e);
+          }
+        }
+      }
+
+      // Строим полилинию для маршрута
+      if (hydratedRoute.points && hydratedRoute.points.length >= 2) {
+        try {
+          console.log('🔧 Строим полилинию для маршрута:', hydratedRoute.id, hydratedRoute.points);
+          // Нормализуем точки в формат [долгота, широта], убираем невалидные/нулевые
+          const toNumber = (v: any) => (v === null || v === undefined ? NaN : Number(v));
+          const isFiniteNumber = (n: number) => typeof n === 'number' && Number.isFinite(n);
+          const isValidLon = (lon: number) => isFiniteNumber(lon) && lon >= -180 && lon <= 180 && Math.abs(lon) > 0.00001;
+          const isValidLat = (lat: number) => isFiniteNumber(lat) && lat >= -90 && lat <= 90 && Math.abs(lat) > 0.00001;
+          let normalized = (hydratedRoute.points || [])
+            .map(p => [toNumber((p as any).longitude), toNumber((p as any).latitude)] as [number, number])
+            .filter(([lon, lat]) => isValidLon(lon) && isValidLat(lat));
+
+          // Фолбэк-гидратация: если в маршруте точки нулевые, пытаемся найти их среди избранных меток
+          if (normalized.length < 2) {
+            try {
+              const byId = new Map<string, { lat: number; lon: number }>();
+              const byTitle = new Map<string, { lat: number; lon: number }>();
+              favoritePlaces.forEach((fav: any) => {
+                const lat = Number(fav.coordinates?.[0] ?? fav.latitude);
+                const lon = Number(fav.coordinates?.[1] ?? fav.longitude);
+                if (isValidLat(lat) && isValidLon(lon)) {
+                  if (fav.id) byId.set(String(fav.id), { lat, lon });
+                  if (fav.name) byTitle.set(String(fav.name), { lat, lon });
+                  if (fav.title) byTitle.set(String(fav.title), { lat, lon });
+                }
+              });
+
+              const hydrated: [number, number][] = [];
+              (hydratedRoute.points || []).forEach((p: any) => {
+                const pid = p.id ? String(p.id) : '';
+                const ptitle = p.title ? String(p.title) : '';
+                let coord = pid && byId.get(pid);
+                if (!coord && ptitle) coord = byTitle.get(ptitle);
+                if (coord && isValidLat(coord.lat) && isValidLon(coord.lon)) {
+                  hydrated.push([coord.lon, coord.lat]);
+                }
+              });
+              if (hydrated.length >= 2) normalized = hydrated;
+            } catch {}
+          }
+
+          if (normalized.length < 2) {
+            console.warn('Маршрут содержит недостаточно валидных точек для ORS', { count: normalized.length, routeId: route.id });
+            return;
+          }
+
+          console.log('🔧 Точки для полилинии (нормализованные):', normalized);
+          console.log('🔧 Исходные hydratedRoute.points:', hydratedRoute.points?.map(p => ({ id: p.id, lat: p.latitude, lon: p.longitude, title: p.title })));
+          setDebugInfo(prev => prev + ` | Нормализовано: ${normalized.length} точек`);
+
+          // 1) Сразу отобразим точки маршрута: добавим их в единую систему точек
+          // через pointManager (именно из activePoints формируются маркеры на карте)
+          const routeMarkersToAdd = normalized.map(([lon, lat], index) => ({
+            id: String((hydratedRoute.points?.[index] as any)?.id || `route-${hydratedRoute.id}-point-${index}`),
+            coordinates: [lat, lon] as [number, number], // Исправлено: Yandex Maps ожидает [широта, долгота]
+            title: (hydratedRoute.points?.[index] as any)?.title || `Точка ${index + 1}`,
+            description: (hydratedRoute.points?.[index] as any)?.description || `Из маршрута: ${hydratedRoute.title}`,
+          }));
+          
+          console.log('🔧 Восстанавливаем временные метки маршрута:', {
+            routeId: hydratedRoute.id,
+            markersToAdd: routeMarkersToAdd.map(m => ({ id: m.id, coords: m.coordinates, title: m.title }))
+          });
+          // Удаляем возможные старые точки этого маршрута и добавляем актуальные
+          try { pointManager.removePointBySource('route', hydratedRoute.id); } catch {}
+          try {
+            routeMarkersToAdd.forEach(m => {
+              pointManager.addPoint({
+                coordinates: [m.coordinates[0], m.coordinates[1]], // [lat, lon] - правильный формат для pointManager
+                title: m.title,
+                description: m.description,
+                source: 'route',
+                sourceId: `${hydratedRoute.id}:${m.id}`
+              });
+            });
+          } catch {}
+          // Поддержим старую систему временных меток для обратной совместимости
+          setMapClickMarkers(prev => {
+            const existing = new Set(prev.map(m => m.id));
+            const merged = [...prev];
+            for (const m of routeMarkersToAdd) {
+              if (!existing.has(m.id)) merged.push(m);
+            }
+            return merged;
+          });
+
+          const polyline = await getRoutePolyline(normalized);
+          console.log('🔧 Получена полилиния:', polyline.length, 'точек');
+          
+          const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1']; // Разные цвета для маршрутов
+          const color = colors[(selectedRouteIds.length + 1) % colors.length]; // +1 потому что мы еще не добавили текущий ID
+          
+          console.log('🔧 Добавляем полилинию в состояние:', { id: hydratedRoute.id, color, pointsCount: polyline.length });
+          setDisplayedRoutePolylines(prev => [...prev, {
+            id: hydratedRoute.id,
+            polyline,
+            color
+          }]);
+        } catch (error) {
+          console.error('Ошибка построения полилинии маршрута, рисуем прямую линию:', error);
+          // Фолбэк: рисуем простую линию между точками [lat,lon]
+          const fallbackPolyline: [number, number][] = (hydratedRoute.points || [])
+            .map((p: any) => [Number(p.longitude), Number(p.latitude)] as [number, number])
+            .filter(([lon, lat]: [number, number]) => Number.isFinite(lon) && Number.isFinite(lat))
+            .map(([lon, lat]: [number, number]) => [lat, lon] as [number, number]);
+          const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1'];
+          const color = colors[(selectedRouteIds.length + 1) % colors.length];
+          setDisplayedRoutePolylines(prev => [...prev, { id: hydratedRoute.id, polyline: fallbackPolyline, color }]);
+        }
+      } else {
+        console.log('🔧 Недостаточно точек для маршрута:', hydratedRoute.points?.length || 0);
+      }
+    } else {
+      // ПРИНУДИТЕЛЬНАЯ ГИДРАЦИЯ для удаления: если route.points пустой, но есть waypoints или route_data
+      let hydratedRouteForRemoval = route;
+      if ((!route.points || route.points.length === 0) && ((route.waypoints && route.waypoints.length > 0) || (route as any).route_data)) {
+        console.log('🔧 Гидратация для удаления маршрута:', route.id);
+        
+        // Пытаемся восстановить точки из waypoints
+        if (route.waypoints && route.waypoints.length > 0) {
+          const byFavId = new Map(favoritePlaces.map(fp => [String(fp.id), fp]));
+          const hydratedPoints = route.waypoints
+            .map((wp: any) => byFavId.get(String(wp.marker_id)))
+            .filter(Boolean)
+            .map((m: any, idx: number) => ({
+              id: m.id,
+              title: m.title || `Точка ${idx + 1}`,
+              description: m.description || '',
+              latitude: Number(m.coordinates?.[0] ?? NaN),
+              longitude: Number(m.coordinates?.[1] ?? NaN)
+            }))
+            .filter((p: any) => Number.isFinite(p.latitude) && Number.isFinite(p.longitude));
+          
+          if (hydratedPoints.length > 0) {
+            hydratedRouteForRemoval = { ...route, points: hydratedPoints };
+            console.log('🔧 Гидратация для удаления из waypoints успешна:', hydratedPoints.length, 'точек');
+          }
+        }
+        
+        // Если не получилось из waypoints, пытаемся из route_data
+        if ((!hydratedRouteForRemoval.points || hydratedRouteForRemoval.points.length === 0) && (route as any).route_data) {
+          try {
+            const rdRaw: any = (route as any).route_data;
+            const rd = typeof rdRaw === 'string' ? (JSON.parse(rdRaw) || {}) : (rdRaw || {});
+            if (Array.isArray(rd.points) && rd.points.length > 0) {
+              const hydratedPoints = rd.points
+                .map((p: any, idx: number) => ({
+                  id: String(p?.id || `pt-${idx}`),
+                  title: p?.title || `Точка ${idx + 1}`,
+                  description: p?.description || '',
+                  latitude: Number(p?.latitude ?? NaN),
+                  longitude: Number(p?.longitude ?? NaN)
+                }))
+                .filter((p: any) => Number.isFinite(p.latitude) && Number.isFinite(p.longitude));
+              
+              if (hydratedPoints.length > 0) {
+                hydratedRouteForRemoval = { ...route, points: hydratedPoints };
+                console.log('🔧 Гидратация для удаления из route_data успешна:', hydratedPoints.length, 'точек');
+              }
+            }
+          } catch (e) {
+            console.error('Ошибка парсинга route_data для удаления:', e);
+          }
+        }
+      }
+
+      console.log('🔧 Снимаем чекбокс маршрута, удаляем метки:', {
+        routeId: route.id,
+        routePoints: hydratedRouteForRemoval.points?.map(p => ({ id: p.id, title: p.title })),
+        currentSelectedRouteIds: selectedRouteIds,
+        currentDisplayedPolylines: displayedRoutePolylines.length
+      });
+      
+      setSelectedRouteIds(prev => {
+        const newIds = prev.filter(id => id !== route.id);
+        console.log('🔧 Обновляем selectedRouteIds:', { было: prev, стало: newIds });
+        return newIds;
+      });
+      setDisplayedRoutePolylines(prev => {
+        const newPolylines = prev.filter(r => r.id !== route.id);
+        console.log('🔧 Обновляем displayedRoutePolylines:', { было: prev.length, стало: newPolylines.length });
+        return newPolylines;
+      });
+      
+      // ВАЖНО: Также очищаем основную полилинию, если она была построена из этого маршрута
+      // Проверяем, не является ли текущая routePolyline результатом этого маршрута
+      if (routePolyline.length > 0) {
+        console.log('🔧 Очищаем основную routePolyline при снятии чекбокса маршрута');
+        setRoutePolyline([]);
+      }
+      
+      // Также очищаем unifiedRoutePolyline через pointManager.clearRoute()
+      console.log('🔧 Очищаем unifiedRoutePolyline через pointManager.clearRoute()');
+      pointManager.clearRoute();
+      
+      // Удаляем временные метки, добавленные для этого маршрута (используем гидратированные точки)
+      setMapClickMarkers(prev => {
+        const toRemove = (hydratedRouteForRemoval.points || []).map((p: any, idx: number) => String(p?.id || `route-${route.id}-point-${idx}`));
+        console.log('🔧 Удаляем метки с ID:', toRemove);
+        return prev.filter(m => !toRemove.includes(m.id));
+      });
+      // Также удаляем точки маршрута из единой системы (именно они рендерятся на карте)
+      // Удаляем все точки этого маршрута по префиксу sourceId
+      try { 
+        const pointsToRemove = activePoints.filter(p => p.source === 'route' && p.sourceId?.startsWith(`${route.id}:`));
+        console.log('🔧 Удаляем точки маршрута из единой системы:', {
+          routeId: route.id,
+          pointsToRemove: pointsToRemove.map(p => ({ id: p.id, sourceId: p.sourceId, title: p.title })),
+          totalActivePoints: activePoints.length
+        });
+        pointsToRemove.forEach(p => {
+          console.log('🔧 Удаляем точку:', p.id);
+          pointManager.removePoint(p.id);
+        });
+      } catch (error) {
+        console.error('Ошибка при удалении точек маршрута:', error);
+      }
+    }
+  };
+
+  // Обработчик клика по карте для добавления меток - единая система
+  const handleMapClick = (coordinates: [number, number]) => {
+    try {
+      // Добавляем точку через единую систему
+      pointManager.addClickPoint(coordinates);
+      
+      console.log('🔧 handleMapClick:', {
+        coordinates,
+        activePointsCount: activePoints.length,
+        canBuild,
+        activePoints: activePoints.map(p => ({ id: p.id, title: p.title, source: p.source, isActive: p.isActive }))
+      });
+      
+      // Автоматически строим маршрут если достаточно точек
+      // Добавляем небольшую задержку для стабильности
+      setTimeout(() => {
+        if (canBuild) {
+          pointManager.buildRoute().catch(error => {
+            console.warn('Ошибка построения маршрута после клика:', error);
+          });
+        }
+      }, 150);
+      
+      // Вдохновляющее сообщение вместо простого alert
+      const inspirationMessages = [
+        "✨ Отличный выбор! Эта точка может стать началом удивительного маршрута",
+        "🌍 Каждое место имеет свою историю. Что вы здесь увидели?",
+        "🎯 Хорошо! Теперь добавьте ещё несколько точек, чтобы создать полноценное путешествие",
+        "💫 Красивое место! Поделитесь с другими, что делает его особенным"
+      ];
+      
+      const message = inspirationMessages[Math.floor(Math.random() * inspirationMessages.length)];
+      const lat = coordinates[0] || 0;
+      const lng = coordinates[1] || 0;
+      alert(`✅ ${message}\n\nКоординаты: [${lat.toFixed(4)}, ${lng.toFixed(4)}]\n\nМетка автоматически выбрана для построения маршрута.\n\n💡 Подсказка: Кликните по метке, чтобы удалить её.`);
+    } catch (error) {
+      // Игнорируем ошибки message channel (обычно от расширений браузера)
+      console.warn('Ошибка при обработке клика по карте:', error);
+    }
+  };
+
+  // Функция удаления маркера из единой системы
+  const handleRemoveMarker = (markerId: string) => {
+    try {
+      // Удаляем точку из единой системы построения маршрутов
+      pointManager.removePoint(markerId);
+      console.log('🗑️ Маркер удален:', markerId);
+    } catch (error) {
+      console.warn('Ошибка при удалении маркера:', error);
+    }
+  };
+
+  // Функция удаления метки, добавленной кликом - новая архитектура
+  const handleRemoveClickMarker = (markerId: string) => {
+    setMapClickMarkers((prev: typeof mapClickMarkers) => prev.filter(marker => marker.id !== markerId));
+    setSelectedMarkerIds((prev: string[]) => (prev || []).filter((id: string) => id !== markerId));
+    // Удаляем точку из единой системы
+    try { pointManager.removePoint(markerId); } catch {}
+  };
+
+  // Регистрируем панели при монтировании компонента
+  useEffect(() => {
+    registerPanel();
+    return () => unregisterPanel();
+  }, [registerPanel, unregisterPanel]);
+
+  return (
+    <MirrorGradientContainer>
+      <div className="page-container">
+        <div className="page-content">
+          {/* Основной контент */}
+          <div className="h-full relative">
+            <div className="map-content-container">
+              {/* Заголовок контента */}
+              <StableHeader 
+                showZonesLayer={showZonesLayer} 
+                setShowZonesLayer={setShowZonesLayer}
+                currentProvider={currentMapProvider}
+                setCurrentProvider={setCurrentMapProvider}
+              />
+
+              {/* Область контента */}
+              <div className="map-area">
+                <div className="full-height-content relative">
+                  {/* Индикатор загрузки карты */}
+                  {!isMapReady && (
+                    <div className="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center z-10">
+                      <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                        <p className="text-gray-600">Загрузка карты...</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Карта через фасад */}
+                  <FacadeMap 
+                    onMapReady={() => setIsMapReady(true)}
+                    onMapClick={handleMapClick}
+                    markers={facadeMarkers}
+                    routes={facadeRoutes}
+                    provider={currentMapProvider}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Левая выдвигающаяся панель с настройками */}
+            <div className={`page-slide-panel left ${false ? 'open' : ''}`}>
+              <div className="page-slide-panel-content">
+                <div className="w-full h-full flex flex-col">
+                  <PlannerAccordion
+                    onBuildRoute={() => {}}
+                    activePoints={activePoints}
+                    onRemovePoint={pointManager.removePoint}
+                    onTogglePoint={pointManager.togglePoint}
+                    onReorderPoints={pointManager.reorderPoints}
+                    onAddSearchPoint={() => {}}
+                    onBuildRouteFromPoints={pointManager.buildRoute}
+                    canBuildRoute={canBuild}
+                    isBuilding={isBuilding}
+                    routeStats={stats}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Правая выдвигающаяся панель с избранным */}
+            <div className={`page-slide-panel right ${false ? 'open' : ''}`}>
+              <div className="page-slide-panel-content">
+                <FavoritesPanel
+                  favorites={(favorites as any)?.favoritePlaces || []}
+                  routes={(favorites as any)?.favoriteRoutes || []}
+                  mode="planner"
+                  isVip={false}
+                  onRemove={() => {}}
+                  onClose={() => {}}
+                  onBuildRoute={() => {}}
+                  onMoveToPlanner={handleMoveToPlanner}
+                  onLoadRoute={() => {}}
+                  selectedMarkerIds={[]}
+                  onSelectedMarkersChange={() => {}}
+                  onMoveToMap={() => {}}
+                  selectedRouteIds={[]}
+                  onSelectedRouteIdsChange={() => {}}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </MirrorGradientContainer>
+  );
+};
+
+export default Planner;

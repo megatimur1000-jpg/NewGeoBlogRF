@@ -1,0 +1,64 @@
+/* Фоновая карта и стеклянные панели */
+.facade-map-root {
+  /* По умолчанию карта позиционируется относительно родителя — это
+    позволяет размещать карту внутри колонок/панелей и опускать её вниз. */
+  position: absolute;
+  inset: 0; /* top:0; right:0; bottom:0; left:0; — заполнит родителя при width/height:100% */
+  z-index: 0;
+  /* По умолчанию делаем карту интерактивной — если нужно сделать фон неинтерактивным,
+    используйте модификатор .facade-map-root--non-interactive */
+  pointer-events: auto;
+}
+
+/* Если нужно, чтобы карта была фоновым слоем на весь viewport, добавьте модификатор */
+.facade-map-root--fixed {
+  position: fixed;
+  inset: 0;
+}
+
+/* Полностью заполняет viewport, поддерживает смещение сверху через CSS-переменную */
+.facade-map-root--viewport {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: var(--facade-map-top, 0);
+  bottom: 0;
+  width: 100%;
+  height: calc(100vh - var(--facade-map-top, 0));
+  z-index: 0;
+}
+
+/* Позволяем интерактивность карты, когда нужен доступ к событиям мыши/тача */
+.facade-map-root--interactive {
+  pointer-events: auto !important;
+}
+
+/* Модификатор для выключения интерактивности фоновой карты */
+.facade-map-root--non-interactive {
+  pointer-events: none !important;
+}
+
+.app-content {
+  position: relative;
+  z-index: 10; /* выше фоновой карты */
+}
+
+/* Не применяем агрессивный глобальный стиль к #map — это ломает инициализацию Leaflet.
+   Вместо этого используем класс .facade-map-root на контейнере, чтобы безопасно делать карту фоном. */
+
+/* Пример стеклянной панели, если понадобится */
+.glass-sidebar {
+  background: rgba(255,255,255,0.32);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  backdrop-filter: blur(8px) saturate(120%);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 6px 18px rgba(23,23,23,0.06);
+  border-radius: 12px;
+  z-index: 20;
+}
+
+/* Тёмный вариант */
+.glass-sidebar--dark {
+  background: rgba(10,12,16,0.32);
+  border: 1px solid rgba(255,255,255,0.06);
+}

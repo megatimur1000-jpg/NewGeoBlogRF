@@ -1,0 +1,69 @@
+.galaxy-preview {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 32px;
+  background: linear-gradient(135deg, #1a1a40 60%, #23235b 100%);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  color: #fff;
+  font-family: 'Segoe UI', sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+.galaxy-preview__subtitle {
+  margin-bottom: 32px;
+  color: #b3b3ff;
+  font-size: 1.1em;
+}
+
+.galaxy-preview__roadmap {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.galaxy-preview__item {
+  margin-bottom: 28px;
+  padding: 20px 24px;
+  border-radius: 16px;
+  background: rgba(40, 40, 80, 0.7);
+  box-shadow: 0 2px 12px rgba(80,80,160,0.15);
+  transition: background 0.3s;
+  position: relative;
+  backdrop-filter: blur(2px);
+}
+
+.galaxy-preview__item--done {
+  border-left: 6px solid #7cf6ff;
+  background: rgba(30, 60, 90, 0.8);
+}
+
+.galaxy-preview__item--soon {
+  border-left: 6px solid #ffe066;
+}
+
+.galaxy-preview__item--in-progress {
+  border-left: 6px solid #a685ff;
+}
+
+.galaxy-preview__item--planned {
+  border-left: 6px solid #444;
+  opacity: 0.7;
+}
+
+.galaxy-preview__status {
+  font-size: 1.1em;
+  margin-bottom: 6px;
+  font-weight: bold;
+}
+
+.galaxy-preview__title {
+  font-size: 1.2em;
+  margin-bottom: 4px;
+}
+
+.galaxy-preview__desc {
+  color: #b3b3ff;
+  font-size: 0.98em;
+}

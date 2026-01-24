@@ -1,0 +1,269 @@
+/* Горящие метки для разных источников */
+
+/* Базовые стили для всех горящих меток */
+.fire-marker {
+  position: relative;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  animation: fire-glow 2s ease-in-out infinite alternate;
+}
+
+/* Желтый огонь для избранного */
+.fire-marker.favorites {
+  background: linear-gradient(45deg, #fbbf24, #f59e0b, #d97706);
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.6);
+}
+
+/* Синий огонь для поиска */
+.fire-marker.search {
+  background: linear-gradient(45deg, #3b82f6, #2563eb, #1d4ed8);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+}
+
+/* Зеленый огонь для кликов по карте */
+.fire-marker.map-click {
+  background: linear-gradient(45deg, #10b981, #059669, #047857);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+}
+
+/* Фиолетовый огонь для импорта */
+.fire-marker.imported {
+  background: linear-gradient(45deg, #8b5cf6, #7c3aed, #6d28d9);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+}
+
+/* Анимация огня */
+@keyframes fire-glow {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  }
+  100% {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Усиление свечения для избранного */
+.fire-marker.favorites {
+  animation: fire-glow-favorites 2s ease-in-out infinite alternate;
+}
+
+@keyframes fire-glow-favorites {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.6);
+  }
+  100% {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px rgba(251, 191, 36, 0.8);
+  }
+}
+
+/* Усиление свечения для поиска */
+.fire-marker.search {
+  animation: fire-glow-search 2s ease-in-out infinite alternate;
+}
+
+@keyframes fire-glow-search {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+  }
+  100% {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
+  }
+}
+
+/* Усиление свечения для кликов */
+.fire-marker.map-click {
+  animation: fire-glow-click 2s ease-in-out infinite alternate;
+}
+
+@keyframes fire-glow-click {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+  }
+  100% {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.8);
+  }
+}
+
+/* Усиление свечения для импорта */
+.fire-marker.imported {
+  animation: fire-glow-imported 2s ease-in-out infinite alternate;
+}
+
+@keyframes fire-glow-imported {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+  }
+  100% {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.8);
+  }
+}
+
+/* Hover эффекты */
+.fire-marker:hover {
+  transform: scale(1.2);
+  z-index: 1000;
+}
+
+.fire-marker.favorites:hover {
+  box-shadow: 0 0 40px rgba(251, 191, 36, 0.9);
+}
+
+.fire-marker.search:hover {
+  box-shadow: 0 0 40px rgba(59, 130, 246, 0.9);
+}
+
+.fire-marker.map-click:hover {
+  box-shadow: 0 0 40px rgba(16, 185, 129, 0.9);
+}
+
+.fire-marker.imported:hover {
+  box-shadow: 0 0 40px rgba(139, 92, 246, 0.9);
+}
+
+/* Мини-попапы с горящими рамками */
+.fire-popup {
+  position: absolute;
+  background: white;
+  border-radius: 8px;
+  padding: 8px 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 120px;
+  max-width: 200px;
+  word-wrap: break-word;
+  white-space: nowrap;
+  line-height: 1.2;
+  animation: popup-appear 0.3s ease-out;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Горящие рамки для попапов */
+.fire-popup.favorites {
+  border: 2px solid;
+  border-image: linear-gradient(45deg, #fbbf24, #f59e0b, #d97706) 1;
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+}
+
+.fire-popup.search {
+  border: 2px solid;
+  border-image: linear-gradient(45deg, #3b82f6, #2563eb, #1d4ed8) 1;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+.fire-popup.map-click {
+  border: 2px solid;
+  border-image: linear-gradient(45deg, #10b981, #059669, #047857) 1;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+.fire-popup.imported {
+  border: 2px solid;
+  border-image: linear-gradient(45deg, #8b5cf6, #7c3aed, #6d28d9) 1;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+}
+
+/* Анимация появления попапа */
+@keyframes popup-appear {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Заголовки попапов с цветовым кодированием */
+.fire-popup.favorites .popup-header {
+  color: #d97706;
+  border-bottom: 1px solid #fbbf24;
+}
+
+.fire-popup.search .popup-header {
+  color: #1d4ed8;
+  border-bottom: 1px solid #3b82f6;
+}
+
+.fire-popup.map-click .popup-header {
+  color: #047857;
+  border-bottom: 1px solid #10b981;
+}
+
+.fire-popup.imported .popup-header {
+  color: #6d28d9;
+  border-bottom: 1px solid #8b5cf6;
+}
+
+/* Иконки источников в попапах */
+.popup-source-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+.popup-source-icon.favorites {
+  background: #fbbf24;
+}
+
+.popup-source-icon.search {
+  background: #3b82f6;
+}
+
+.popup-source-icon.map-click {
+  background: #10b981;
+}
+
+.popup-source-icon.imported {
+  background: #8b5cf6;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

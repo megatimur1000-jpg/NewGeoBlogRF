@@ -1,0 +1,25 @@
+{
+  "name": "events-parser",
+  "version": "1.0.0",
+  "description": "Парсер событий для городов",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "parse": "node index.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "chalk": "^4.1.2",
+    "dotenv": "^16.6.1",
+    "inquirer": "^8.2.6",
+    "pg": "^8.11.3"
+  },
+  "keywords": [
+    "events",
+    "parser",
+    "cities",
+    "database"
+  ],
+  "author": "WayAtom Team",
+  "license": "MIT"
+}

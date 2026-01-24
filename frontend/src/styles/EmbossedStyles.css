@@ -1,0 +1,166 @@
+/* Стили для embossed эффектов - загружаются в конце для приоритета */
+
+/* ОСНОВНЫЕ КОНТЕЙНЕРЫ СТРАНИЦ - ТОЛЬКО ВНЕШНИЕ КОНТЕЙНЕРЫ с "embossed" эффектом */
+.deep-container {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 20px !important;
+  /* ТОЧНАЯ СТРУКТУРА ИЗ ЧАТА */
+  box-shadow: 
+    inset 0 0 0 1px rgba(0, 0, 0, 0.1),      /* Тонкая темная линия слева */
+    inset 0 0 0 2px rgba(255, 255, 255, 0.9), /* Яркая белая линия */
+    inset 0 0 0 3px rgba(0, 0, 0, 0.1),      /* Тонкая темная линия справа */
+    0 2px 8px rgba(255, 255, 255, 0.3),       /* Светлый ореол */
+    0 8px 32px rgba(0, 0, 0, 0.1),            /* Глубокое затемнение */
+    0 16px 64px rgba(0, 0, 0, 0.05) !important; /* Дополнительная глубина */
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  position: relative !important;
+}
+
+/* ОСНОВНОЙ КОНТЕЙНЕР СТРАНИЦ СО СТИЛЯМИ ЧАТА */
+.page-main-container {
+  width: 100% !important;
+  height: 100% !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 20px !important;
+  /* ТОЧНАЯ СТРУКТУРА ИЗ ЧАТА */
+  box-shadow: 
+    inset 0 0 0 1px rgba(0, 0, 0, 0.1),      /* Тонкая темная линия слева */
+    inset 0 0 0 2px rgba(255, 255, 255, 0.9), /* Яркая белая линия */
+    inset 0 0 0 3px rgba(0, 0, 0, 0.1),      /* Тонкая темная линия справа */
+    0 2px 8px rgba(255, 255, 255, 0.3),       /* Светлый ореол */
+    0 8px 32px rgba(0, 0, 0, 0.1),            /* Глубокое затемнение */
+    0 16px 64px rgba(0, 0, 0, 0.05) !important; /* Дополнительная глубина */
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  position: relative !important;
+}
+
+/* Специальные стили для карты - ВНЕШНИЙ КОНТЕЙНЕР С "EMBOSSED" ЭФФЕКТОМ */
+.map-container {
+  width: 100% !important;
+  height: 100% !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 20px !important;
+  /* ТОЧНАЯ СТРУКТУРА ИЗ ЧАТА */
+  box-shadow: 
+    inset 0 0 0 1px rgba(0, 0, 0, 0.1),      /* Тонкая темная линия слева */
+    inset 0 0 0 2px rgba(255, 255, 255, 0.9), /* Яркая белая линия */
+    inset 0 0 0 3px rgba(0, 0, 0, 0.1),      /* Тонкая темная линия справа */
+    0 2px 8px rgba(255, 255, 255, 0.3),       /* Светлый ореол */
+    0 8px 32px rgba(0, 0, 0, 0.1),            /* Глубокое затемнение */
+    0 16px 64px rgba(0, 0, 0, 0.05) !important; /* Дополнительная глубина */
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  position: relative !important;
+}
+
+/* Специальные стили для главной страницы - ВНЕШНИЙ КОНТЕЙНЕР С "EMBOSSED" ЭФФЕКТОМ */
+.home-container {
+  width: 100% !important;
+  height: 100% !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 20px !important;
+  /* ТОЧНАЯ СТРУКТУРА ИЗ ЧАТА */
+  box-shadow: 
+    inset 0 0 0 1px rgba(0, 0, 0, 0.1),      /* Тонкая темная линия слева */
+    inset 0 0 0 2px rgba(255, 255, 255, 0.9), /* Яркая белая линия */
+    inset 0 0 0 3px rgba(0, 0, 0, 0.1),      /* Тонкая темная линия справа */
+    0 2px 8px rgba(255, 255, 255, 0.3),       /* Светлый ореол */
+    0 8px 32px rgba(0, 0, 0, 0.1),            /* Глубокое затемнение */
+    0 16px 64px rgba(0, 0, 0, 0.05) !important; /* Дополнительная глубина */
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  position: relative !important;
+}
+
+/* Добавляем стили для других внешних контейнеров страниц */
+.planner-container,
+.activity-container,
+.blog-container,
+.calendar-container,
+.centrepage-container,
+.profile-container {
+  width: 100% !important;
+  height: 100% !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 20px !important;
+  /* ТОЧНАЯ СТРУКТУРА ИЗ ЧАТА */
+  box-shadow: 
+    inset 0 0 0 1px rgba(0, 0, 0, 0.1),      /* Тонкая темная линия слева */
+    inset 0 0 0 2px rgba(255, 255, 255, 0.9), /* Яркая белая линия */
+    inset 0 0 0 3px rgba(0, 0, 0, 0.1),      /* Тонкая темная линия справа */
+    0 2px 8px rgba(255, 255, 255, 0.3),       /* Светлый ореол */
+    0 8px 32px rgba(0, 0, 0, 0.1),            /* Глубокое затемнение */
+    0 16px 64px rgba(0, 0, 0, 0.05) !important; /* Дополнительная глубина */
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  position: relative !important;
+}
+
+/* Дополнительные стили для тестирования embossed эффектов */
+.test-embossed-strong {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(15px) !important;
+  border-radius: 25px !important;
+  box-shadow: 
+    inset 0 0 0 1px rgba(0, 0, 0, 0.15),     /* Усиленная темная линия слева */
+    inset 0 0 0 3px rgba(255, 255, 255, 0.95), /* Усиленная белая линия */
+    inset 0 0 0 4px rgba(0, 0, 0, 0.15),     /* Усиленная темная линия справа */
+    0 4px 12px rgba(255, 255, 255, 0.4),      /* Усиленный светлый ореол */
+    0 12px 40px rgba(0, 0, 0, 0.15),          /* Усиленное глубокое затемнение */
+    0 24px 80px rgba(0, 0, 0, 0.08) !important; /* Усиленная дополнительная глубина */
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  position: relative !important;
+}
+
+.test-embossed-soft {
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(8px) !important;
+  border-radius: 15px !important;
+  box-shadow: 
+    inset 0 0 0 1px rgba(0, 0, 0, 0.05),     /* Мягкая темная линия слева */
+    inset 0 0 0 1px rgba(255, 255, 255, 0.8), /* Мягкая белая линия */
+    inset 0 0 0 2px rgba(0, 0, 0, 0.05),     /* Мягкая темная линия справа */
+    0 1px 4px rgba(255, 255, 255, 0.2),       /* Мягкий светлый ореол */
+    0 4px 16px rgba(0, 0, 0, 0.08),           /* Мягкое глубокое затемнение */
+    0 8px 32px rgba(0, 0, 0, 0.03) !important; /* Мягкая дополнительная глубина */
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  position: relative !important;
+}
+
+.test-embossed-colorful {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 20px !important;
+  box-shadow: 
+    inset 0 0 0 1px rgba(0, 0, 0, 0.1),      /* Темная линия слева */
+    inset 0 0 0 2px rgba(255, 255, 255, 0.9), /* Белая линия */
+    inset 0 0 0 3px rgba(0, 0, 0, 0.1),      /* Темная линия справа */
+    0 2px 8px rgba(255, 255, 255, 0.3),       /* Светлый ореол */
+    0 8px 32px rgba(102, 126, 234, 0.2),      /* Цветное глубокое затемнение */
+    0 16px 64px rgba(102, 126, 234, 0.05) !important; /* Цветная дополнительная глубина */
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  position: relative !important;
+}
+
+.test-embossed-glow {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  border-radius: 20px !important;
+  box-shadow: 
+    inset 0 0 0 1px rgba(0, 0, 0, 0.1),      /* Темная линия слева */
+    inset 0 0 0 2px rgba(255, 255, 255, 0.9), /* Белая линия */
+    inset 0 0 0 3px rgba(0, 0, 0, 0.1),      /* Темная линия справа */
+    0 2px 8px rgba(255, 255, 255, 0.3),       /* Светлый ореол */
+    0 8px 32px rgba(0, 0, 0, 0.1),            /* Глубокое затемнение */
+    0 16px 64px rgba(0, 0, 0, 0.05),          /* Дополнительная глубина */
+    0 0 20px rgba(102, 126, 234, 0.1) !important; /* Дополнительное свечение */
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  position: relative !important;
+} 

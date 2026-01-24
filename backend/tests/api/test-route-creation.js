@@ -1,0 +1,121 @@
+import pool from './db.js';
+import { generateToken } from './src/utils/jwt.js';
+
+async function testRouteCreation() {
+  try {
+    console.log('🔍 Тестируем создание маршрута...\n');
+
+    // Генерируем тестовый токен
+    const testUserId = 'c0421a84-8760-42bb-8b7c-72f4ed1e2e1b';
+    const token = generateToken(testUserId, 'registered');
+    console.log('✅ Токен сгенерирован:', token.substring(0, 50) + '...');
+
+    // Тестовые данные маршрута
+    const testRoute = {
+      title: 'Тестовый маршрут',
+      description: 'Описание тестового маршрута',
+      start_date: '2025-10-12',
+      end_date: '2025-10-13',
+      transport_type: ['car'],
+      route_data: { test: true },
+      total_distance: 100,
+      estimated_duration: 120,
+      estimated_cost: 500,
+      difficulty_level: 1,
+      is_public: true,
+      tags: ['тест'],
+      waypoints: [
+        {
+          marker_id: 'test-marker-1',
+          order_index: 1,
+          arrival_time: '09:00',
+          departure_time: '10:00',
+          duration_minutes: 60,
+          notes: 'Тестовая заметка',
+          is_overnight: false
+        }
+      ]
+    };
+
+    console.log('📝 Тестовые данные:', JSON.stringify(testRoute, null, 2));
+
+    // Проверяем подключение к БД
+    console.log('\n🔍 Проверяем подключение к БД...');
+    const dbTest = await pool.query('SELECT NOW()');
+    console.log('✅ БД подключена, время:', dbTest.rows[0].now);
+
+    // Проверяем, есть ли пользователь
+    console.log('\n🔍 Проверяем пользователя...');
+    const userCheck = await pool.query('SELECT id FROM users WHERE id = $1', [testUserId]);
+    if (userCheck.rows.length === 0) {
+      console.log('❌ Пользователь не найден, создаем тестового...');
+      await pool.query(`
+        INSERT INTO users (id, username, email, role, created_at) 
+        VALUES ($1, 'testuser', 'test@test.com', 'registered', NOW())
+        ON CONFLICT (id) DO NOTHING
+      `, [testUserId]);
+      console.log('✅ Тестовый пользователь создан');
+    } else {
+      console.log('✅ Пользователь найден');
+    }
+
+    // Пробуем создать маршрут
+    console.log('\n🔍 Создаем маршрут...');
+    const routeResult = await pool.query(`
+      INSERT INTO travel_routes (
+        creator_id, title, description, start_date, end_date, transport_type, route_data, 
+        total_distance, estimated_duration, estimated_cost, difficulty_level, is_public, tags, 
+        created_at, updated_at
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,NOW(),NOW()) RETURNING *
+    `, [
+      testUserId, 
+      testRoute.title, 
+      testRoute.description, 
+      testRoute.start_date, 
+      testRoute.end_date, 
+      testRoute.transport_type, 
+      JSON.stringify(testRoute.route_data), 
+      testRoute.total_distance, 
+      testRoute.estimated_duration, 
+      testRoute.estimated_cost, 
+      testRoute.difficulty_level, 
+      testRoute.is_public, 
+      testRoute.tags
+    ]);
+
+    console.log('✅ Маршрут создан:', routeResult.rows[0].id);
+
+    // Пробуем создать waypoints
+    console.log('\n🔍 Создаем waypoints...');
+    for (const wp of testRoute.waypoints) {
+      try {
+        await pool.query(`
+          INSERT INTO route_waypoints (route_id, marker_id, order_index, arrival_time, departure_time, duration_minutes, notes, is_overnight)
+          VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+        `, [
+          routeResult.rows[0].id, 
+          wp.marker_id, 
+          wp.order_index, 
+          wp.arrival_time, 
+          wp.departure_time, 
+          wp.duration_minutes, 
+          wp.notes, 
+          wp.is_overnight
+        ]);
+        console.log('✅ Waypoint создан:', wp.marker_id);
+      } catch (wpErr) {
+        console.log('❌ Ошибка создания waypoint:', wpErr.message);
+      }
+    }
+
+    console.log('\n✅ Тест завершен успешно!');
+
+  } catch (error) {
+    console.error('❌ Ошибка теста:', error);
+    console.error('Stack:', error.stack);
+  } finally {
+    process.exit();
+  }
+}
+
+testRouteCreation();

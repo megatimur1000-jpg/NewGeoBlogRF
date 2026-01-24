@@ -1,0 +1,71 @@
+-- Создание тестового события для доработки UX
+-- Замените creator_id на реальный ID пользователя из вашей БД
+
+INSERT INTO events (
+  id,
+  creator_id,
+  title,
+  description,
+  event_type,
+  start_datetime,
+  end_datetime,
+  timezone,
+  location_id,
+  max_participants,
+  price,
+  is_recurring,
+  recurrence_rule,
+  cover_image_url,
+  is_public,
+  requires_approval,
+  status,
+  created_at,
+  updated_at,
+  category,
+  location,
+  photo_urls,
+  hashtags,
+  author_name,
+  participants_count,
+  likes_count,
+  comments_count,
+  is_user_modified,
+  used_in_blogs,
+  organizer,
+  latitude,
+  longitude
+) VALUES (
+  gen_random_uuid(),
+  (SELECT id FROM users LIMIT 1), -- Используем первого пользователя или замените на конкретный ID
+  'Фестиваль "День огурца" в Суздале',
+  'Ежегодный фестиваль, посвященный главному символу города Суздаль - огурцу. Включает ярмарку с дегустацией различных сортов огурцов, конкурсы на самый большой огурец, мастер-классы по засолке, народные гуляния и концертную программу. Фестиваль проходит на центральной площади города и собирает тысячи гостей со всей России.',
+  'festival',
+  '2025-07-15 12:00:00',
+  '2025-07-15 18:00:00',
+  'Europe/Moscow',
+  NULL,
+  NULL,
+  '0.00',
+  false,
+  NULL,
+  NULL, -- URL обложки (можно добавить позже)
+  true,
+  false,
+  'active',
+  NOW(),
+  NOW(),
+  'Фестиваль',
+  'Суздаль, Владимирская область, Центральная площадь',
+  ARRAY[]::text[], -- Массив URL фотографий
+  ARRAY['суздаль', 'огурец', 'фестиваль', 'традиции', 'ярмарка']::text[],
+  NULL,
+  0,
+  0,
+  0,
+  false,
+  false,
+  'Администрация города Суздаль',
+  56.4274, -- Широта Суздаля
+  40.4466  -- Долгота Суздаля
+);
+

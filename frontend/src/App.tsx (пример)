@@ -1,0 +1,15 @@
+import { GlobalMarkerStyles } from './components/Map/Map.styles';
+
+function App() {
+  return (
+    <Router>
+      <LayoutProvider>
+        <GlobalMarkerStyles />
+        <AppRoutes />
+        <ChatWindows />
+      </LayoutProvider>
+    </Router>
+  );
+}
+
+export default App; 

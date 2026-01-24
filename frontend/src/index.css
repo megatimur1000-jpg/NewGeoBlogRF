@@ -1,0 +1,366 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Lato:wght@300;400;700&display=swap');
+/* Стили Leaflet загружаются динамически через loadLeafletStyles() только когда нужны */
+@import "./styles/GlobalStyles.css";
+@import "./pages/ChatNew.css";
+@import "./styles/EmbossedStyles.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Анимации для интерактивной карты */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes markerPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes routeDraw {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.animate-markerPulse {
+  animation: markerPulse 2s ease-in-out infinite;
+}
+
+.animate-routeDraw {
+  animation: routeDraw 2s ease-out;
+}
+
+@layer base {
+  /* CSS переменные для мобильной версии */
+  :root {
+    /* Высота навигации */
+    --nav-height: 64px;
+    --bottom-nav-height: 72px;
+    /* Высота ActionButtons (70px кнопка + 24px padding + 12px отступ = 106px) */
+    --action-buttons-height: 106px;
+    
+    /* 🎨 НОВАЯ СИСТЕМА СТЕКЛЯННОГО МОРФИЗМА - Единая система токенов */
+    /* Фоны - светло-зеленый градиент вместо темного */
+    --bg-gradient: transparent;
+    --bg-root: transparent;
+    --bg-content: transparent;
+    --glass-bg: rgba(255, 255, 255, 0.15); /* Более прозрачный */
+    --glass-bg-modal: rgba(255, 255, 255, 0.25);
+    --feed-bg: transparent;
+    --card-bg: rgba(25, 25, 55, 0.5);
+    --surface-card: rgba(25, 25, 55, 0.5);
+    
+    /* Границы */
+    --border-glass: rgba(255, 255, 255, 0.08);
+    --border-light: rgba(255, 255, 255, 0.08);
+    --border-card: rgba(255, 255, 255, 0.07);
+    
+    /* Текст */
+    --text-primary: #e6e6ff;
+    --text-secondary: #a0a0cc;
+    --text-accent: #4cc9f0;
+    
+    /* Радиусы */
+    --radius-panel: 16px;
+    --radius-card: 16px;
+    --radius-photo: 12px;
+    
+    /* Тени */
+    --shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.3);
+    --shadow-card: 0 6px 16px rgba(0, 0, 0, 0.2);
+    
+    /* Градиенты */
+    --gradient-primary: linear-gradient(135deg, hsl(210 85% 55%), hsl(195 90% 65%));
+    --gradient-secondary: linear-gradient(135deg, hsl(155 65% 50%), hsl(170 70% 55%));
+    --gradient-accent: linear-gradient(135deg, hsl(35 95% 60%), hsl(45 95% 65%));
+    --gradient-hero: linear-gradient(135deg, hsl(210 85% 55%) 0%, hsl(155 65% 50%) 100%);
+    
+    /* Старые тени (для совместимости) */
+    --shadow-sm: 0 1px 2px 0 hsl(210 30% 15% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(210 30% 15% / 0.1), 0 2px 4px -2px hsl(210 30% 15% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(210 30% 15% / 0.1), 0 4px 6px -4px hsl(210 30% 15% / 0.1);
+    --shadow-elevated: 0 20px 25px -5px hsl(210 30% 15% / 0.1), 0 8px 10px -6px hsl(210 30% 15% / 0.1);
+    
+    /* Цвета для мобильной версии (HSL формат) */
+    --mobile-background: 210 40% 98%;
+    --mobile-foreground: 215 25% 15%;
+    --mobile-card: 0 0% 100%;
+    --mobile-card-foreground: 215 25% 15%;
+    --mobile-primary: 210 85% 55%;
+    
+    /* Glassmorphism переменные - основано на MapActionButtons.css */
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-bg-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    --glass-bg-hover: rgba(255, 255, 255, 0.15);
+    --glass-bg-active: rgba(59, 130, 246, 0.3);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-border-hover: rgba(255, 255, 255, 0.3);
+    --glass-border-active: rgba(59, 130, 246, 0.6);
+    --glass-blur: blur(10px) saturate(180%);
+    --glass-radius: 20px;
+    --glass-radius-small: 12px;
+    --glass-radius-large: 24px;
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    --glass-shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.2);
+    --glass-shadow-active: 0 4px 12px rgba(59, 130, 246, 0.3);
+    --glass-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --glass-text: rgba(0, 0, 0, 0.8);
+    --glass-text-light: rgba(0, 0, 0, 0.6);
+    --glass-accent: rgba(59, 130, 246, 1);
+    --glass-danger: rgba(239, 68, 68, 1);
+    --glass-success: rgba(34, 197, 94, 1);
+    
+    /* Темная тема для glassmorphism */
+    --glass-dark-bg: rgba(0, 0, 0, 0.1);
+    --glass-dark-bg-gradient: linear-gradient(135deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.1) 100%);
+    --glass-dark-bg-hover: rgba(255, 255, 255, 0.05);
+    --glass-dark-border: rgba(255, 255, 255, 0.1);
+    --glass-dark-border-hover: rgba(255, 255, 255, 0.2);
+    --glass-dark-text: rgba(255, 255, 255, 0.9);
+    --glass-dark-text-light: rgba(255, 255, 255, 0.7);
+    
+    /* Fallback для старых браузеров */
+    --glass-fallback-bg: rgba(255, 255, 255, 0.85);
+    --glass-fallback-dark-bg: rgba(0, 0, 0, 0.75);
+    --mobile-primary-foreground: 0 0% 100%;
+    --mobile-secondary: 155 65% 50%;
+    --mobile-secondary-foreground: 0 0% 100%;
+    --mobile-muted: 210 40% 96%;
+    --mobile-muted-foreground: 215 15% 45%;
+    --mobile-accent: 35 95% 60%;
+    --mobile-accent-foreground: 0 0% 100%;
+    --mobile-border: 210 30% 88%;
+    --mobile-input: 210 30% 92%;
+    --mobile-ring: 210 85% 55%;
+    --mobile-radius: 1rem;
+  }
+
+  body {
+    @apply m-0 min-h-screen font-lato;
+    /* 🎨 СВЕТЛО-ЗЕЛЕНЫЙ ГРАДИЕНТ - убрали темный фон */
+    background: var(--bg-gradient);
+    color: var(--text-primary);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  #root {
+    background: var(--bg-gradient);
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-montserrat text-primary font-bold;
+  }
+}
+
+@layer components {
+  .header {
+    @apply fixed top-0 left-0 right-0 h-[70px] text-gray-800 flex items-center justify-between px-8 z-50;
+    background: #ffffff;
+    box-shadow: theme('boxShadow.sm');
+  }
+
+  /* 🎨 САЙДБАР - Glass-морфизм, абсолютный внутри карты */
+  .sidebar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-right: 1px solid var(--border-glass);
+    box-shadow: var(--shadow-panel);
+    z-index: 10;
+    transition: width 0.3s ease;
+    overflow: hidden;
+    color: var(--text-primary);
+    padding-top: 64px; /* Отступ под топбар */
+  }
+
+  /* Скрываем сайдбар на мобильных устройствах */
+  @media (max-width: 767px) {
+    .sidebar {
+      display: none !important;
+    }
+  }
+
+  .sidebar.w-sidebar-expanded {
+    width: 18rem; /* Увеличено с 16rem до 18rem (~1.125cm) */
+    /* Увеличиваем z-index при раскрытии, чтобы панель была поверх контента */
+    z-index: 70;
+    /* Добавляем тень для визуального выделения */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  .sidebar.w-sidebar-expanded .sidebar-text {
+    opacity: 1;
+  }
+
+  /* ИКОНКИ ВСЕГДА ВИДНЫ */
+  .sidebar i {
+    opacity: 1 !important;
+    color: #374151 !important;
+    display: inline-block !important;
+    visibility: visible !important;
+  }
+
+  /* ТЕКСТ СКРЫТ В ЗАКРЫТОМ СОСТОЯНИИ */
+  .sidebar:not(.w-sidebar-expanded) .sidebar-text {
+    opacity: 0;
+  }
+
+  .content-block {
+    @apply bg-white rounded-xl p-5 mb-5;
+    box-shadow: theme('boxShadow.sm');
+  }
+  
+  .btn-primary {
+    @apply bg-accent-teal text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors duration-200;
+  }
+  
+  .stat-card {
+    @apply bg-white p-6 rounded-xl flex flex-col items-center transition-transform duration-200 hover:-translate-y-1;
+    box-shadow: theme('boxShadow.sm');
+  }
+
+  .search-bar input {
+    @apply w-full bg-white/20 text-white rounded-full px-4 py-2 pr-10;
+  }
+
+  .search-bar input::placeholder {
+    @apply text-white/70;
+  }
+
+  .nav-icons {
+    @apply flex items-center gap-4;
+  }
+
+  .badge {
+    @apply absolute -top-1 -right-2 bg-accent-teal text-white rounded-full px-1.5 min-w-[20px] text-xs text-center;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Стили для карты */
+.map-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.map-container .leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 0 !important;
+}
+
+/* Стили для кластеров маркеров */
+.marker-cluster-small {
+  background-color: rgba(181, 226, 140, 0.6);
+}
+
+.marker-cluster-small div {
+  background-color: rgba(110, 204, 57, 0.6);
+}
+
+.marker-cluster-medium {
+  background-color: rgba(241, 211, 87, 0.6);
+}
+
+.marker-cluster-medium div {
+  background-color: rgba(240, 194, 12, 0.6);
+}
+
+.marker-cluster-large {
+  background-color: rgba(253, 156, 115, 0.6);
+}
+
+.marker-cluster-large div {
+  background-color: rgba(241, 128, 23, 0.6);
+}
+
+/* Исправляем проблему с иконками маркеров */
+.leaflet-default-icon-path {
+  background-image: url(https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png);
+}
+
+/* Временная метка должна быть видна поверх overlay */
+.temp-marker-icon {
+  z-index: 3000 !important;
+}
+
+.leaflet-marker-icon.temp-marker-icon {
+  z-index: 3000 !important;
+}
+
+.leaflet-marker-icon.marker-icon,
+.leaflet-marker-icon .marker-base,
+.marker-icon,
+.marker-base {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  background: inherit !important;
+}
+
+.marker-icon i,
+.marker-base i {
+  color: violet !important;
+  font-size: 1.3em !important;
+  line-height: 1 !important;
+}
+
+/* Стиль для input в тёмном стеклянном блоке */
+.dark-glass-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.dark-glass-input:focus {
+  border-color: rgba(76, 201, 240, 0.4) !important;
+  box-shadow: 0 0 0 3px rgba(76, 201, 240, 0.1) !important;
+}
