@@ -3,6 +3,7 @@
 import '../../utils/leafletInit';
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { OSMMapRenderer } from '../../services/map_facade/adapters/OSMMapRenderer';
 import CircularProgressBar from '../ui/CircularProgressBar';
 import * as Leaflet from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -496,19 +497,20 @@ const Map: React.FC<MapProps> = ({
                     mapRef.current = (facadeApi as any).map as L.Map;
                 } else if (facadeApi && (facadeApi as any).mapInstance) {
                     mapRef.current = (facadeApi as any).mapInstance as L.Map;
-                } else if (initResult && (initResult as any).map) {
-                    mapRef.current = (initResult as any).map as L.Map;
-                } else if ((window as any).L) {
+                                } else {
+                    // FACADE: Используем OSMMapRenderer вместо прямого вызова L.map
                     try {
-                        const maybeMap = (window as any).L.map(mapContainer, { center, zoom });
-                        (window as any).L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(maybeMap);
-                        mapRef.current = maybeMap;
-                        try {
-                            (mapFacade as any).INTERNAL = (mapFacade as any).INTERNAL || {};
-                            (mapFacade as any).INTERNAL.api = (mapFacade as any).INTERNAL.api || {};
-                            (mapFacade as any).INTERNAL.api.map = maybeMap;
-                        } catch (e) { }
-                    } catch (err) { }
+                         // ИСПРАВЛЕНИЕ 1: Конструктор без аргументов
+                        const mapRenderer = new OSMMapRenderer();
+
+                        // ИСПРАВЛЕНИЕ 2: Передаем 'map' в initialize
+                        mapRenderer.initialize('map');
+
+                        // Получаем инстанс карты Leaflet из фасада для совместимости с остальным кодом
+                        mapRef.current = mapRenderer.getMap();
+                    } catch (e) {
+                        console.error("Ошибка инициализации OSMMapRenderer", e);
+                    }
                 }
 
                 if (!mapRef.current) {
@@ -534,7 +536,7 @@ const Map: React.FC<MapProps> = ({
                 });
 
                 if (!hasTileLayer) {
-                    const tileLayer = L.tileLayer(tileLayerInfo.url, {
+                     const tileLayer = L.tileLayer(tileLayerInfo.url, {
                         attribution: tileLayerInfo.attribution,
                         maxZoom: 19,
                         subdomains: 'abc',
