@@ -6,7 +6,6 @@ import PageLayout from '../components/PageLayout';
 import { listPosts, createPost, PostDTO, toggleReaction } from '../services/postsService';
 import { FaPlus, FaCog, FaEdit, FaFileAlt, FaCloud, FaTimes } from 'react-icons/fa';
 import { useContentStore } from '../stores/contentStore';
-import AdsIcon from '../../Только промты!!!!/icons8-реклама-64.png';
 import '../styles/GlobalStyles.css';
 import '../styles/PageLayout.css';
 import CreatePostModal from '../components/Posts/CreatePostModal';
@@ -39,7 +38,6 @@ const PostsPage: React.FC = () => {
   const [selectedPost, setSelectedPost] = useState<PostDTO | null>(null);
   const [showInteractivePost, setShowInteractivePost] = useState(false);
   const [expandedPosts, setExpandedPosts] = useState<Record<string, boolean>>({});
-  const [showAdsPanel, setShowAdsPanel] = useState(false);
   const [contentFilter, setContentFilter] = useState<ContentFilter>('all');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [showModerationModal, setShowModerationModal] = useState(false);
@@ -764,116 +762,7 @@ const PostsPage: React.FC = () => {
       />
 
       {/* Модальное окно конструктора постов */}
-      {/* Центрированный модальный блок: реклама */}
-      {showAdsPanel && (
-        <>
-          <div
-            onClick={() => setShowAdsPanel(false)}
-            style={{
-              position: 'fixed',
-              inset: 0,
-              background: 'rgba(0,0,0,0.45)',
-              backdropFilter: 'blur(2px)',
-              zIndex: 999
-            }}
-          />
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Рекламные возможности"
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              position: 'fixed',
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: 'min(820px, 92vw)',
-              maxHeight: '86vh',
-              background: 'linear-gradient(180deg, #ffffff 0%, #fafafa 100%)',
-              borderRadius: 16,
-              boxShadow: '0 25px 60px rgba(0,0,0,0.25), 0 10px 25px rgba(0,0,0,0.12)',
-              zIndex: 1000,
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-              border: '1px solid #e5e7eb'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', padding: '18px 20px', borderBottom: '1px solid #e5e7eb', background: 'linear-gradient(90deg, #f8fafc, #ffffff)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <img src={AdsIcon} alt="Реклама" style={{ width: 36, height: 36, filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.15))' }} />
-                <div>
-                  <div style={{ fontWeight: 800, fontSize: 18, color: '#0f172a' }}>Продвижение на ГеоБлог.рф</div>
-                  <div style={{ fontSize: 12, color: '#475569' }}>Нативная реклама рядом с маршрутами, метками и гидами</div>
-                </div>
-              </div>
-              <button onClick={() => setShowAdsPanel(false)} className="text-gray-500 hover:text-gray-700" style={{ marginLeft: 'auto', fontSize: 22, lineHeight: 1 }}>×</button>
-            </div>
-            <div style={{ padding: 20, overflowY: 'auto' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 14, padding: 16 }}>
-                  <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>Преимущества</div>
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, color: '#334155' }}>
-                    <li style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
-                      <span>•</span>
-                      <span><b>Живые пользователи</b>: аудитория путешественников и локальных жителей.</span>
-                    </li>
-                    <li style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
-                      <span>•</span>
-                      <span><b>Конверсия</b>: нативные блоки приводят тёплый трафик.</span>
-                    </li>
-                    <li style={{ display: 'flex', gap: 10, marginBottom: 0 }}>
-                      <span>•</span>
-                      <span><b>Гео‑релевантность</b>: показы рядом с точками интереса и маршрутами.</span>
-                    </li>
-                  </ul>
-                </div>
-                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 14, padding: 16 }}>
-                  <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>Форматы</div>
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, color: '#334155' }}>
-                    <li style={{ marginBottom: 8 }}>— Пост‑реклама в ленте (фото/галерея, карта, CTA)</li>
-                    <li style={{ marginBottom: 8 }}>— Закреп у геометки/маршрута</li>
-                    <li>— Блок «Полезно рядом» в гиде</li>
-                  </ul>
-                </div>
-                <div style={{ gridColumn: '1 / -1', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 14, padding: 16 }}>
-                  <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>Как начать</div>
-                  <ol style={{ paddingLeft: 18, color: '#334155', marginBottom: 12 }}>
-                    <li style={{ marginBottom: 6 }}>Выберите формат и бюджет</li>
-                    <li style={{ marginBottom: 6 }}>Добавьте фото и укажите адрес/метку на карте</li>
-                    <li>Запустите — модерация до 1 часа</li>
-                  </ol>
-                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                    <button
-                      onClick={() => { alert('Заявка на рекламу отправлена. Мы свяжемся с вами.'); setShowAdsPanel(false); }}
-                      style={{
-                        background: 'linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: 10,
-                        padding: '10px 14px',
-                        fontWeight: 700,
-                        boxShadow: '0 8px 20px rgba(37, 99, 235, 0.35)'
-                      }}
-                    >Запустить рекламу</button>
-                    <button
-                      onClick={() => { alert('Мы свяжемся с вами для настройки кампании.'); setShowAdsPanel(false); }}
-                      style={{
-                        background: '#0f172a',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: 10,
-                        padding: '10px 14px',
-                        fontWeight: 700
-                      }}
-                    >Связаться с менеджером</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+
 
       {/* Кнопка модерации для админа */}
       {isAdmin && !showModerationModal && (
