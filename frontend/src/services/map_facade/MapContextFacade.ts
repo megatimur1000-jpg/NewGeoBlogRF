@@ -58,6 +58,9 @@ export class MapContextFacade {
   // Event handler registries
   private readonly clickHandlers: Array<(latLng: [number, number]) => void> = [];
   private readonly routeGeometryHandlers: Array<(coords: Array<[number, number]>) => void> = [];
+  // Добавлены новые реестры для событий перемещения и зума
+  private readonly moveHandlers: Array<() => void> = [];
+  private readonly zoomHandlers: Array<() => void> = []; 
 
   private splitScreenState = {
     left: 'osm' as MapContext | 'calendar',
@@ -208,18 +211,39 @@ export class MapContextFacade {
 
       const r = this.currentRenderer as any;
 
-      if (r.onClick && this.clickHandlers.length > 0) {
-        r.onClick((coords: [number, number]) => {
+      // Bind Click handlers
+      if (r.onMapClick && this.clickHandlers.length > 0) {
+        r.onMapClick((e: any) => {
+          const coords: [number, number] = [e.latlng.lat, e.latlng.lng];
           this.clickHandlers.forEach(h => {
             try { h(coords); } catch (error_) { console.debug('[MapContextFacade] click handler error:', error_); }
           });
         });
       }
 
+      // Bind Route Geometry handlers
       if (r.onRouteGeometry && this.routeGeometryHandlers.length > 0) {
         r.onRouteGeometry((coords: Array<[number, number]>) => {
           this.routeGeometryHandlers.forEach(h => {
             try { h(coords); } catch (error_) { console.debug('[MapContextFacade] routeGeometry handler error:', error_); }
+          });
+        });
+      }
+
+      // Bind Move handlers
+      if (r.onMapMove && this.moveHandlers.length > 0) {
+        r.onMapMove(() => {
+          this.moveHandlers.forEach(h => {
+            try { h(); } catch (error_) { console.debug('[MapContextFacade] move handler error:', error_); }
+          });
+        });
+      }
+
+      // Bind Zoom handlers
+      if (r.onMapZoom && this.zoomHandlers.length > 0) {
+        r.onMapZoom(() => {
+          this.zoomHandlers.forEach(h => {
+            try { h(); } catch (error_) { console.debug('[MapContextFacade] zoom handler error:', error_); }
           });
         });
       }
@@ -679,6 +703,36 @@ export class MapContextFacade {
         });
       }
     } catch (error_) { console.debug('[MapContextFacade] onRouteGeometry setup failed:', error_); }
+  }
+
+  /**
+   * Подписка на событие окончания перемещения карты.
+   */
+  onMapMove(handler: () => void): void {
+    this.moveHandlers.push(handler);
+    try {
+      const r = this.currentRenderer as any;
+      if (r?.onMapMove) {
+        r.onMapMove(() => {
+          try { handler(); } catch (error_) { console.debug('[MapContextFacade] onMapMove handler error:', error_); }
+        });
+      }
+    } catch (error_) { console.debug('[MapContextFacade] onMapMove setup failed:', error_); }
+  }
+
+  /**
+   * Подписка на событие изменения зума.
+   */
+  onMapZoom(handler: () => void): void {
+    this.zoomHandlers.push(handler);
+    try {
+      const r = this.currentRenderer as any;
+      if (r?.onMapZoom) {
+        r.onMapZoom(() => {
+          try { handler(); } catch (error_) { console.debug('[MapContextFacade] onMapZoom handler error:', error_); }
+        });
+      }
+    } catch (error_) { console.debug('[MapContextFacade] onMapZoom setup failed:', error_); }
   }
 
   // Fit bounds with an options object to support different providers

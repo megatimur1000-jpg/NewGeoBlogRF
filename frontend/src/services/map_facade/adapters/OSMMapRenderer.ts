@@ -1,7 +1,55 @@
-import type { IMapRenderer, MapConfig, UnifiedMarker, PersistedRoute, GeoPoint } from '../IMapRenderer';
+import type { IMapRenderer, MapConfig, UnifiedMarker, PersistedRoute, GeoPoint, LatLng } from '../IMapRenderer';
 import L from 'leaflet';
 
 export class OSMMapRenderer implements IMapRenderer {
+  clear?(): void {
+    throw new Error('Method not implemented.');
+  }
+  removeMarker?(id: string): void {
+    throw new Error('Method not implemented.');
+  }
+  removeRoute?(id: string): void {
+    throw new Error('Method not implemented.');
+  }
+  setZoomControl?(position?: string) {
+    throw new Error('Method not implemented.');
+  }
+  createDivIcon?(opts?: any) {
+    throw new Error('Method not implemented.');
+  }
+  createIcon?(opts?: any) {
+    throw new Error('Method not implemented.');
+  }
+  createMarker?(latlng: any, opts?: any) {
+    throw new Error('Method not implemented.');
+  }
+  point?(x: number, y: number) {
+    throw new Error('Method not implemented.');
+  }
+  latLng?(lat: number, lon: number) {
+    throw new Error('Method not implemented.');
+  }
+  createPolyline?(latlngs: Array<[number, number]>, opts?: any) {
+    throw new Error('Method not implemented.');
+  }
+  latLngBounds?(points: any) {
+    throw new Error('Method not implemented.');
+  }
+  createPolygon?(latlngs: Array<[number, number]>, opts?: any) {
+    throw new Error('Method not implemented.');
+  }
+  createCircle?(center: [number, number], opts?: any) {
+    throw new Error('Method not implemented.');
+  }
+  fitBounds?(bounds: any, opts?: any): void {
+    throw new Error('Method not implemented.');
+  }
+  createMarkerClusterGroup?(opts?: any) {
+    throw new Error('Method not implemented.');
+  }
+  latLngToContainerPoint?(latlng: any): { x: number; y: number; } {
+    throw new Error('Method not implemented.');
+  }
   private containerId: string | null = null;
   private mapInstance: L.Map | null = null;
   private leafletMarkers: Record<string, L.Marker> = {};
@@ -41,20 +89,63 @@ export class OSMMapRenderer implements IMapRenderer {
       zoomControl: true,
     });
 
+    // Используем публичный метод для добавления слоя по умолчанию
     this.addTileLayer();
 
     // Небольшая задержка для корректного отображения (опционально)
     setTimeout(() => {
-      this.mapInstance?.invalidateSize();
+      this.invalidateSize();
     }, 100);
   }
 
-  private addTileLayer(): void {
-    if (!this.mapInstance) return;
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  /**
+   * Добавляет слой тайлов на карту. Публичный метод для фасада.
+   */
+  public addTileLayer(url?: string, options?: L.TileLayerOptions): L.TileLayer {
+    if (!this.mapInstance) {
+      throw new Error('Карта не инициализирована');
+    }
+    const tileUrl = url || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    const tileOpts = options || {
       attribution: '© OpenStreetMap contributors',
       maxZoom: 19,
-    }).addTo(this.mapInstance);
+    };
+    return L.tileLayer(tileUrl, tileOpts).addTo(this.mapInstance);
+  }
+
+  /**
+   * Обновляет размер карты (полезно при изменении размеров контейнера).
+   */
+  public invalidateSize(): void {
+    if (!this.mapInstance) {
+      console.warn('[OSMMapRenderer] Map not initialized, cannot invalidate size');
+      return;
+    }
+    this.mapInstance.invalidateSize();
+  }
+
+  /**
+   * Подписка на клик по карте.
+   */
+  public onMapClick(handler: (e: L.LeafletMouseEvent) => void): void {
+    if (!this.mapInstance) return;
+    this.mapInstance.on('click', handler);
+  }
+
+  /**
+   * Подписка на перемещение карты.
+   */
+  public onMapMove(handler: (e: L.LeafletEvent) => void): void {
+    if (!this.mapInstance) return;
+    this.mapInstance.on('move', handler);
+  }
+
+  /**
+   * Подписка на изменение зума.
+   */
+  public onMapZoom(handler: (e: L.LeafletEvent) => void): void {
+    if (!this.mapInstance) return;
+    this.mapInstance.on('zoom', handler);
   }
 
   public getMap(): L.Map {

@@ -506,8 +506,8 @@ const Map: React.FC<MapProps> = ({
                          // ИСПРАВЛЕНИЕ 1: Конструктор без аргументов
                         const mapRenderer = new OSMMapRenderer();
 
-                        // ИСПРАВЛЕНИЕ 2: Передаем 'map' в initialize
-                        await mapRenderer.init('map-container', config);
+                        // ИСПРАВЛЕНИЕ 2: Передаём id контейнера 'map' в initialize
+                        await mapRenderer.init('map', config);
 
                         // Получаем инстанс карты Leaflet из фасада для совместимости с остальным кодом
                         mapRef.current = mapRenderer.getMap();
@@ -565,13 +565,13 @@ const Map: React.FC<MapProps> = ({
                     }
                 }, 100);
 
-                mapRef.current!.eachLayer((layer: any) => {
+                mapRef.current?.eachLayer((layer: any) => {
                     if (layer && typeof layer.getLayers === 'function' && layer !== markerClusterGroupRef.current) {
-                        try { mapRef.current!.removeLayer(layer); } catch (e) { }
+                        try { mapRef.current?.removeLayer(layer); } catch (e) { }
                     }
                 });
 
-                mapRef.current!.on('moveend', () => {
+                mapRef.current?.on('moveend', () => {
                     if (onBoundsChange && mapRef.current) {
                         const bounds = mapRef.current.getBounds();
                         if (bounds && typeof bounds.getNorth === 'function') {
@@ -585,22 +585,23 @@ const Map: React.FC<MapProps> = ({
                     }
                 });
 
-                mapRef.current!.on('click', async (e: any) => {
+                mapRef.current?.on('click', async (e: any) => {
+                    if (!mapRef.current) return; // Guard to avoid crashes if map is gone
                     if (isAddingMarkerModeRef.current) {
                         if (tempMarkerRef.current) {
-                            mapRef.current!.removeLayer(tempMarkerRef.current);
+                            try { mapRef.current.removeLayer(tempMarkerRef.current); } catch (err) { }
                         }
 
                         const clickedLatLng = e.latlng;
-                        const zoom = mapRef.current!.getZoom();
-                        const mapSize = mapRef.current!.getSize();
+                        const zoom = mapRef.current.getZoom();
+                        const mapSize = mapRef.current.getSize();
                         const targetScreenY = mapSize.y * 0.25;
                         const screenCenterY = mapSize.y / 2;
                         const offsetY = targetScreenY - screenCenterY;
-                        const projectedClick = mapRef.current!.project(clickedLatLng, zoom);
+                        const projectedClick = mapRef.current.project(clickedLatLng, zoom);
                         const targetCenterPoint = mapFacade().point(projectedClick.x, projectedClick.y - offsetY);
-                        const targetCenterLatLng = mapRef.current!.unproject(targetCenterPoint, zoom);
-                        mapRef.current!.setView(targetCenterLatLng, zoom, { animate: true });
+                        const targetCenterLatLng = mapRef.current.unproject(targetCenterPoint, zoom);
+                        try { mapRef.current.setView(targetCenterLatLng, zoom, { animate: true }); } catch (err) { }
 
                         const tempIcon = mapFacade().createDivIcon({
                             className: 'temp-marker-icon',
@@ -1181,7 +1182,7 @@ const Map: React.FC<MapProps> = ({
         let zoomHandler: any;
         if (mapRef.current && routePolyline) {
             const updateStyle = () => {
-                const z = mapRef.current!.getZoom();
+                const z = mapRef.current?.getZoom() ?? 0;
                 const weight = z <= 5 ? 8 : z <= 8 ? 6 : z <= 12 ? 5 : 4;
                 routePolyline!.setStyle({ weight });
             };
@@ -1234,7 +1235,12 @@ const Map: React.FC<MapProps> = ({
                     fillOpacity: 0.2,
                     weight: 2,
                 });
-                (polygon as any).isZoneLayer = true;
+
+                // ИСПРАВЛЕНИЕ: Добавляем полигон на карту и помечаем его
+                if (polygon && mapRef.current && typeof (polygon as any).addTo === 'function') {
+                    polygon.addTo(mapRef.current);
+                    (polygon as any).isZoneLayer = true;
+                }
             });
         });
     }, [zones]);
@@ -1263,18 +1269,18 @@ const Map: React.FC<MapProps> = ({
 
             if (radiusCircle) {
                 radiusCircle.on('mousedown', function (_: any) {
-                    mapRef.current!.dragging.disable();
+                    mapRef.current?.dragging?.disable();
                     const onMove = (ev: any) => {
                         if (radiusCircle) radiusCircle.setLatLng(ev.latlng);
                     };
                     const onUp = (ev: any) => {
                         onSearchRadiusCenterChange([ev.latlng.lat, ev.latlng.lng]);
-                        mapRef.current!.off('mousemove', onMove);
-                        mapRef.current!.off('mouseup', onUp);
-                        mapRef.current!.dragging.enable();
+                        mapRef.current?.off('mousemove', onMove);
+                        mapRef.current?.off('mouseup', onUp);
+                        mapRef.current?.dragging?.enable();
                     };
-                    mapRef.current!.on('mousemove', onMove);
-                    mapRef.current!.on('mouseup', onUp);
+                    mapRef.current?.on('mousemove', onMove);
+                    mapRef.current?.on('mouseup', onUp);
                 });
             }
         }
