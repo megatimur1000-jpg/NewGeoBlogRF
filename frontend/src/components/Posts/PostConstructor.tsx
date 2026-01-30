@@ -512,18 +512,18 @@ const PostConstructor: React.FC<PostConstructorProps> = ({ onSave, onClose }) =>
           <PanelTitle>Создать пост</PanelTitle>
           
           {/* Переключатель типа поста */}
-          <div style={{ marginBottom: 20, display: 'flex', gap: 8 }}>
+          <div className="pc-toggle-group">
             <ControlButton
               active={postType === 'simple'}
               onClick={() => setPostType('simple')}
-              style={{ flex: 1, marginBottom: 0 }}
+              className="pc-btn-full"
             >
               📝 Простой
             </ControlButton>
             <ControlButton
               active={postType === 'guide'}
               onClick={() => setPostType('guide')}
-              style={{ flex: 1, marginBottom: 0 }}
+              className="pc-btn-full"
             >
               🗺️ Путеводитель
             </ControlButton>
@@ -590,9 +590,7 @@ const PostConstructor: React.FC<PostConstructorProps> = ({ onSave, onClose }) =>
                   <ControlButton active={postData.map.base === 'alidade'} onClick={() => setPostData(prev => ({ ...prev, map: { ...prev.map, base: 'alidade' } }))}>Alidade Smooth</ControlButton>
                 </div>
               </div>
-              <h3 style={{ marginTop: '20px', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: '#374151' }}>
-                Добавить на карту
-              </h3>
+              <h3 className="pc-section-header">Добавить на карту</h3>
               
               <ControlButton onClick={() => openFavoritesModal('markers')}>
                 <MapPin size={16} />
@@ -611,11 +609,11 @@ const PostConstructor: React.FC<PostConstructorProps> = ({ onSave, onClose }) =>
 
               {/* Список выбранных элементов с крестиками для удаления */}
               {(postData.map.elements.markers.length > 0 || postData.map.elements.routes.length > 0 || postData.map.elements.events.length > 0) && (
-                <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div className="pc-selected-list">
                   {postData.map.elements.markers.length > 0 && (
                     <div>
                       <div className="pc-label-sm">Метки на карте</div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <div className="pc-list-col">
                         {postData.map.elements.markers.map((m: any) => (
                           <div key={m.id} className="pc-list-item">
                             <div className="pc-text-muted-sm">{m.title}</div>
@@ -628,7 +626,7 @@ const PostConstructor: React.FC<PostConstructorProps> = ({ onSave, onClose }) =>
                   {postData.map.elements.routes.length > 0 && (
                     <div>
                       <div className="pc-label-sm">Маршруты на карте</div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <div className="pc-list-col">
                         {postData.map.elements.routes.map((r: any) => (
                           <div key={r.id} className="pc-list-item">
                             <div className="pc-text-muted-sm">{r.title}</div>
@@ -641,7 +639,7 @@ const PostConstructor: React.FC<PostConstructorProps> = ({ onSave, onClose }) =>
                   {postData.map.elements.events.length > 0 && (
                     <div>
                       <div className="pc-label-sm">События на карте</div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <div className="pc-list-col">
                         {postData.map.elements.events.map((e: any) => (
                           <div key={e.id} className="pc-list-item">
                             <div className="pc-text-muted-sm">{e.title}</div>
@@ -652,24 +650,23 @@ const PostConstructor: React.FC<PostConstructorProps> = ({ onSave, onClose }) =>
                     </div>
                   )}
                 </div>
-              )}
+              )} 
             </>
           )}
           
           {/* Для путеводителя: список секций */}
           {postType === 'guide' && guideSections.length > 0 && (
-            <div style={{ marginTop: 20, marginBottom: 20 }}>
+            <div className="pc-guide-wrapper">
               <div className="pc-section-heading">
                 Секции путеводителя ({guideSections.length})
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 300, overflowY: 'auto' }}>
+              <div className="pc-guide-list">
                 {guideSections.map((section, idx) => (
                   <div key={section.id} className={"pc-section-card " + (selectedBlock === `section-${section.id}` ? 'active' : '')}>
-                    <div className="pc-list-item" style={{ marginBottom: 6 }}>
+                    <div className="pc-list-item">
                       <span 
                         onClick={() => setSelectedBlock(`section-${section.id}`)}
-                        className="pc-text-muted-sm"
-                        style={{ cursor: 'pointer', flex: 1 }}
+                        className="pc-text-muted-sm pc-clickable"
                       >
                         {section.title || `Секция ${idx + 1}`}
                       </span>
@@ -683,7 +680,7 @@ const PostConstructor: React.FC<PostConstructorProps> = ({ onSave, onClose }) =>
                     </div>
                     
                     {/* Чекбокс для карты в секции */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                    <div className="pc-checkbox-row">
                       <input
                         type="checkbox"
                         checked={section.hasMap}
@@ -697,9 +694,10 @@ const PostConstructor: React.FC<PostConstructorProps> = ({ onSave, onClose }) =>
                           }
                           setGuideSections(newSections);
                         }}
-                        style={{ width: 14, height: 14 }}
+                        id={`map-check-${section.id}`}
+                        className="pc-checkbox-sm"
                       />
-                      <label className="pc-label-sm" style={{ cursor: 'pointer' }}>
+                      <label htmlFor={`map-check-${section.id}`} className="pc-label-sm">
                         Добавить карту
                       </label>
                     </div>
@@ -858,9 +856,9 @@ const PostConstructor: React.FC<PostConstructorProps> = ({ onSave, onClose }) =>
             {/* Изображения */}
             {postData.images.visible && (
               <ContentBlock onClick={() => setSelectedBlock('images')}>
-                <div style={{ marginBottom: '16px' }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px' }}>Фотографии</h3>
-                  <p style={{ fontSize: '12px', color: '#666', marginBottom: '16px' }}>
+                <div className="pc-images-header">
+                  <h3 className="pc-images-title">Фотографии</h3>
+                  <p className="pc-images-hint">
                     Нажмите на фото или перетащите файл для загрузки
                   </p>
                 </div>
@@ -872,7 +870,7 @@ const PostConstructor: React.FC<PostConstructorProps> = ({ onSave, onClose }) =>
                         key={image.id}
                         onDrop={(e) => handleImageDrop(e, image.id)}
                         onDragOver={(e) => e.preventDefault()}
-                        style={{ position: 'relative' }}
+                        className="image-item"
                       >
                         {image.src ? (
                           <>

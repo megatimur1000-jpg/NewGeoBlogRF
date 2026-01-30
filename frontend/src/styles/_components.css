@@ -376,3 +376,108 @@
 
 .pc-btn-row { display:flex; gap:8px; }
 .pc-section { margin-top:10px; }
+
+/* ========================================
+   Дополнительные утилиты для PostConstructor
+   ======================================== */
+
+/* Группа переключателей (Simple/Guide) */
+.pc-toggle-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+/* Кнопка на всю ширину внутри группы */
+.pc-btn-full {
+  flex: 1;
+  margin-bottom: 0 !important; /* Сброс стандартного margin-bottom у ControlButton */
+}
+
+/* Универсальный заголовок секции (для "Добавить на карту" и др.) */
+.pc-section-header {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* Вертикальный список элементов (col = column) */
+.pc-list-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Стили для блока изображений */
+.pc-images-header {
+  margin-bottom: 16px;
+}
+.pc-images-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #1f2937;
+}
+.pc-images-hint {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 16px;
+}
+
+/* Секции путеводителя */
+.pc-guide-wrapper {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+.pc-guide-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* Чекбокс и лейбл в ряд */
+.pc-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.pc-checkbox-sm {
+  width: 14px;
+  height: 14px;
+}
+
+/* Кнопки действий карты в секции */
+.pc-map-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+/* Статусное сообщение (цветное) */
+.pc-status-badge {
+  margin-top: 4px;
+  padding: 4px;
+  background: #f0f9ff;
+  border-radius: 4px;
+}
+
+/* Кнопки снизу */
+.pc-bottom-actions {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Доп. утилиты */
+.image-item { position: relative; }
+
+.pc-section-title { margin-bottom: 15px; }
+
+.pc-selected-list { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
