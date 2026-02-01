@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { mapFacade } from '../../services/map_facade/index';
 
 import '../../styles/FireMarkers.css';
 import { FaLayerGroup, FaMap, FaSatelliteDish, FaGlobe, FaMoon } from 'react-icons/fa';
@@ -281,6 +282,9 @@ const YandexMap: React.FC<YandexMapProps> = ({
           controls: ['zoomControl', 'fullscreenControl']
         });
 
+        // Register background API in facade so facade methods can operate on this instance
+        try { mapFacade().registerBackgroundApi({ map: mapInstanceRef.current }); } catch (e) { }
+
         // Добавление обработчика клика по карте
         if (!destroyed) {
           mapInstanceRef.current.events.add('click', (e: any) => {
@@ -325,6 +329,8 @@ const YandexMap: React.FC<YandexMapProps> = ({
         }
         mapInstanceRef.current = null;
       }
+
+      try { mapFacade().registerBackgroundApi(null); } catch (e) { }
       
       // Очищаем маркеры
       markersRef.current.forEach(marker => {
@@ -356,7 +362,7 @@ const YandexMap: React.FC<YandexMapProps> = ({
       const zoomChanged = Math.abs(currentZoom - zoom) > 1;
       
       if (centerChanged || zoomChanged) {
-        mapInstanceRef.current.setCenter(center, zoom);
+        try { mapFacade().setView(center, zoom); } catch (e) { mapInstanceRef.current.setCenter(center, zoom); }
     }
   }, [center, zoom]);
 
@@ -484,10 +490,7 @@ const YandexMap: React.FC<YandexMapProps> = ({
               [bounds.maxLng + padding, bounds.maxLat + padding]
             ];
 
-            mapInstanceRef.current.setBounds(newBounds, {
-              checkZoomRange: true,
-              duration: 300
-            });
+            try { mapFacade().fitBounds({ southWest: [newBounds[0][0], newBounds[0][1]], northEast: [newBounds[1][0], newBounds[1][1]] }, { padding: 50 }); } catch (e) { mapInstanceRef.current.setBounds(newBounds, { checkZoomRange: true, duration: 300 }); }
           } catch (error) {
             // Игнорируем ошибки при автоматическом масштабировании
           }

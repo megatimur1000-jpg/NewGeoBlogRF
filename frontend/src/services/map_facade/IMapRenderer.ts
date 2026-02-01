@@ -96,6 +96,7 @@ export interface MapMarker {
   title?: string;
   category?: string;
   type?: string;
+  description?: string; // optional description allowed for markers
   // Добавь остальные поля, если они нужны, например: icon, popup и т.д.
 }
 
@@ -189,8 +190,22 @@ export interface IMapRenderer {
   destroy(): void;
 
   // Управление видом
-  setView(center: GeoPoint, zoom: number): void;
+  setView(center: GeoPoint | LatLng, zoom: number): void;
   invalidateSize?(): void;
+
+  // === Координатные и утилитарные методы ===
+  // Возвращает пиксельную точку для заданного latlng
+  project?(latlng: LatLng): { x: number; y: number };
+  // Обратная операция — возвращает [lat, lng]
+  unproject?(point: { x: number; y: number }, zoom?: number): LatLng;
+  // Возвращает размер контейнера карты в пикселях
+  getSize?(): { x: number; y: number };
+  // Текущий зум
+  getZoom?(): number;
+
+  // === Работа со слоями ===
+  eachLayer?(fn: (layer: any) => void): void;
+  removeLayer?(layer: any): void;
 
   // Рендеринг данных
   renderMarkers(markers: UnifiedMarker[]): void;
@@ -207,9 +222,19 @@ export interface IMapRenderer {
   // --- Доп. утилиты (опциональные) для упрощения работы компонентов через фасад ---
   // Только общие методы, не завязанные на конкретной реализации карты
   addTileLayer?(url: string, options?: any): any;
+  // Перелет/анимация к точке
+  flyTo?(center: LatLng, zoom?: number, options?: any): void;
 
   // Обработка событий
   onMapClick?(handler: (event: any) => void): void;
   onMapMove?(handler: () => void): void;
+  offMapMove?(handler: () => void): void;
   onMapZoom?(handler: () => void): void;
+  offMapZoom?(handler: () => void): void;
+
+  // События начала перемещения/зума (movestart/zoomstart)
+  onMapMoveStart?(handler: () => void): void;
+  offMapMoveStart?(handler: () => void): void;
+  onMapZoomStart?(handler: () => void): void;
+  offMapZoomStart?(handler: () => void): void;
 }
