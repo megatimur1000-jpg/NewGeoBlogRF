@@ -17,7 +17,7 @@ export interface RouteCreationData {
   title: string;
   description?: string;
   category: string;
-  purpose: 'personal' | 'blog' | 'post' | 'event' | 'shared' | 'draft';
+  purpose: 'personal' | 'post' | 'event' | 'shared' | 'draft';
   tags: string[];
   visibility: 'private' | 'public' | 'friends';
   isTemplate: boolean;

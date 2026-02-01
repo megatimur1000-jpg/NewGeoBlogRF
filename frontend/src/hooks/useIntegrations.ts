@@ -7,7 +7,7 @@ import apiClient from '../api/apiClient';
 interface Integrations {
   mapMarkerId?: string;
   chatRoomId?: string;
-  blogId?: string;
+  postId?: string;
 }
 
 export const useIntegrations = () => {
@@ -67,12 +67,12 @@ export const useIntegrations = () => {
     }
   }, []);
 
-  const createBlogPost = useCallback(async (eventData: EventType) => {
+  const createPost = useCallback(async (eventData: EventType) => {
     try {
-      const response = await apiClient.post('/blog/posts', {
+      const response = await apiClient.post('/posts', {
         title: `Отчет: ${eventData.title}`,
-        content: eventData.description,
-        eventId: eventData.id,
+        body: eventData.description,
+        event_id: eventData.id,
         tags: eventData.metadata?.tags || []
       });
       return response.data.id;
@@ -110,10 +110,10 @@ export const useIntegrations = () => {
         // Publish to activity feed
         await publishToActivity(eventData);
 
-        // If event is completed, create blog post
+        // If event is completed, create a post
         if (eventData.status === 'completed') {
-          const blogId = await createBlogPost(eventData);
-          integrations.blogId = blogId ?? undefined;
+          const postId = await createPost(eventData);
+          integrations.postId = postId ?? undefined;
         }
 
         return {
@@ -126,11 +126,11 @@ export const useIntegrations = () => {
         setLoading(false);
       }
     },
-    [createMapMarker, createChatRoom, publishToActivity, createBlogPost]
+    [createMapMarker, createChatRoom, publishToActivity, createPost]
   );
 
   const openInModule = useCallback(
-    (moduleType: 'chat' | 'map' | 'route' | 'blog', id: string) => {
+    (moduleType: 'chat' | 'map' | 'route' | 'post', id: string) => {
       // Здесь можно добавить навигацию к соответствующим модулям
       switch (moduleType) {
         case 'chat':
@@ -142,8 +142,8 @@ export const useIntegrations = () => {
         case 'route':
           window.location.href = `/routes?route=${id}`;
           break;
-        case 'blog':
-          window.location.href = `/blog/${id}`;
+        case 'post':
+          window.location.href = `/posts/${id}`;
           break;
         default:
           }
@@ -159,6 +159,6 @@ export const useIntegrations = () => {
     createMapMarker,
     createChatRoom,
     publishToActivity,
-    createBlogPost
+    createPost
   };
 };
