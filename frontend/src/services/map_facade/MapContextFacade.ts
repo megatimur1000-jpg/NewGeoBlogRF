@@ -66,6 +66,21 @@ export class MapContextFacade {
   private readonly moveStartHandlers: Array<() => void> = [];
   private readonly zoomStartHandlers: Array<() => void> = [];
 
+  // Dispatcher callbacks attached to the renderer exactly once. They iterate
+  // the registered handlers and call them safely. Using a single dispatcher
+  // prevents duplicate firing when switching renderers or attaching handlers.
+  private readonly moveStartDispatcher = () => {
+    this.moveStartHandlers.forEach(h => {
+      try { h(); } catch (error_) { console.debug('[MapContextFacade] moveStart handler error:', error_); }
+    });
+  };
+
+  private readonly zoomStartDispatcher = () => {
+    this.zoomStartHandlers.forEach(h => {
+      try { h(); } catch (error_) { console.debug('[MapContextFacade] zoomStart handler error:', error_); }
+    });
+  }; 
+
   // Maps to keep track of wrappers for unsubscribe
   private readonly clickHandlerMap: Map<(e: any) => void, (coords: [number, number]) => void> = new Map();
   private readonly moveHandlerMap: Map<() => void, () => void> = new Map();
@@ -259,22 +274,16 @@ export class MapContextFacade {
         });
       }
 
-      // Bind MoveStart handlers (movestart)
+      // Bind MoveStart handlers (movestart) — attach single dispatcher to renderer
+      try { r.offMapMoveStart?.(this.moveStartDispatcher); } catch (_) { }
       if (r.onMapMoveStart && this.moveStartHandlers.length > 0) {
-        r.onMapMoveStart(() => {
-          this.moveStartHandlers.forEach(h => {
-            try { h(); } catch (error_) { console.debug('[MapContextFacade] moveStart handler error:', error_); }
-          });
-        });
+        r.onMapMoveStart(this.moveStartDispatcher);
       }
 
-      // Bind ZoomStart handlers (zoomstart)
+      // Bind ZoomStart handlers (zoomstart) — attach single dispatcher to renderer
+      try { r.offMapZoomStart?.(this.zoomStartDispatcher); } catch (_) { }
       if (r.onMapZoomStart && this.zoomStartHandlers.length > 0) {
-        r.onMapZoomStart(() => {
-          this.zoomStartHandlers.forEach(h => {
-            try { h(); } catch (error_) { console.debug('[MapContextFacade] zoomStart handler error:', error_); }
-          });
-        });
+        r.onMapZoomStart(this.zoomStartDispatcher);
       }
     } catch (error_) {
       console.debug('[MapContextFacade] Ignored binding error:', error_);
@@ -1210,10 +1219,13 @@ export class MapContextFacade {
     };
     this.moveStartHandlers.push(wrapper);
     this.moveStartHandlerMap.set(handler as any, wrapper);
-    // Immediately attach to active renderer so the handler works without a renderer switch
+    // Ensure renderer has dispatcher attached so our wrapper will be executed exactly once
     try {
       const r = this.currentRenderer as any;
-      r?.onMapMoveStart?.(wrapper);
+      if (r?.onMapMoveStart) {
+        try { r.offMapMoveStart?.(this.moveStartDispatcher); } catch (_) { }
+        r.onMapMoveStart(this.moveStartDispatcher);
+      }
     } catch (error_) { console.debug('[MapContextFacade] onMapMoveStart setup failed:', error_); }
   }
 
@@ -1225,7 +1237,10 @@ export class MapContextFacade {
     if (idx >= 0) this.moveStartHandlers.splice(idx, 1);
     try {
       const r = this.currentRenderer as any;
-      r?.offMapMoveStart?.(wrapper);
+      // If no more handlers remain, detach dispatcher from renderer
+      if (this.moveStartHandlers.length === 0) {
+        try { r?.offMapMoveStart?.(this.moveStartDispatcher); } catch (_) { }
+      }
     } catch (error_) { console.debug('[MapContextFacade] offMapMoveStart failed:', error_); }
   }
 
@@ -1236,10 +1251,13 @@ export class MapContextFacade {
     };
     this.zoomStartHandlers.push(wrapper);
     this.zoomStartHandlerMap.set(handler as any, wrapper);
-    // Immediately attach to active renderer
+    // Ensure renderer has dispatcher attached
     try {
       const r = this.currentRenderer as any;
-      r?.onMapZoomStart?.(wrapper);
+      if (r?.onMapZoomStart) {
+        try { r.offMapZoomStart?.(this.zoomStartDispatcher); } catch (_) { }
+        r.onMapZoomStart(this.zoomStartDispatcher);
+      }
     } catch (error_) { console.debug('[MapContextFacade] onMapZoomStart setup failed:', error_); }
   }
 
@@ -1251,7 +1269,9 @@ export class MapContextFacade {
     if (idx >= 0) this.zoomStartHandlers.splice(idx, 1);
     try {
       const r = this.currentRenderer as any;
-      r?.offMapZoomStart?.(wrapper);
+      if (this.zoomStartHandlers.length === 0) {
+        try { r?.offMapZoomStart?.(this.zoomStartDispatcher); } catch (_) { }
+      }
     } catch (error_) { console.debug('[MapContextFacade] offMapZoomStart failed:', error_); }
   }
 
