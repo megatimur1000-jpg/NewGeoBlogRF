@@ -283,11 +283,6 @@ const Map: React.FC<MapProps> = ({
             }
         }
         
-        // Обновляем CSS переменную для правильного позиционирования
-        const headerEl = document.querySelector('.page-header') || document.querySelector('header');
-        const headerHeight = headerEl ? (headerEl as HTMLElement).offsetHeight : 0;
-        document.documentElement.style.setProperty('--facade-map-top', `${headerHeight}px`);
-        
         // Добавляем класс для стилизации в зависимости от режима
         if (facadeMapRoot) {
             facadeMapRoot.classList.remove('two-panel-mode', 'single-panel-mode', 'map-hidden');
@@ -311,28 +306,18 @@ const Map: React.FC<MapProps> = ({
     }, [mapDisplayMode.shouldShowFullscreen, mapDisplayMode.isTwoPanelMode, mapDisplayMode.isOnlyPostsAndActivity]);
 
     useEffect(() => {
-        const setFacadeMapTop = () => {
-            try {
-                const headerEl = document.querySelector('.page-header') || document.querySelector('header');
-                const h = headerEl ? (headerEl as HTMLElement).offsetHeight : 0;
-                
-                // Используем значение из хука режима отображения карты
-                const topValue = mapDisplayMode.shouldShowFullscreen ? `${h}px` : `${h}px`;
-                document.documentElement.style.setProperty('--facade-map-top', topValue);
-                
-                if (mapRef.current) {
-                    setTimeout(() => {
-                        try {
-                            mapRef.current?.invalidateSize();
-                        } catch (e) { }
-                    }, 120);
-                }
-            } catch (e) { }
+        // On resize, invalidate Leaflet size when map is visible — don't set CSS vars here (MainLayout manages --facade-map-top)
+        const handler = () => {
+          try {
+            if (mapRef.current && mapDisplayMode.shouldShowFullscreen) {
+              setTimeout(() => { try { mapRef.current?.invalidateSize(); } catch (e) {} }, 120);
+            }
+          } catch (e) {}
         };
 
-        setFacadeMapTop();
-        window.addEventListener('resize', setFacadeMapTop);
-        return () => window.removeEventListener('resize', setFacadeMapTop);
+        handler();
+        window.addEventListener('resize', handler);
+        return () => window.removeEventListener('resize', handler);
     }, [mapDisplayMode.shouldShowFullscreen]);
 
     // --- CENTER/ZOOM FROM PROPS (only if no saved state) ---

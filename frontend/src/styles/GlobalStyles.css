@@ -1,122 +1,12 @@
 /* DEPRECATED: Legacy global styles. Prefer modular imports from `styles/index.css` (/_base, _components, _layout, _modes). */
 /* Глобальные стили для всех страниц с единым дизайном как в чате */
 
-/* 🎨 НОВЫЙ СТИЛЬ - Прозрачный фон, картографические паттерны через MapBackground.css */
-.page-container {
-  min-height: 100vh;
-  background: transparent;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  padding: 0;
-}
+/* Layout rules have been consolidated into `PageLayout.css` and `_layout.css`.
+   Keep layout definitions there as the single source of truth to avoid duplication and conflicts.
+   If you need to adjust container/mode behavior, edit `frontend/src/styles/_layout.css` or `frontend/src/styles/PageLayout.css`.
+*/
 
-/* Исключение для chat-container, planner-mode и map-mode - там отступы не нужны */
-.page-container:not(.chat-container):not(.planner-mode):not(.map-mode) {
-  padding: 24px;
-}
-
-/* Специальные стили для page-container с классом chat-container */
-.page-container.chat-container {
-  padding: 32px 0 32px 0; /* Отступы 2 см сверху и снизу */
-  margin: 0;
-  height: 100%;
-  width: 100%;
-  background: #e8e8e8; /* Светло-светло-серый фон */
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-/* Альтернативный зеркальный градиент для более выраженного эффекта */
-.page-container.mirror-gradient {
-  background: #e8e8e8; /* Светло-светло-серый фон */
-}
-
-/* Вертикальный зеркальный градиент */
-.page-container.vertical-mirror {
-  background: #e8e8e8; /* Светло-светло-серый фон */
-}
-
-/* Диагональный зеркальный градиент */
-.page-container.diagonal-mirror {
-  background: #e8e8e8; /* Светло-светло-серый фон */
-}
-
-/* Градиент с плавным переходом для двухоконного режима */
-.page-container.two-panel-mode {
-  background: #e8e8e8; /* Светло-светло-серый фон */
-}
-
-/* Градиент для трехоконного режима */
-.page-container.three-panel-mode {
-  background: #e8e8e8; /* Светло-светло-серый фон */
-}
-
-
-
-/* Заголовок страницы */
-.page-header {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 1rem 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Основная область контента */
-.page-main-area {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 100%;
-  margin: 0;
-  padding: 0;
-  overflow: hidden !important;
-}
-
-/* Для planner-mode - убираем все отступы */
-.page-container.planner-mode .page-main-area {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-/* Обертка контента */
-.page-content-wrapper {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 100%;
-  background: transparent !important; /* Убираем белый фон */
-  margin: 0; /* Убираем отступы */
-  padding: 0; /* Убираем отступы */
-  overflow: hidden !important;
-}
-
-/* Для planner-mode - убираем все отступы */
-.page-container.planner-mode .page-content-wrapper {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
+/* NOTE: Page-specific / component styles remain here if not layout-related (e.g., embossed classes).*/
 
 /* НОВЫЙ КЛАСС: EMBOSSED ЭФФЕКТ БЕЗ ВЫДВИГАЮЩИХСЯ ПАНЕЛЕЙ */
 .embossed-container {
@@ -895,39 +785,10 @@ html, body, #root {
 
 
 
-/* Главная панель - обеспечиваем полную высоту */
-.page-main-panel {
-  flex: 1 !important;
-  height: 100% !important;
-  min-height: 100% !important;
-  display: flex !important;
-  flex-direction: column !important;
-  overflow: hidden !important;
-  background: transparent !important;
-}
+/* Layout: canonical rules live in `frontend/src/styles/PageLayout.css` and `frontend/src/styles/_layout.css`.
+   Remove duplicated/legacy rules from this file to avoid conflicts. */
 
-/* Стили для двухоконного режима - обеспечиваем одинаковую высоту */
-.page-layout-container {
-  height: calc(100vh - 64px) !important; /* Вычитаем отступы сверху и снизу (32px + 32px) */
-  min-height: calc(100vh - 64px) !important;
-  max-height: calc(100vh - 64px) !important;
-  display: flex !important;
-  flex-direction: column !important;
-  overflow: hidden !important;
-  background: transparent !important;
-}
-
-/* Для карты - полный экран без ограничений */
-.page-layout-container.map-mode {
-  height: 100vh !important;
-  min-height: 100vh !important;
-  max-height: 100vh !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  display: contents !important;
-  overflow: visible !important;
-  background: transparent !important;
-  position: absolute !important;
+/* See `PageLayout.css` for authoritative definitions of `.page-main-panel` and `.page-layout-container` */
   top: 0 !important;
   left: 0 !important;
   width: 100% !important;

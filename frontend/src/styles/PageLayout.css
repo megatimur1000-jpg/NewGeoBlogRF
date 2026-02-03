@@ -1307,36 +1307,12 @@
   width: 0 !important;
 }
 
-/* Старый класс для совместимости */
-.posts-inner-container {
-  display: none !important;
-}
+/* Posts mode styles have been migrated to `frontend/src/styles/_content.css`.
+   Keep `_content.css` as the canonical source for posts/blog related layout and scroll behavior.
+   Removed legacy duplicates from this file to avoid conflicts. */
 
-/* Убираем двойные скроллы на всех уровнях */
-.page-container.posts-mode,
-.page-container.posts-mode .page-main-area,
-.page-container.posts-mode .page-content-wrapper,
-.page-container.posts-mode .page-main-panel {
-  scrollbar-width: none !important;
-  -ms-overflow-style: none !important;
-}
-
-.page-container.posts-mode::-webkit-scrollbar,
-.page-container.posts-mode .page-main-area::-webkit-scrollbar,
-.page-container.posts-mode .page-content-wrapper::-webkit-scrollbar,
-.page-container.posts-mode .page-main-panel::-webkit-scrollbar {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-}
-
-/* Скрываем скролл на .p-6 внутри posts-mode */
-.page-container.posts-mode .p-6 {
-  height: 100% !important;
-  overflow: hidden !important;
-  position: relative !important;
-}
-
+/* Back-compat helper (minimal) */
+.posts-inner-container { display: none; }
 /* ===== СТИЛИ ДЛЯ ACTIVITY-MODE - GLASSMORPHISM КОНТЕЙНЕР ===== */
 
 /* Основной контейнер activity - аналогично posts-mode */
