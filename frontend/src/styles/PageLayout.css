@@ -1,19 +1,66 @@
 /* Модульная система стилей для всех страниц */
 
-/* ===== БАЗОВЫЕ КОНТЕЙНЕРЫ ===== */
-
-/* Основной контейнер страницы */
-.page-layout-container {
-  height: 100vh;
-  padding: 0;
-  margin: 0;
-  /* Светло-светло-серый фон */
-  background: #e8e8e8;
-  display: flex;
-  flex-direction: column;
-  overflow: visible !important;
+/* ===== CORE LAYOUT (минимальные, предсказуемые правила) ===== */
+:root {
+  /* layout tokens (override in _base.css if needed) */
+  --page-padding: 24px;
+  --topbar-height: var(--header-height, 70px);
+  --sidebar-width: var(--sidebar-width, 4rem);
+  --z-topbar: 1200;
+  --z-sidebar: 1150;
+  --z-map: 100;
+  --z-overlay: 1100;
 }
 
+/* Основной контейнер страницы — минимальный, предсказуемый */
+.page-layout-container {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.page-container {
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: var(--page-padding);
+  box-sizing: border-box;
+}
+
+.page-main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* allow internal scrolling */
+}
+
+.page-content-wrapper {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.page-main-panel {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* Кнопки управления */
+.page-side-button { z-index: var(--z-overlay); }
+.page-side-buttons { z-index: calc(var(--z-overlay) + 10); }
+
+/* NOTE: Specific mode styles are in _modes.css. Keep this file for generic layout only. */
 /* Для planner-mode - переопределяем все ограничения для полного экрана */
 .page-layout-container.planner-mode {
   height: 100vh !important;
@@ -27,7 +74,7 @@
   min-height: 100vh !important;
 }
 
-/* Blog page: narrow edge blur strips (2cm) at left and right, full height, pointer-events none */
+/* Blog page: narrow edge blur strips (2cm) at left and right, full height, pointer-events none (kept minimal) */
 .page-container.blog-page::before,
 .page-container.blog-page::after {
   content: '';
@@ -36,7 +83,7 @@
   bottom: 0;
   width: 2cm;
   pointer-events: none; /* allow clicks through */
-  z-index: 5; /* above map but below main panel */
+  z-index: calc(var(--z-overlay) - 10);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   background: rgba(255,255,255,0.55);
