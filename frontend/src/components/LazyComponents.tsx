@@ -27,6 +27,8 @@ export const LazyAnalyticsDashboard = lazy(() => import('../analytics/dashboard/
 
 // Lazy loading для административных страниц
 export const LazyModerationPage = lazy(() => import('../pages/ModerationPage'));
+// Админ - подписки
+export const LazyAdminSubscriptionsPage = lazy(() => import('../pages/AdminSubscriptionsPage'));
 
 // Lazy loading для правовых страниц
 export const LazyUserAgreement = lazy(() => import('../pages/UserAgreement'));
