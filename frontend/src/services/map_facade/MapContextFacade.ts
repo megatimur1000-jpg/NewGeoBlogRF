@@ -919,15 +919,30 @@ export class MapContextFacade {
         }
         
         // КРИТИЧНО: Сохраняем карту в INTERNAL.api для mapRef
-        if (result && this.currentRenderer) {
+        if (this.currentRenderer) {
             (this as any).INTERNAL = (this as any).INTERNAL || {};
             (this as any).INTERNAL.api = (this as any).INTERNAL.api || {};
-            // Пробуем разные пути к карте
-            if ((this.currentRenderer as any).map) {
-                (this as any).INTERNAL.api.map = (this.currentRenderer as any).map;
+            // Пробуем разные пути к карте:
+            // 1. renderer.getMap() — основной способ (OSMMapRenderer хранит карту как private mapInstance)
+            // 2. renderer.map — для рендереров, которые экспонируют карту напрямую
+            let mapInstance = null;
+            try {
+                if (typeof (this.currentRenderer as any).getMap === 'function') {
+                    mapInstance = (this.currentRenderer as any).getMap();
+                }
+            } catch (e) { /* getMap may throw if not initialized */ }
+            if (!mapInstance && (this.currentRenderer as any).map) {
+                mapInstance = (this.currentRenderer as any).map;
+            }
+            if (!mapInstance && (this.currentRenderer as any).mapInstance) {
+                mapInstance = (this.currentRenderer as any).mapInstance;
+            }
+            if (mapInstance) {
+                (this as any).INTERNAL.api.map = mapInstance;
+                (this as any).INTERNAL.api.mapInstance = mapInstance;
             }
             (this as any).INTERNAL.api.containerId = containerId;
-            console.log('[MapContextFacade] Saved map to INTERNAL.api:', !!(this as any).INTERNAL.api.map);
+            console.log('[MapContextFacade] Saved map to INTERNAL.api:', !!mapInstance);
         }
         
         return result;

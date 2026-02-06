@@ -511,7 +511,11 @@ const Map: React.FC<MapProps> = ({
             return;
         }
 
-        if (!isContainerVisible) {
+        // ИСПРАВЛЕНО: Не выходим из init если контейнер существует но ещё невидим —
+        // при портальном рендере контейнер может быть ещё не примонтирован.
+        // Вместо раннего выхода, позволяем initMapAndLoadMarkers
+        // самостоятельно ждать пока контейнер станет видимым.
+        if (!container) {
             setError(null);
             setIsLoading(false);
             return;
@@ -600,14 +604,20 @@ const Map: React.FC<MapProps> = ({
                                 } else {
                     // FACADE: Используем OSMMapRenderer вместо прямого вызова L.map
                     try {
-                         // ИСПРАВЛЕНИЕ 1: Конструктор без аргументов
                         const mapRenderer = new OSMMapRenderer();
-
-                        // ИСПРАВЛЕНИЕ 2: Передаём id контейнера 'map' в initialize
                         await mapRenderer.init('map', config);
 
-                        // Получаем инстанс карты Leaflet из фасада для совместимости с остальным кодом
+                        // Получаем инстанс карты Leaflet
                         mapRef.current = mapRenderer.getMap();
+
+                        // КРИТИЧНО: Регистрируем карту в фасаде, чтобы
+                        // mapFacade().createMarker() и другие helper-методы работали
+                        if (mapRef.current) {
+                            mapFacade().registerBackgroundApi(
+                                { map: mapRef.current, mapInstance: mapRef.current, containerId: 'map' },
+                                'map'
+                            );
+                        }
                     } catch (e) {
                         console.error("Ошибка инициализации OSMMapRenderer", e);
                     }
