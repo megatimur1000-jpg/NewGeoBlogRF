@@ -813,6 +813,13 @@ export class MapContextFacade {
    */
   setView(center: GeoPoint | [number, number], zoom?: number): void {
     try {
+      const map = this.getMapSafe();
+      if (!map) {
+        // Map not ready yet — пропускаем вызов, он будет выполнен когда карта будет готова
+        console.debug('[MapContextFacade] setView skipped: map not ready');
+        return;
+      }
+
       if (Array.isArray(center)) {
         const gp: GeoPoint = { lat: center[0], lon: center[1] };
         (this.currentRenderer as any)?.setView?.(gp, zoom ?? 13);
