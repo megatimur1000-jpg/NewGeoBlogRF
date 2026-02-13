@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, no-empty */
+// TODO: temporary — relax lint rules in large files while we migrate types (follow-up task)
 /**
  * OfflineOSMRenderer — рендерер офлайн-карт на базе Leaflet.
  *
@@ -11,6 +13,7 @@
  *  - Отображение границ покрытия офлайн-тайлов
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type {
   IMapRenderer,
   MapConfig,

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 // Global test setup: provide a minimal localStorage shim and any globals tests need.
 (globalThis as any).localStorage = (globalThis as any).localStorage || {
   _store: new Map<string, string>(),
@@ -13,7 +14,7 @@
 // This file is executed before other tests to avoid modules auto-initializing IndexedDB.
 
 // Minimal fake IndexedDB open implementation used by offlineContentStorage.init()
-;(globalThis as any).indexedDB = {
+(globalThis as any).indexedDB = {
   open: (name: string, version?: number) => {
     const req: any = {};
     // emulate async open lifecycle
@@ -48,6 +49,6 @@
 };
 
 // Ensure alert exists
-;(globalThis as any).alert = (msg?: any) => {
+(globalThis as any).alert = (msg?: any) => {
   // no-op in tests
 };

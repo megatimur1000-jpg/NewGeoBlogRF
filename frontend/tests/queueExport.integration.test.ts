@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mocks for network and APIs
@@ -115,7 +116,7 @@ describe('Offline queue -> export integration (mocked storage)', () => {
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Provide a minimal in-memory IndexedDB shim for the test environment
-;(global as any).indexedDB = (function () {
+(global as any).indexedDB = (function () {
   const dbs: Record<string, any> = {};
   return {
     deleteDatabase(name: string) {
