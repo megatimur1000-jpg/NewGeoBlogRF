@@ -48,6 +48,15 @@ describe('useMapMarkers', () => {
     createdMarkers.length = 0;
     mockRoot.render.mockClear();
     mockRoot.unmount.mockClear();
+
+    // Ensure markerClusterGroup plugin is available in the test DOM environment
+    (window as any).L = (window as any).L || {};
+    (window as any).L.markerClusterGroup = vi.fn((opts: any) => ({
+      addLayer: vi.fn(),
+      addTo: vi.fn(),
+      getLayers: () => [],
+      getAllChildMarkers: () => []
+    }));
   });
 
   afterEach(() => {
@@ -105,7 +114,8 @@ describe('useMapMarkers', () => {
     />);
 
     const facade = (await import('../../services/map_facade')).mapFacade();
-    expect(facade.createMarkerClusterGroup).toHaveBeenCalled();
+    // cluster group is created via the global markerCluster plugin in this hook
+    expect((window as any).L.markerClusterGroup).toHaveBeenCalled();
     expect(facade.createMarker).toHaveBeenCalled();
     expect(createdMarkers.length).toBeGreaterThan(0);
   });
