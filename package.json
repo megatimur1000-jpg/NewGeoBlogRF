@@ -7,7 +7,11 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepare": "husky install",
+    "precommit": "npm run lint-staged && npm run gitleaks-precommit",
+    "lint-staged": "lint-staged",
+    "gitleaks-precommit": "sh scripts/gitleaks-precommit.sh"
   },
   "dependencies": {
     "@emotion/react": "^11.11.3",
@@ -40,10 +44,17 @@
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
+    "husky": "^8.0.3",
+    "lint-staged": "^14.0.1",
     "postcss": "^8.4.33",
     "postcss-preset-env": "^9.3.0",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3",
     "vite": "^5.0.11"
+  },
+  "lint-staged": {
+    "**/*.{js,ts,jsx,tsx}": [
+      "eslint --fix"
+    ]
   }
 }
