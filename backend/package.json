@@ -9,7 +9,7 @@
     "npm": ">=9.0.0"
   },
   "scripts": {
-    "test": "cross-env NODE_ENV=test jest --runInBand",
+    "test": "cross-env NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --runInBand",
     "start": "node server.js",
     "build": "npx tsc",
     "postbuild": "node -e \"const fs=require('fs');const path=require('path');const oldFile=path.join('dist','database','config','database.config.cjs');const newFile=path.join('dist','database','config','database.config.js');if(fs.existsSync(oldFile))fs.unlinkSync(oldFile);if(fs.existsSync(newFile))fs.renameSync(newFile,oldFile);\"",
