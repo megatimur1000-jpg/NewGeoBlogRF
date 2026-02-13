@@ -30,4 +30,5 @@ jobs:
         working-directory: ./backend
         env:
           NODE_ENV: test
+          NODE_OPTIONS: --experimental-vm-modules
         run: npm test --silent
