@@ -1,0 +1,15 @@
+{
+  "root": true,
+  "env": {
+    "es2021": true,
+    "node": true
+  },
+  "overrides": [
+    {
+      "files": ["backend/src/**"],
+      "rules": {
+        "no-console": ["error", { "allow": ["warn", "error"] }]
+      }
+    }
+  ]
+}
