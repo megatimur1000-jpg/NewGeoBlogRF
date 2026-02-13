@@ -140,8 +140,8 @@ backend/
 │   ├── chat_server.php   # PHP WebSocket сервер
 │   └── vendor/           # Composer зависимости
 ├── scripts/              # Скрипты и парсеры
-│   ├── events-parser/    # Парсер событий
-│   └── wayatom-parser/   # Парсер данных WayAtom
+│   ├── events-parser/ (ARCHIVED)    # Парсер событий — перемещён в `archive/fixed_files/backend/scripts/events-parser`
+│   └── wayatom-parser/ (ARCHIVED)   # Парсер данных WayAtom — перемещён в `archive/fixed_files/backend/scripts/wayatom-parser`
 ├── logs/                 # Логи приложения
 ├── public/              # Публичные файлы
 │   └── uploads/         # Загруженные файлы

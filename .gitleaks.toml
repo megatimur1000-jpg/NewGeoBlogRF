@@ -1,0 +1,14 @@
+# Basic gitleaks configuration - ignore archive and node_modules
+[[rules]]
+  description = "Generic secret"
+  regex = '''(?i)(?:apikey|api[_-]?key|secret|token|passwd|password|aws[_-]?secret|private[_-]?key)\W*[:=]\W*["']?[0-9A-Za-z\-_=+\/]{8,}'''
+  tags = ["pattern"]
+
+[allowlist]
+  description = "Paths to ignore"
+  paths = [
+    "^archive/",
+    "^node_modules/",
+    "^dist/",
+    "^frontend/dist/"
+  ]
