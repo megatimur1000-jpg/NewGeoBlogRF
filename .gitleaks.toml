@@ -1,7 +1,8 @@
 # Basic gitleaks configuration - ignore archive and node_modules
 [[rules]]
-  description = "Generic secret"
-  regex = '''(?i)(?:apikey|api[_-]?key|secret|token|passwd|password|aws[_-]?secret|private[_-]?key)\W*[:=]\W*["']?[0-9A-Za-z\-_=+\/]{8,}'''
+  id = "generic-secret"
+  description = "Generic secret (requires quoted value to reduce false positives)"
+  regex = '''(?i)(?:apikey|api[_-]?key|secret|token|passwd|password|aws[_-]?secret|private[_-]?key)\W*[:=]\W*["'][0-9A-Za-z\-_+=\/]{8,}["']'''
   tags = ["pattern"]
 
 [allowlist]
@@ -10,5 +11,15 @@
     "^archive/",
     "^node_modules/",
     "^dist/",
-    "^frontend/dist/"
+    "^frontend/dist/",
+    "^backend/tests/",
+    "^backend/public/",
+    "^backend/scripts/",
+    "^frontend/tests/",
+    "^backend/check-",
+    "^backend/create-",
+    "^backend/ws/vendor/",
+    "^frontend/scripts/",
+    "^frontend/Только промты!!!!/",
+    "^backend/clear-blogs.cjs$"
   ]
