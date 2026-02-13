@@ -445,8 +445,12 @@ async function startServer() {
   }
 }
 
-// Запускаем сервер
-startServer();
+// Экспортируем `app` для тестов и запускаем сервер только в ненастроенном тестовом окружении
+export default app;
+
+if (process.env.NODE_ENV !== 'test') {
+  startServer();
+}
 
 // Глобальные ловушки ошибок, чтобы процесс не «умирал» молча
 process.on('unhandledRejection', (reason) => {
