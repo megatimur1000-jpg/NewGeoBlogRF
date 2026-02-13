@@ -7,7 +7,9 @@ import io
 import math
 from PIL import Image, ImageDraw
 
-OUTPUT = r"d:\newgeoblogrf\offline-tiles\test-raster.mbtiles"
+# Путь к выходному файлу (определяется относительно расположения скрипта)
+import os
+OUTPUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test-raster.mbtiles")
 
 # Параметры: Владимирская область
 BOUNDS = (39.0, 55.5, 42.5, 57.0)  # west, south, east, north

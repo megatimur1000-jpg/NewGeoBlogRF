@@ -58,7 +58,7 @@ export class OfflineOSMRenderer implements IMapRenderer {
 
     this.containerId = containerId;
     this.apiBase = config?.apiBase ?? '';
-    this.currentTileset = config?.tileset ?? 'vla';
+    this.currentTileset = config?.tileset ?? 'test-raster';
 
     // Очистка предыдущей инициализации
     this.cleanupContainer(container);
