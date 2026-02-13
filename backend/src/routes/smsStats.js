@@ -2,6 +2,8 @@ import express from 'express';
 import { checkSMSSendLimits, getSMSStats } from '../services/smsLimiter.js';
 import { authenticateToken } from '../middleware/auth.js';
 import pool from '../../db.js';
+import logger from '../../logger.js';
+
 
 const router = express.Router();
 
@@ -60,7 +62,7 @@ router.get('/stats', authenticateToken, async (req, res) => {
     }
 
   } catch (error) {
-    console.error('Ошибка получения статистики SMS:', error);
+    logger.error('Ошибка получения статистики SMS:', error);
     res.status(500).json({
       message: 'Ошибка сервера при получении статистики'
     });
@@ -97,7 +99,7 @@ router.get('/failed-attempts', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Ошибка получения логов неудачных попыток:', error);
+    logger.error('Ошибка получения логов неудачных попыток:', error);
     res.status(500).json({
       message: 'Ошибка сервера при получении логов'
     });

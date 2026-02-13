@@ -129,7 +129,7 @@ router.post('/:contentType/:id/revision', async (req, res) => {
 
     res.json({ message: 'Контент отправлен на доработку.' });
   } catch (error) {
-    console.error('Ошибка отправки на доработку:', error);
+    logger.error('Ошибка отправки на доработку:', error);
     res.status(500).json({ message: 'Ошибка сервера.' });
   }
 });
@@ -285,7 +285,7 @@ router.post('/approve-local', async (req, res) => {
               logger.info(`💰 XP начислено автору ${author_id} за метку ${createdId}: ${totalXP} XP (уровень: ${newLevelData.level})`);
             }
           } catch (xpError) {
-            console.error('Ошибка начисления очков за метку:', xpError);
+            logger.error('Ошибка начисления очков за метку:', xpError);
           }
         }
         break;
@@ -305,7 +305,7 @@ router.post('/approve-local', async (req, res) => {
               AND column_name IN ('template', 'content_type', 'constructor_data', 'payload', 'photo_urls')
           `);
         } catch (checkError) {
-          console.error('❌ Ошибка проверки колонок:', checkError);
+          logger.error('❌ Ошибка проверки колонок:', checkError);
           // Если проверка не удалась, предполагаем, что колонок нет
           checkColumns = { rows: [] };
         }
@@ -386,7 +386,7 @@ router.post('/approve-local', async (req, res) => {
         
         // Финальная проверка: убеждаемся, что template не в списке, если колонки нет
         if (!hasTemplate && columns.includes('template')) {
-          console.error('❌ КРИТИЧЕСКАЯ ОШИБКА: template в списке колонок, но hasTemplate = false!');
+          logger.error('❌ КРИТИЧЕСКАЯ ОШИБКА: template в списке колонок, но hasTemplate = false!');
           const templateIndex = columns.indexOf('template');
           if (templateIndex !== -1) {
             columns.splice(templateIndex, 1);
@@ -407,7 +407,7 @@ router.post('/approve-local', async (req, res) => {
         // Проверяем, что количество колонок и значений совпадает (без учета NOW())
         const nowCount = 2; // created_at, updated_at
         if (columns.length !== values.length + nowCount) {
-          console.error('❌ КРИТИЧЕСКАЯ ОШИБКА: Несоответствие количества колонок и значений!', {
+          logger.error('❌ КРИТИЧЕСКАЯ ОШИБКА: Несоответствие количества колонок и значений!', {
             columnsCount: columns.length,
             valuesCount: values.length,
             nowCount,
@@ -535,7 +535,7 @@ router.post('/approve-local', async (req, res) => {
               logger.info(`💰 XP начислено автору ${author_id} за пост ${createdId}: ${totalXP} XP (уровень: ${newLevelData.level})`);
             }
           } catch (xpError) {
-            console.error('Ошибка начисления очков за пост:', xpError);
+            logger.error('Ошибка начисления очков за пост:', xpError);
           }
         }
         break;
@@ -682,7 +682,7 @@ router.post('/approve-local', async (req, res) => {
               logger.info(`💰 XP начислено автору ${author_id} за событие ${createdId}: ${totalXP} XP (уровень: ${newLevelData.level})`);
             }
           } catch (xpError) {
-            console.error('Ошибка начисления очков за событие:', xpError);
+            logger.error('Ошибка начисления очков за событие:', xpError);
           }
         }
         break;
@@ -697,7 +697,7 @@ router.post('/approve-local', async (req, res) => {
     `, [createdId]);
 
     if (createdContent.rows.length === 0) {
-      console.error(`❌ Ошибка: контент ${content_type} с ID ${createdId} не найден после создания!`);
+      logger.error(`❌ Ошибка: контент ${content_type} с ID ${createdId} не найден после создания!`);
       return res.status(500).json({ 
         message: 'Контент создан, но не найден в базе данных.',
         id: createdId
@@ -718,7 +718,7 @@ router.post('/approve-local', async (req, res) => {
       success: true
     });
   } catch (error) {
-    console.error('Ошибка одобрения локального контента:', error);
+    logger.error('Ошибка одобрения локального контента:', error);
     res.status(500).json({ message: 'Ошибка сервера.' });
   }
 });

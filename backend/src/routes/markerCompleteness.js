@@ -2,6 +2,8 @@ import express from 'express';
 import pool from '../../db.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { 
+import logger from '../../logger.js';
+
   calculateMarkerCompleteness, 
   getStatusDescription,
   getPriorityImprovements,
@@ -60,7 +62,7 @@ router.get('/markers/:id/completeness', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Ошибка при анализе полноты метки:', error);
+    logger.error('Ошибка при анализе полноты метки:', error);
     res.status(500).json({
       success: false,
       message: 'Ошибка сервера при анализе полноты метки',
@@ -138,7 +140,7 @@ router.post('/markers/:id/update-completeness', authenticateToken, async (req, r
     });
     
   } catch (error) {
-    console.error('Ошибка при обновлении полноты метки:', error);
+    logger.error('Ошибка при обновлении полноты метки:', error);
     res.status(500).json({
       success: false,
       message: 'Ошибка сервера при обновлении полноты метки',
@@ -226,7 +228,7 @@ router.get('/markers/incomplete', authenticateToken, async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Ошибка при получении неполных меток:', error);
+    logger.error('Ошибка при получении неполных меток:', error);
     res.status(500).json({
       success: false,
       message: 'Ошибка сервера при получении неполных меток',
@@ -294,7 +296,7 @@ router.post('/markers/batch-update-completeness', authenticateToken, async (req,
         });
         
       } catch (markerError) {
-        console.error(`Ошибка при обновлении метки ${marker.id}:`, markerError);
+        logger.error(`Ошибка при обновлении метки ${marker.id}:`, markerError);
       }
     }
     
@@ -309,7 +311,7 @@ router.post('/markers/batch-update-completeness', authenticateToken, async (req,
     });
     
   } catch (error) {
-    console.error('Ошибка при массовом обновлении полноты:', error);
+    logger.error('Ошибка при массовом обновлении полноты:', error);
     res.status(500).json({
       success: false,
       message: 'Ошибка сервера при массовом обновлении полноты',

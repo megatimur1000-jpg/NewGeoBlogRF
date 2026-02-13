@@ -35,7 +35,7 @@ async function createSMSCodesTable() {
 
     logger.info('✅ Таблица sms_codes создана успешно');
   } catch (error) {
-    console.error('❌ Ошибка создания таблицы sms_codes:', error);
+    logger.error('❌ Ошибка создания таблицы sms_codes:', { error });
   }
 }
 
@@ -47,7 +47,7 @@ async function cleanupExpiredCodes() {
     `);
     logger.info(`🧹 Удалено ${result.rowCount} устаревших SMS-кодов`);
   } catch (error) {
-    console.error('❌ Ошибка очистки устаревших кодов:', error);
+    logger.error('❌ Ошибка очистки устаревших кодов:', { error });
   }
 }
 

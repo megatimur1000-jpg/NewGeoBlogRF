@@ -35,7 +35,7 @@ export const createOfflinePost = async (req, res) => {
     
     const userId = req.user?.id;
     if (!userId) {
-      console.error('❌ Нет userId в req.user');
+      logger.error('❌ Нет userId в req.user');
       return res.status(401).json({ message: 'Требуется авторизация' });
     }
 
@@ -178,9 +178,9 @@ export const createOfflinePost = async (req, res) => {
           const actualStatus = statusCheck.rows[0].status;
           logger.info(`🔍 Проверка статуса сразу после INSERT: ${actualStatus || 'NULL'}`);
           if (actualStatus !== 'pending') {
-            console.error(`❌ КРИТИЧНО: Статус поста ${createdId} = '${actualStatus}', а должен быть 'pending'!`);
-            console.error(`❌ Возможно, в БД установлено значение по умолчанию 'active' для колонки status`);
-            console.error(`❌ Или есть триггер, который меняет статус автоматически`);
+            logger.error(`❌ КРИТИЧНО: Статус поста ${createdId} = '${actualStatus}', а должен быть 'pending'!`);
+            logger.error(`❌ Возможно, в БД установлено значение по умолчанию 'active' для колонки status`);
+            logger.error(`❌ Или есть триггер, который меняет статус автоматически`);
             // Пытаемся исправить статус вручную
             try {
               await pool.query(
@@ -189,7 +189,7 @@ export const createOfflinePost = async (req, res) => {
               );
               logger.info(`✅ Статус поста ${createdId} исправлен на 'pending' вручную`);
             } catch (fixError) {
-              console.error(`❌ Не удалось исправить статус:`, fixError);
+              logger.error(`❌ Не удалось исправить статус:`, fixError);
             }
           } else {
             logger.info(`✅ Статус поста ${createdId} корректно установлен как 'pending'`);
@@ -197,8 +197,8 @@ export const createOfflinePost = async (req, res) => {
         }
       }
     } catch (dbError) {
-      console.error('❌ Ошибка выполнения SQL запроса:', dbError);
-      console.error('❌ Детали ошибки:', {
+      logger.error('❌ Ошибка выполнения SQL запроса:', dbError);
+      logger.error('❌ Детали ошибки:', {
         message: dbError.message,
         code: dbError.code,
         detail: dbError.detail,
@@ -212,7 +212,7 @@ export const createOfflinePost = async (req, res) => {
     
     // Проверяем, что пост был создан
     if (!result.rows || result.rows.length === 0) {
-      console.error('❌ Пост не был создан в БД. Результат запроса:', result);
+      logger.error('❌ Пост не был создан в БД. Результат запроса:', result);
       return res.status(500).json({ message: 'Ошибка создания поста в базе данных' });
     }
     
@@ -223,9 +223,9 @@ export const createOfflinePost = async (req, res) => {
     // нужно убедиться, что пост будет виден в модерации
     // Для этого проверяем статус созданного поста
     if (!hasStatus) {
-      console.warn(`⚠️ ВНИМАНИЕ: Колонка 'status' отсутствует в таблице 'posts'!`);
-      console.warn(`⚠️ Пост ${createdPostId} создан БЕЗ статуса и НЕ будет виден в модерации!`);
-      console.warn(`⚠️ Необходимо выполнить миграцию: backend/src/migrations/add-status-to-posts.sql`);
+      logger.warn(`⚠️ ВНИМАНИЕ: Колонка 'status' отсутствует в таблице 'posts'!`);
+      logger.warn(`⚠️ Пост ${createdPostId} создан БЕЗ статуса и НЕ будет виден в модерации!`);
+      logger.warn(`⚠️ Необходимо выполнить миграцию: backend/src/migrations/add-status-to-posts.sql`);
     } else {
       // Проверяем, что статус установлен правильно
       const statusCheck = await pool.query(
@@ -236,7 +236,7 @@ export const createOfflinePost = async (req, res) => {
         const actualStatus = statusCheck.rows[0].status;
         logger.info(`✅ Статус поста ${createdPostId}: ${actualStatus || 'NULL'}`);
         if (actualStatus !== 'pending') {
-          console.warn(`⚠️ ВНИМАНИЕ: Статус поста не 'pending'! Пост может не попасть в модерацию!`);
+          logger.warn(`⚠️ ВНИМАНИЕ: Статус поста не 'pending'! Пост может не попасть в модерацию!`);
         }
       }
     }
@@ -253,7 +253,7 @@ export const createOfflinePost = async (req, res) => {
         logger.info(`✅ Создана папка для поста: ${postDir}`);
       }
     } catch (dirError) {
-      console.error('⚠️ Ошибка создания папки (не критично):', dirError);
+      logger.error('⚠️ Ошибка создания папки (не критично):', dirError);
       // Не критично, продолжаем
     }
 
@@ -302,8 +302,8 @@ export const createOfflinePost = async (req, res) => {
       `, [postId, regionId, hasImages, hasTrack, hasImages ? 0 : 0]);
       logger.info('✅ Метаданные сохранены');
     } catch (metaError) {
-      console.error('⚠️ Ошибка создания метаданных (не критично):', metaError);
-      console.error('⚠️ Детали:', {
+      logger.error('⚠️ Ошибка создания метаданных (не критично):', metaError);
+      logger.error('⚠️ Детали:', {
         message: metaError.message,
         code: metaError.code,
         detail: metaError.detail
@@ -332,15 +332,15 @@ export const createOfflinePost = async (req, res) => {
     
     res.status(201).json(responseData);
   } catch (error) {
-    console.error('❌ ===== КРИТИЧЕСКАЯ ОШИБКА создания офлайн поста =====');
-    console.error('❌ Error name:', error.name);
-    console.error('❌ Error message:', error.message);
-    console.error('❌ Error code:', error.code);
-    console.error('❌ Error detail:', error.detail);
-    console.error('❌ Error hint:', error.hint);
-    console.error('❌ Stack trace:', error.stack);
-    console.error('❌ Full error:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
-    console.error('❌ ===== КОНЕЦ ОШИБКИ =====');
+    logger.error('❌ ===== КРИТИЧЕСКАЯ ОШИБКА создания офлайн поста =====');
+    logger.error('❌ Error name:', error.name);
+    logger.error('❌ Error message:', error.message);
+    logger.error('❌ Error code:', error.code);
+    logger.error('❌ Error detail:', error.detail);
+    logger.error('❌ Error hint:', error.hint);
+    logger.error('❌ Stack trace:', error.stack);
+    logger.error('❌ Full error:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+    logger.error('❌ ===== КОНЕЦ ОШИБКИ =====');
     
     // Отправляем ответ с деталями ошибки
     const errorResponse = {
@@ -405,7 +405,7 @@ export const uploadPostImages = async (req, res) => {
       );
       metadata = metaResult.rows[0];
     } catch (metaError) {
-      console.warn('Метаданные не найдены, создаём:', metaError);
+      logger.warn('Метаданные не найдены, создаём:', metaError);
       metadata = null;
     }
 
@@ -495,7 +495,7 @@ export const uploadPostImages = async (req, res) => {
       paths: savedPaths
     });
   } catch (error) {
-    console.error('Ошибка загрузки изображений:', error);
+    logger.error('Ошибка загрузки изображений:', error);
     res.status(500).json({ message: 'Ошибка загрузки изображений', error: error.message });
   }
 };
@@ -568,7 +568,7 @@ export const uploadPostTrack = async (req, res) => {
             updated_at = NOW()
         `, [postId, JSON.stringify(track)]);
       } catch (trackError) {
-        console.error('Ошибка сохранения трека:', trackError);
+        logger.error('Ошибка сохранения трека:', trackError);
         return res.status(500).json({ message: 'Ошибка сохранения трека' });
       }
     }
@@ -581,7 +581,7 @@ export const uploadPostTrack = async (req, res) => {
         WHERE post_id = $1
       `, [postId]);
     } catch (metaError) {
-      console.warn('Ошибка обновления метаданных трека:', metaError);
+      logger.warn('Ошибка обновления метаданных трека:', metaError);
     }
 
     // Проверяем, все ли части загружены
@@ -594,7 +594,7 @@ export const uploadPostTrack = async (req, res) => {
       postId
     });
   } catch (error) {
-    console.error('Ошибка загрузки трека:', error);
+    logger.error('Ошибка загрузки трека:', error);
     res.status(500).json({ message: 'Ошибка загрузки трека', error: error.message });
   }
 };
@@ -655,7 +655,7 @@ async function checkAndUpdatePostStatus(postId) {
       logger.info(`⏳ Пост ${postId} еще не готов: imagesReady=${imagesReady}, trackReady=${trackReady}`);
     }
   } catch (error) {
-    console.error('Ошибка проверки статуса поста:', error);
+    logger.error('Ошибка проверки статуса поста:', error);
   }
 }
 
@@ -689,7 +689,7 @@ export const getPostStatus = async (req, res) => {
       res.status(403).json({ message: 'Нет доступа к статусу поста' });
     }
   } catch (error) {
-    console.error('Ошибка получения статуса поста:', error);
+    logger.error('Ошибка получения статуса поста:', error);
     res.status(500).json({ message: 'Ошибка получения статуса', error: error.message });
   }
 };

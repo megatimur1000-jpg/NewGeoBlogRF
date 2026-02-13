@@ -1,4 +1,6 @@
 import pool from '../../db.js';
+import logger from '../../logger.js';
+
 
 /**
  * Контроллер для истории модерации
@@ -149,7 +151,7 @@ export const getModerationHistory = async (req, res) => {
       offset: parseInt(offset)
     });
   } catch (error) {
-    console.error('Ошибка получения истории модерации:', error);
+    logger.error('Ошибка получения истории модерации:', error);
     res.status(500).json({ message: 'Ошибка сервера.' });
   }
 };
@@ -237,7 +239,7 @@ export const getContentDetails = async (req, res) => {
       moderationHistory
     });
   } catch (error) {
-    console.error('Ошибка получения деталей контента:', error);
+    logger.error('Ошибка получения деталей контента:', error);
     res.status(500).json({ message: 'Ошибка сервера.' });
   }
 };

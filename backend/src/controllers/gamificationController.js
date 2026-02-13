@@ -1,5 +1,7 @@
 import pool from '../../db.js';
 import { calculateLevelFromTotalXP } from '../utils/xpCalculator.js';
+import logger from '../../logger.js';
+
 
 /**
  * Определить этап геймификации на основе количества пользователей
@@ -75,7 +77,7 @@ export const getUserLevel = async (req, res) => {
       progress: Math.min(100, Math.max(0, progress)),
     });
   } catch (error) {
-    console.error('getUserLevel error:', error);
+    logger.error('getUserLevel error:', error);
     res.status(500).json({ error: 'Failed to get user level' });
   }
 };
@@ -178,7 +180,7 @@ export const addXP = async (req, res) => {
       requiredXP: newLevelData.requiredXP,
     });
   } catch (error) {
-    console.error('addXP error:', error);
+    logger.error('addXP error:', error);
     res.status(500).json({ error: 'Failed to add XP', details: error.message });
   }
 };
@@ -209,7 +211,7 @@ export const getDailyGoals = async (req, res) => {
 
     res.json({ goals: goals.rows });
   } catch (error) {
-    console.error('getDailyGoals error:', error);
+    logger.error('getDailyGoals error:', error);
     res.status(500).json({ error: 'Failed to get daily goals' });
   }
 };
@@ -276,7 +278,7 @@ export const completeGoal = async (req, res) => {
 
     res.json({ success: true, goal: result.rows[0] });
   } catch (error) {
-    console.error('completeGoal error:', error);
+    logger.error('completeGoal error:', error);
     res.status(500).json({ error: 'Failed to complete goal' });
   }
 };
@@ -363,7 +365,7 @@ export const claimDailyReward = async (req, res) => {
 
     res.json({ success: true, bonusXP });
   } catch (error) {
-    console.error('claimDailyReward error:', error);
+    logger.error('claimDailyReward error:', error);
     res.status(500).json({ error: 'Failed to claim daily reward' });
   }
 };
@@ -387,7 +389,7 @@ export const getAchievements = async (req, res) => {
 
     res.json({ achievements: achievements.rows });
   } catch (error) {
-    console.error('getAchievements error:', error);
+    logger.error('getAchievements error:', error);
     res.status(500).json({ error: 'Failed to get achievements' });
   }
 };
@@ -416,7 +418,7 @@ export const getFeatures = async (req, res) => {
       userCount,
     });
   } catch (error) {
-    console.error('getFeatures error:', error);
+    logger.error('getFeatures error:', error);
     res.status(500).json({ 
       error: 'Failed to get features',
       features: getActiveFeatures(1), // Fallback к этапу 1
@@ -462,7 +464,7 @@ export const applyRetroactiveGamification = async (req, res) => {
       message: 'Retroactive gamification applied',
     });
   } catch (error) {
-    console.error('applyRetroactiveGamification error:', error);
+    logger.error('applyRetroactiveGamification error:', error);
     res.status(500).json({ error: 'Failed to apply retroactive gamification' });
   }
 };
@@ -487,7 +489,7 @@ export const markGuestActionAsApproved = async (req, res) => {
       message: 'Guest action marked as approved',
     });
   } catch (error) {
-    console.error('markGuestActionAsApproved error:', error);
+    logger.error('markGuestActionAsApproved error:', error);
     res.status(500).json({ error: 'Failed to mark guest action as approved' });
   }
 };
@@ -557,7 +559,7 @@ export const getStats = async (req, res) => {
       recentXP: [], // TODO: последние XP из истории
     });
   } catch (error) {
-    console.error('getStats error:', error);
+    logger.error('getStats error:', error);
     res.status(500).json({ error: 'Failed to get stats' });
   }
 };

@@ -2,6 +2,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import logger from '../../logger.js';
 // SONAR-AUTO-FIX (javascript:S1128): original: // SONAR-AUTO-FIX (javascript:S1128): original: import pool from '../../db.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -70,7 +71,7 @@ export const uploadImage = async (req, res) => {
       mimetype: req.file.mimetype
     });
   } catch (error) {
-    console.error('Ошибка загрузки изображения:', error);
+    logger.error('Ошибка загрузки изображения:', { error });
     res.status(500).json({ 
       message: 'Ошибка сервера при загрузке изображения',
       error: error.message 
@@ -91,7 +92,7 @@ export const deleteImage = async (req, res) => {
       res.status(404).json({ message: 'Файл не найден' });
     }
   } catch (error) {
-    console.error('Ошибка удаления изображения:', error);
+    logger.error('Ошибка удаления изображения:', { error });
     res.status(500).json({ 
       message: 'Ошибка сервера при удалении изображения' 
     });

@@ -30,7 +30,7 @@ async function runMigration() {
     
   } catch (error) {
     await client.query('ROLLBACK');
-    console.error('❌ Ошибка при выполнении миграции:', error);
+    logger.error('❌ Ошибка при выполнении миграции:', error);
     process.exit(1);
   } finally {
     client.release();

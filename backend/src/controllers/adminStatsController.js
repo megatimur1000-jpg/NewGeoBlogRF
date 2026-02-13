@@ -1,4 +1,6 @@
 import pool from '../../db.js';
+import logger from '../../logger.js';
+
 
 /**
  * Контроллер статистики для админ-панели
@@ -158,7 +160,7 @@ export const getProjectStats = async (req, res) => {
       dailyStats: dailyStats.rows
     });
   } catch (error) {
-    console.error('Ошибка получения статистики проекта:', error);
+    logger.error('Ошибка получения статистики проекта:', error);
     res.status(500).json({ message: 'Ошибка сервера при получении статистики.' });
   }
 };
@@ -232,7 +234,7 @@ export const getUserStats = async (req, res) => {
       xpHistory: xpHistory.rows
     });
   } catch (error) {
-    console.error('Ошибка получения статистики пользователя:', error);
+    logger.error('Ошибка получения статистики пользователя:', error);
     res.status(500).json({ message: 'Ошибка сервера.' });
   }
 };
@@ -288,7 +290,7 @@ export const getTrends = async (req, res) => {
 
     res.json({ trends: trendsWithChange });
   } catch (error) {
-    console.error('Ошибка получения тенденций:', error);
+    logger.error('Ошибка получения тенденций:', error);
     res.status(500).json({ message: 'Ошибка сервера.' });
   }
 };

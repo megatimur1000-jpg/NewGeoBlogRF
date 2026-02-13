@@ -44,7 +44,7 @@ class SMSService {
         throw new Error(`SMS отправка не удалась: ${response.data.status_text}`);
       }
     } catch (error) {
-      console.error('Ошибка отправки SMS:', error.message);
+      logger.error('Ошибка отправки SMS:', error.message);
       throw new Error('Не удалось отправить SMS');
     }
   }
@@ -72,7 +72,7 @@ class SMSService {
         throw new Error(`SMS отправка не удалась: ${response.data.status_text}`);
       }
     } catch (error) {
-      console.error('Ошибка отправки SMS:', error.message);
+      logger.error('Ошибка отправки SMS:', error.message);
       throw new Error('Не удалось отправить SMS');
     }
   }
@@ -92,7 +92,7 @@ class SMSService {
 
       return { balance: response.data.balance, currency: 'RUB' };
     } catch (error) {
-      console.error('Ошибка проверки баланса SMS:', error.message);
+      logger.error('Ошибка проверки баланса SMS:', { message: error?.message, stack: error?.stack });
       return { balance: 0, currency: 'RUB' };
     }
   }

@@ -1,6 +1,8 @@
 import express from 'express';
 import pool from '../../db.js';
 import { authenticateToken } from '../middleware/auth.js';
+import logger from '../../logger.js';
+
 
 const router = express.Router();
 
@@ -22,7 +24,7 @@ async function ensureTable() {
     `);
   } catch (error) {
     // Игнорируем ошибки создания таблицы (может уже существовать)
-    console.warn('Ratings table creation warning:', error.message);
+    logger.warn('Ratings table creation warning:', error.message);
   }
 }
 
@@ -51,7 +53,7 @@ async function getSummary(targetType, targetId) {
     if (error.message && error.message.includes('invalid input syntax for type uuid')) {
       return { avg: 0, count: 0 };
     }
-    console.error('Error in getSummary:', error);
+    logger.error('Error in getSummary:', error);
     return { avg: 0, count: 0 };
   }
 }
@@ -124,7 +126,7 @@ router.get('/ratings/summary', async (req, res) => {
     const summary = await getSummary(targetType, targetId);
     res.json({ ok: true, summary });
   } catch (e) {
-    console.error('Error getting rating summary:', e);
+    logger.error('Error getting rating summary:', e);
     // Для числовых ID возвращаем пустой рейтинг вместо ошибки
     const targetId = String(req.query.id || '');
     const isNumeric = /^\d+$/.test(targetId);
@@ -165,7 +167,7 @@ router.get('/ratings/user', authenticateToken, async (req, res) => {
     );
     res.json({ ok: true, value: rows[0]?.value ?? null });
   } catch (e) {
-    console.error('Error getting user rating:', e);
+    logger.error('Error getting user rating:', e);
     // Для числовых ID возвращаем null вместо ошибки
     const targetId = String(req.query.id || '');
     const isNumeric = /^\d+$/.test(targetId);

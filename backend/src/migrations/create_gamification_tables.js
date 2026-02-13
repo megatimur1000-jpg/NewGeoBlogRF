@@ -40,7 +40,7 @@ async function createGamificationTables() {
     
   } catch (error) {
     await client.query('ROLLBACK');
-    console.error('❌ Ошибка при создании таблиц:', error.message);
+    logger.error('❌ Ошибка при создании таблиц:', error.message);
     
     if (error.code === '42P07') {
       logger.info('ℹ️  Некоторые таблицы уже существуют. Это нормально.');
@@ -60,7 +60,7 @@ createGamificationTables()
     process.exit(0);
   })
   .catch((error) => {
-    console.error('❌ Ошибка миграции:', error);
+    logger.error('❌ Ошибка миграции:', error);
     process.exit(1);
   });
 

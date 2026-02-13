@@ -66,7 +66,7 @@ router.get('/posts', async (req, res) => {
         const userResult = await pool.query('SELECT role FROM users WHERE id = $1', [userId]);
         userRole = userResult.rows[0]?.role || 'registered';
       } catch (err) {
-        console.warn('Ошибка проверки роли в GET /posts:', err);
+        logger.warn('Ошибка проверки роли в GET /posts:', err);
         // Явно обрабатываем ошибку и оставляем роль гостя
         userRole = 'guest';
       }
@@ -183,7 +183,7 @@ router.get('/posts', async (req, res) => {
         try {
           row.constructor_data = JSON.parse(row.constructor_data);
         } catch (e) {
-          console.warn(`Не удалось распарсить constructor_data для поста ${row.id}:`, e);
+          logger.warn(`Не удалось распарсить constructor_data для поста ${row.id}:`, e);
           // Оставляем исходную строку
         }
       }
@@ -191,7 +191,7 @@ router.get('/posts', async (req, res) => {
         try {
           row.payload = JSON.parse(row.payload);
         } catch (e) {
-          console.warn(`Не удалось распарсить payload для поста ${row.id}:`, e);
+          logger.warn(`Не удалось распарсить payload для поста ${row.id}:`, e);
           // Оставляем исходную строку
         }
       }
@@ -234,7 +234,7 @@ router.get('/posts', async (req, res) => {
       total: total
     });
   } catch (err) {
-    console.error('Ошибка при получении постов:', err);
+    logger.error('Ошибка при получении постов:', err);
     res.status(500).json({ message: 'Ошибка сервера при получении постов.' });
   }
 });
@@ -311,7 +311,7 @@ router.get('/posts/:id', async (req, res) => {
 
     res.json(post);
   } catch (err) {
-    console.error('Ошибка при получении поста:', err);
+    logger.error('Ошибка при получении поста:', err);
     res.status(500).json({ message: 'Ошибка сервера при получении поста.' });
   }
 });
@@ -346,13 +346,13 @@ router.post('/posts', optionalAuthenticateToken, async (req, res) => {
         logger.info(`   ✅ Роль из БД: ${userRole}, АДМИН: ${isAdmin}`);
       } else {
         // Пользователь не найден в БД - обрабатываем как гостя
-        console.warn(`   ⚠️ Пользователь ${author_id} не найден в БД, обрабатываем как гостя`);
+        logger.warn(`   ⚠️ Пользователь ${author_id} не найден в БД, обрабатываем как гостя`);
         userRole = 'guest';
         isAdmin = false;
         finalStatus = 'pending';
       }
     } catch (roleError) {
-      console.error('❌ ОШИБКА ПРОВЕРКИ РОЛИ:', roleError);
+      logger.error('❌ ОШИБКА ПРОВЕРКИ РОЛИ:', roleError);
       // При ошибке - всегда pending (безопаснее)
       userRole = 'guest';
       isAdmin = false;
@@ -394,7 +394,7 @@ router.post('/posts', optionalAuthenticateToken, async (req, res) => {
       hasStatus = checkColumns.rows.some(r => r.column_name === 'status');
       logger.info(`📊 КОЛОНКИ: photo_urls = ${hasPhotoUrls}, status = ${hasStatus}`);
     } catch (colError) {
-      console.error('❌ ОШИБКА ПРОВЕРКИ КОЛОНОК:', colError);
+      logger.error('❌ ОШИБКА ПРОВЕРКИ КОЛОНОК:', colError);
     }
 
     logger.info(`✅ ФИНАЛЬНОЕ РЕШЕНИЕ: статус = "${finalStatus}", роль = "${userRole}"`);
@@ -483,10 +483,10 @@ router.post('/posts', optionalAuthenticateToken, async (req, res) => {
             logger.info(`✅ ИИ-помощник: анализ поста ${createdPost.id} завершён, рекомендация сохранена`);
           })
           .catch(err => {
-            console.error(`❌ ИИ-помощник: ошибка анализа поста ${createdPost.id}:`, err);
+            logger.error(`❌ ИИ-помощник: ошибка анализа поста ${createdPost.id}:`, err);
           });
       } catch (err) {
-        console.error('❌ ИИ-помощник: не удалось запустить анализ поста:', err.message);
+        logger.error('❌ ИИ-помощник: не удалось запустить анализ поста:', err.message);
       }
     } else {
       logger.info('ℹ️ Пост создан админом со статусом active, ИИ-анализ не требуется');
@@ -500,7 +500,7 @@ router.post('/posts', optionalAuthenticateToken, async (req, res) => {
 
     res.status(201).json(responseData);
   } catch (err) {
-    console.error('❌ Ошибка при создании поста:', err);
+    logger.error('❌ Ошибка при создании поста:', err);
     res.status(500).json({ message: 'Ошибка при создании поста', error: err.message });
   }
 });

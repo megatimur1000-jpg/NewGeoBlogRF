@@ -77,7 +77,7 @@ router.get('/routes/:id', async (req, res) => {
         ? JSON.parse(route.route_data) 
         : (route.route_data || null);
     } catch (e) {
-      console.warn('Ошибка парсинга route_data:', e);
+      logger.warn('Ошибка парсинга route_data:', e);
     }
     
     res.json({
@@ -93,7 +93,7 @@ router.get('/routes/:id', async (req, res) => {
       updated_at: route.updated_at
     });
   } catch (err) {
-    console.error('Ошибка при получении маршрута:', err);
+    logger.error('Ошибка при получении маршрута:', err);
     res.status(500).json({ message: 'Ошибка сервера при получении маршрута.' });
   }
 });
@@ -135,7 +135,7 @@ router.get('/routes', authenticateToken, async (req, res) => {
           ? JSON.parse(row.route_data) 
           : (row.route_data || null);
       } catch (e) {
-        console.warn('Ошибка парсинга route_data для маршрута', row.id, ':', e);
+        logger.warn('Ошибка парсинга route_data для маршрута', row.id, ':', e);
       }
       
       return {
@@ -179,7 +179,7 @@ router.post('/routes', authenticateToken, async (req, res) => {
     userRole = userResult.rows[0]?.role || 'registered';
     isAdmin = userRole === 'admin';
   } catch (err) {
-    console.warn('Ошибка проверки роли пользователя:', err);
+    logger.warn('Ошибка проверки роли пользователя:', err);
   }
   
   // Устанавливаем статус: админ может сразу 'active', остальные - 'pending' (требуют модерации)
@@ -293,10 +293,10 @@ router.post('/routes', authenticateToken, async (req, res) => {
       try {
         const { autoAnalyzeContent } = await import('../middleware/autoModeration.js');
         autoAnalyzeContent('routes', route.id, route).catch(err => {
-          console.error('Ошибка автоматического анализа маршрута:', err);
+          logger.error('Ошибка автоматического анализа маршрута:', err);
         });
       } catch (err) {
-        console.warn('Не удалось запустить автоматический анализ маршрута:', err.message);
+        logger.warn('Не удалось запустить автоматический анализ маршрута:', err.message);
       }
     }
     

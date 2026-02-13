@@ -1,4 +1,6 @@
 import pool from '../../db.js';
+import logger from '../../logger.js';
+
 
 /**
  * Получить задачи модерации для конкретной страницы/типа контента
@@ -189,7 +191,7 @@ export const getModerationTasks = async (req, res) => {
       count: tasks.length
     });
   } catch (error) {
-    console.error('Ошибка получения задач модерации:', error);
+    logger.error('Ошибка получения задач модерации:', error);
     res.status(500).json({ message: 'Ошибка сервера.' });
   }
 };
@@ -238,7 +240,7 @@ export const getModerationTasksCount = async (req, res) => {
       posts: parseInt(result.posts) || 0
     });
   } catch (error) {
-    console.error('Ошибка получения счётчиков задач модерации:', error);
+    logger.error('Ошибка получения счётчиков задач модерации:', error);
     res.status(500).json({ message: 'Ошибка сервера.' });
   }
 };

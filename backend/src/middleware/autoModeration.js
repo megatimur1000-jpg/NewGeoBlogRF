@@ -109,14 +109,14 @@ export async function autoAnalyzeContent(contentType, contentId, contentData) {
     if (checkResult.rows.length > 0) {
       logger.info(`✅ Проверка: запись существует, admin_verdict='${checkResult.rows[0].admin_verdict}'`);
     } else {
-      console.error(`❌ ОШИБКА: запись не найдена в БД после создания!`);
+      logger.error(`❌ ОШИБКА: запись не найдена в БД после создания!`);
     }
   } catch (error) {
     // Не блокируем создание контента, если анализ не удался
-    console.error(`❌ Ошибка автоматического анализа контента (${contentType}/${contentId}):`, error);
-    console.error(`   Детали ошибки:`, error.message);
+    logger.error(`❌ Ошибка автоматического анализа контента (${contentType}/${contentId}):`, error);
+    logger.error(`   Детали ошибки:`, error.message);
     if (error.stack) {
-      console.error(`   Stack trace:`, error.stack);
+      logger.error(`   Stack trace:`, error.stack);
     }
     // Пробуем сохранить хотя бы базовую запись для ручной проверки
     try {
@@ -129,7 +129,7 @@ export async function autoAnalyzeContent(contentType, contentId, contentData) {
       `, [contentType, String(contentId)]);
       logger.info(`⚠️ Создана запись с ошибкой для ручной проверки`);
     } catch (fallbackError) {
-      console.error(`❌ Критическая ошибка: не удалось создать запись даже с ошибкой:`, fallbackError.message);
+      logger.error(`❌ Критическая ошибка: не удалось создать запись даже с ошибкой:`, fallbackError.message);
     }
   }
 }

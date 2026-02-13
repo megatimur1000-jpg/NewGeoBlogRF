@@ -10,6 +10,8 @@
 
 import pool from '../../db.js';
 import { calculateLevelFromTotalXP } from '../utils/xpCalculator.js';
+import logger from '../../logger.js';
+
 
 /**
  * Типы контента и соответствующие источники XP
@@ -114,7 +116,7 @@ export async function approveContent(contentType, contentId, adminId) {
     
   } catch (error) {
     await client.query('ROLLBACK');
-    console.error('Ошибка при одобрении контента:', error);
+    logger.error('Ошибка при одобрении контента:', error);
     throw error;
   } finally {
     client.release();
@@ -142,7 +144,7 @@ export async function rejectContent(contentType, contentId, adminId, reason) {
     
   } catch (error) {
     await client.query('ROLLBACK');
-    console.error('Ошибка при отклонении контента:', error);
+    logger.error('Ошибка при отклонении контента:', error);
     throw error;
   } finally {
     client.release();

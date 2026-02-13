@@ -1,5 +1,7 @@
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
+import logger from '../../logger.js';
+
 
 dotenv.config();
 
@@ -83,7 +85,7 @@ async function checkSMSSendLimits(phone) {
     };
 
   } catch (error) {
-    console.error('Ошибка проверки лимитов SMS:', error);
+    logger.error('Ошибка проверки лимитов SMS:', error);
     // В случае ошибки разрешаем отправку, чтобы не блокировать легитимных пользователей
     return { allowed: true, error: true };
   }
@@ -100,7 +102,7 @@ async function logSMSTry(phone, type, success, error = null) {
       [phone, type, success, error]
     );
   } catch (err) {
-    console.error('Ошибка логирования SMS:', err);
+    logger.error('Ошибка логирования SMS:', err);
   }
 }
 
@@ -136,7 +138,7 @@ async function getSMSStats(phone, timeWindow = 'hour') {
     return result.rows[0];
 
   } catch (error) {
-    console.error('Ошибка получения статистики SMS:', error);
+    logger.error('Ошибка получения статистики SMS:', error);
     return null;
   }
 }

@@ -26,7 +26,7 @@ export const authenticateToken = (req, res, next) => {
 
     if (!token) {
       if (isOfflinePost) {
-        console.error('❌ Токен не предоставлен');
+        logger.error('❌ Токен не предоставлен');
       }
       return res.status(401).json({ 
         message: 'Токен доступа не предоставлен' 
@@ -41,7 +41,7 @@ export const authenticateToken = (req, res, next) => {
     
     if (!decoded) {
       if (isOfflinePost) {
-        console.error('❌ Токен недействителен');
+        logger.error('❌ Токен недействителен');
       }
       return res.status(403).json({ 
         message: 'Недействительный токен' 
@@ -55,7 +55,7 @@ export const authenticateToken = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (error) {
-    console.error('❌ Ошибка в authenticateToken middleware:', error);
+    logger.error('❌ Ошибка в authenticateToken middleware:', { error });
     return res.status(500).json({ 
       message: 'Ошибка проверки авторизации',
       error: error.message 

@@ -158,7 +158,7 @@ router.post('/markers', authenticateToken, validateMarker, async (req, res) => {
     userRole = userResult.rows[0]?.role || 'registered';
     isAdmin = userRole === 'admin';
   } catch (err) {
-    console.warn('Ошибка проверки роли пользователя:', err);
+    logger.warn('Ошибка проверки роли пользователя:', err);
   }
   
   // Устанавливаем статус: админ может сразу 'active', остальные - 'pending' (требуют модерации)
@@ -292,10 +292,10 @@ router.post('/markers', authenticateToken, validateMarker, async (req, res) => {
       try {
         const { autoAnalyzeContent } = await import('../middleware/autoModeration.js');
         autoAnalyzeContent('markers', createdMarker.id, createdMarker).catch(err => {
-          console.error('Ошибка автоматического анализа метки:', err);
+          logger.error('Ошибка автоматического анализа метки:', err);
         });
       } catch (err) {
-        console.warn('Не удалось запустить автоматический анализ метки:', err.message);
+        logger.warn('Не удалось запустить автоматический анализ метки:', err.message);
       }
     }
     

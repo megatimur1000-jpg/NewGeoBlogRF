@@ -1,6 +1,8 @@
 import express from 'express';
 import { authenticateToken } from '../middleware/auth.js';
 import { 
+import logger from '../../logger.js';
+
   checkForDuplicateMarkers,
   getNearbyIncompleteMarkers,
   checkUserCanCreateMarker
@@ -82,7 +84,7 @@ router.post('/markers/check-duplicates', authenticateToken, async (req, res) => 
     });
 
   } catch (error) {
-    console.error('Ошибка при проверке дублирования меток:', error);
+    logger.error('Ошибка при проверке дублирования меток:', error);
     res.status(500).json({
       success: false,
       message: 'Ошибка сервера при проверке дублирования',
@@ -135,7 +137,7 @@ router.get('/markers/nearby-incomplete', authenticateToken, async (req, res) => 
     });
 
   } catch (error) {
-    console.error('Ошибка при поиске неполных меток:', error);
+    logger.error('Ошибка при поиске неполных меток:', error);
     res.status(500).json({
       success: false,
       message: 'Ошибка сервера при поиске неполных меток',
@@ -180,7 +182,7 @@ router.get('/markers/user-limits/:userId', authenticateToken, async (req, res) =
     });
 
   } catch (error) {
-    console.error('Ошибка при проверке лимитов пользователя:', error);
+    logger.error('Ошибка при проверке лимитов пользователя:', error);
     res.status(500).json({
       success: false,
       message: 'Ошибка сервера при проверке лимитов',
@@ -303,7 +305,7 @@ router.post('/markers/validate-creation', authenticateToken, async (req, res) =>
     });
 
   } catch (error) {
-    console.error('Ошибка при валидации создания метки:', error);
+    logger.error('Ошибка при валидации создания метки:', error);
     res.status(500).json({
       success: false,
       message: 'Ошибка сервера при валидации',

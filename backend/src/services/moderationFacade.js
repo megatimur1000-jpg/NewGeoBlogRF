@@ -75,7 +75,7 @@ export async function createContentWithModeration(contentType, contentData, user
           logger.info(`✅ ИИ-помощник: анализ ${contentType} ${content.id} завершён`);
         })
         .catch(err => {
-          console.error(`❌ ИИ-помощник: ошибка анализа ${contentType} ${content.id}:`, err);
+          logger.error(`❌ ИИ-помощник: ошибка анализа ${contentType} ${content.id}:`, err);
         });
     }
     

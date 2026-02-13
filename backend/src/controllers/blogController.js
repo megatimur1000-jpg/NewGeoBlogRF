@@ -106,10 +106,10 @@ const createBlog = async (req, res) => {
       try {
         const { autoAnalyzeContent } = await import('../middleware/autoModeration.js');
         autoAnalyzeContent('blogs', createdBlog.id, createdBlog).catch(err => {
-          console.error('Ошибка автоматического анализа блога:', err);
+          logger.error('Ошибка автоматического анализа блога:', err);
         });
       } catch (err) {
-        console.warn('Не удалось запустить автоматический анализ блога:', err.message);
+        logger.warn('Не удалось запустить автоматический анализ блога:', err.message);
       }
     }
     

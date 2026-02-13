@@ -160,7 +160,7 @@ export const getPendingContent = async (req, res) => {
     const result = await pool.query(query);
     res.json(result.rows);
   } catch (error) {
-    console.error(`Ошибка получения контента на модерации (${req.params.contentType}):`, error);
+    logger.error(`Ошибка получения контента на модерации (${req.params.contentType}):`, error);
     res.status(500).json({ message: 'Ошибка сервера при получении контента на модерации.' });
   }
 };
@@ -421,7 +421,7 @@ export const approveContent = async (req, res) => {
             };
           }
         } catch (xpError) {
-          console.error('Ошибка начисления XP при одобрении контента:', xpError);
+          logger.error('Ошибка начисления XP при одобрении контента:', xpError);
           // Не прерываем транзакцию, если XP не начислился
           xpResult = {
             success: false,
@@ -457,7 +457,7 @@ export const approveContent = async (req, res) => {
     });
   } catch (error) {
     await client.query('ROLLBACK');
-    console.error(`Ошибка одобрения контента (${req.params.contentType}):`, error);
+    logger.error(`Ошибка одобрения контента (${req.params.contentType}):`, error);
     res.status(500).json({ message: 'Ошибка сервера при одобрении контента.' });
   } finally {
     client.release();
@@ -541,7 +541,7 @@ export const rejectContent = async (req, res) => {
       reason: reason
     });
   } catch (error) {
-    console.error(`Ошибка отклонения контента (${req.params.contentType}):`, error);
+    logger.error(`Ошибка отклонения контента (${req.params.contentType}):`, error);
     res.status(500).json({ message: 'Ошибка сервера при отклонении контента.' });
   }
 };
@@ -608,7 +608,7 @@ export const hideContent = async (req, res) => {
       content: result.rows[0]
     });
   } catch (error) {
-    console.error(`Ошибка скрытия контента (${req.params.contentType}):`, error);
+    logger.error(`Ошибка скрытия контента (${req.params.contentType}):`, error);
     res.status(500).json({ message: 'Ошибка сервера при скрытии контента.' });
   }
 };
@@ -703,7 +703,7 @@ export const getModerationStats = async (req, res) => {
 
     res.json(stats);
   } catch (error) {
-    console.error('Ошибка получения статистики модерации:', error);
+    logger.error('Ошибка получения статистики модерации:', error);
     res.status(500).json({ message: 'Ошибка сервера при получении статистики.' });
   }
 };

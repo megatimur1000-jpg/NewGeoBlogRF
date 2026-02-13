@@ -1,3 +1,5 @@
+import logger from '../../logger.js';
+
 // SONAR-AUTO-FIX (javascript:S1128): original: // SONAR-AUTO-FIX (javascript:S1128): original: import pool from '../../db.js';
 
 /**
@@ -72,7 +74,7 @@ export const getGlobalGoals = async (req, res) => {
       active: goalsWithProgress.filter(g => !g.isCompleted).length,
     });
   } catch (error) {
-    console.error('getGlobalGoals error:', error);
+    logger.error('getGlobalGoals error:', error);
     res.status(500).json({ error: 'Failed to get global goals' });
   }
 };
@@ -97,7 +99,7 @@ export const updateGlobalGoalProgress = async (req, res) => {
       message: 'Global goal progress updated',
     });
   } catch (error) {
-    console.error('updateGlobalGoalProgress error:', error);
+    logger.error('updateGlobalGoalProgress error:', error);
     res.status(500).json({ error: 'Failed to update global goal progress' });
   }
 };
@@ -118,7 +120,7 @@ export const getGlobalGoalsStats = async (req, res) => {
 
     res.json(stats);
   } catch (error) {
-    console.error('getGlobalGoalsStats error:', error);
+    logger.error('getGlobalGoalsStats error:', error);
     res.status(500).json({ error: 'Failed to get global goals stats' });
   }
 };

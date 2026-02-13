@@ -4,6 +4,8 @@
  */
 
 import pool from '../../db.js';
+import logger from '../../logger.js';
+
 
 /**
  * Рассчитывает схожесть двух строк (алгоритм Левенштейна)
@@ -187,7 +189,7 @@ export async function checkForDuplicateMarkers(lat, lng, title, options = {}) {
     };
 
   } catch (error) {
-    console.error('Ошибка при проверке дублирования меток:', error);
+    logger.error('Ошибка при проверке дублирования меток:', { error });
     throw new Error(`Ошибка проверки дублирования: ${error.message}`);
   }
 }
@@ -441,7 +443,7 @@ export async function getNearbyIncompleteMarkers(lat, lng, category = null, radi
         suggestions = row.completion_suggestions ? 
           JSON.parse(row.completion_suggestions) : [];
       } catch (error) {
-        console.warn('Ошибка парсинга completion_suggestions:', error);
+        logger.warn('Ошибка парсинга completion_suggestions:', error);
         suggestions = [];
       }
       
@@ -463,7 +465,7 @@ export async function getNearbyIncompleteMarkers(lat, lng, category = null, radi
     });
 
   } catch (error) {
-    console.error('Ошибка при поиске неполных меток:', error);
+    logger.error('Ошибка при поиске неполных меток:', { error });
     return [];
   }
 }
@@ -512,7 +514,7 @@ export async function checkUserCanCreateMarker(userId, lat, lng) {
     };
 
   } catch (error) {
-    console.error('Ошибка при проверке лимитов пользователя:', error);
+    logger.error('Ошибка при проверке лимитов пользователя:', error);
     return {
       canCreate: true, // В случае ошибки разрешаем создание
       error: error.message

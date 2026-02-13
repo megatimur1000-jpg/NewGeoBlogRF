@@ -15,6 +15,8 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import Database from 'better-sqlite3';
+import logger from '../../logger.js';
+
 
 const router = Router();
 
@@ -61,7 +63,7 @@ function getDB(tileset) {
     dbCache.set(tileset, db);
     return db;
   } catch (err) {
-    console.error(`[TileServer] Ошибка открытия ${filePath}:`, err.message);
+    logger.error(`[TileServer] Ошибка открытия ${filePath}:`, err.message);
     return null;
   }
 }
@@ -98,7 +100,7 @@ router.get('/', (req, res) => {
 
     res.json({ tilesets });
   } catch (err) {
-    console.error('[TileServer] Ошибка списка тайлсетов:', err);
+    logger.error('[TileServer] Ошибка списка тайлсетов:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -188,7 +190,7 @@ router.get('/:tileset/:z/:x/:y', (req, res) => {
     });
     res.end(row.tile_data);
   } catch (err) {
-    console.error(`[TileServer] Ошибка чтения тайла ${tileset}/${z}/${x}/${y}:`, err.message);
+    logger.error(`[TileServer] Ошибка чтения тайла ${tileset}/${z}/${x}/${y}:`, err.message);
     res.status(500).json({ error: 'Ошибка чтения тайла' });
   }
 });

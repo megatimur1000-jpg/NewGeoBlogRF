@@ -98,7 +98,7 @@ export const getContentForReview = async (req, res) => {
 
     res.json(result.rows);
   } catch (error) {
-    console.error('Ошибка получения контента для проверки:', error);
+    logger.error('Ошибка получения контента для проверки:', { error });
     res.status(500).json({ message: 'Ошибка сервера.' });
   }
 };
@@ -223,7 +223,7 @@ export const analyzeContent = async (req, res) => {
       content: contentData
     });
   } catch (error) {
-    console.error('Ошибка анализа контента ИИ:', error);
+    logger.error('Ошибка анализа контента ИИ:', { error });
     res.status(500).json({ message: 'Ошибка анализа контента.' });
   }
 };
@@ -320,14 +320,14 @@ export const setAdminVerdict = async (req, res) => {
           
           logger.info(`✅ Одобрение завершено успешно`);
         } catch (approveError) {
-          console.error('❌ Ошибка при автоматическом одобрении контента через ИИ:', approveError);
-          console.error('   Stack:', approveError.stack);
+          logger.error('❌ Ошибка при автоматическом одобрении контента через ИИ:', { approveError });
+          logger.error('   Stack:', { stack: approveError?.stack });
           // Пытаемся хотя бы обновить статус вручную
           try {
             await applyAIDecision(decision.content_type, decision.content_id, 'approve');
             logger.info(`⚠️ Статус обновлён вручную, но XP не начислено из-за ошибки`);
           } catch (fallbackError) {
-            console.error('❌ Критическая ошибка: не удалось даже обновить статус:', fallbackError);
+            logger.error('❌ Критическая ошибка: не удалось даже обновить статус:', { fallbackError });
           }
         }
       } else {
@@ -369,7 +369,7 @@ export const setAdminVerdict = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Ошибка установки вердикта:', error);
+    logger.error('Ошибка установки вердикта:', { error });
     res.status(500).json({ message: 'Ошибка сервера.' });
   }
 };
@@ -397,7 +397,7 @@ async function applyAIDecision(contentType, contentId, suggestion) {
       tableName = 'blog_posts';
       break;
     default:
-      console.warn(`⚠️ Неизвестный тип контента для applyAIDecision: ${contentType}`);
+      logger.warn(`⚠️ Неизвестный тип контента для applyAIDecision: ${contentType}`);
       return;
   }
 
@@ -431,7 +431,7 @@ async function applyAIDecision(contentType, contentId, suggestion) {
   if (result.rows.length > 0) {
     logger.info(`✅ Статус обновлён: ${tableName} ${contentId} → ${status}`);
   } else {
-    console.warn(`⚠️ Контент не найден для обновления: ${tableName} ${contentId}`);
+    logger.warn(`⚠️ Контент не найден для обновления: ${tableName} ${contentId}`);
   }
 }
 
@@ -514,7 +514,7 @@ export const getAIStats = async (req, res) => {
       accuracy: accuracyStats.rows[0]?.accuracy || 0
     });
   } catch (error) {
-    console.error('Ошибка получения статистики ИИ:', error);
+    logger.error('Ошибка получения статистики ИИ:', error);
     res.status(500).json({ message: 'Ошибка сервера.' });
   }
 };
@@ -579,7 +579,7 @@ export const getModerationCounts = async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    console.error('Ошибка получения счётчиков модерации:', error);
+    logger.error('Ошибка получения счётчиков модерации:', error);
     res.status(500).json({ message: 'Ошибка сервера.' });
   }
 };

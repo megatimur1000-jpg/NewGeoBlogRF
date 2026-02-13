@@ -114,7 +114,7 @@ export const getProductAnalytics = async (req, res) => {
 
     res.json(analytics);
   } catch (error) {
-    console.error('Ошибка получения продуктовой аналитики:', error);
+    logger.error('Ошибка получения продуктовой аналитики:', { error });
     res.status(500).json({ message: 'Ошибка получения данных' });
   }
 };
@@ -213,7 +213,7 @@ export const getBehavioralAnalytics = async (req, res) => {
 
     res.json(analytics);
   } catch (error) {
-    console.error('Ошибка получения поведенческой аналитики:', error);
+    logger.error('Ошибка получения поведенческой аналитики:', { error });
     res.status(500).json({ message: 'Ошибка получения данных' });
   }
 };
@@ -260,7 +260,7 @@ export const getTechnicalHealth = async (req, res) => {
 
     res.json(health);
   } catch (error) {
-    console.error('Ошибка получения технического здоровья:', error);
+    logger.error('Ошибка получения технического здоровья:', { error });
     res.status(500).json({ message: 'Ошибка получения данных' });
   }
 };
@@ -295,7 +295,7 @@ export const getComprehensiveMetrics = async (req, res) => {
       `);
       logger.info('📊 DAU данные успешно получены:', dauResult.rows[0]?.count);
     } catch (error) {
-      console.error('❌ Ошибка получения DAU данных:', error);
+      logger.error('❌ Ошибка получения DAU данных:', { error });
       dauResult = { rows: [{ count: 0 }] };
     }
 
@@ -325,7 +325,7 @@ export const getComprehensiveMetrics = async (req, res) => {
       behavioral = await getBehavioralAnalyticsData(time_range);
       logger.info('📊 Поведенческая аналитика успешно получена');
     } catch (error) {
-      console.error('❌ Ошибка получения поведенческой аналитики:', error);
+      logger.error('❌ Ошибка получения поведенческой аналитики:', { error });
       behavioral = {
         travel_patterns: { popular_routes: [], seasonal_destinations: [], user_movement_types: [] },
         content_behavior: { search_patterns: [], consumption_depth: {}, engagement_triggers: [] },
@@ -340,7 +340,7 @@ export const getComprehensiveMetrics = async (req, res) => {
       technical = await getTechnicalHealthData();
       logger.info('📊 Техническое здоровье успешно получено');
     } catch (error) {
-      console.error('❌ Ошибка получения технического здоровья:', error);
+      logger.error('❌ Ошибка получения технического здоровья:', { error });
       technical = {
         error_rate: 0.2,
         errors_by_component: {},
@@ -396,7 +396,7 @@ export const getComprehensiveMetrics = async (req, res) => {
     
     res.json(response);
   } catch (error) {
-    console.error('Ошибка получения комплексных метрик:', error);
+    logger.error('Ошибка получения комплексных метрик:', error);
     res.status(500).json({ message: 'Ошибка получения данных' });
   }
 };
@@ -433,11 +433,11 @@ export const trackEvent = async (req, res) => {
       INSERT INTO analytics_events (event_type, user_id, properties, category, created_at)
       VALUES ($1, $2, $3, $4, NOW())
     `, [event_type, user_id || null, JSON.stringify(properties || {}), category || 'general']).catch((error) => {
-      console.error('❌ Ошибка вставки в analytics_events:', error);
+      logger.error('❌ Ошибка вставки в analytics_events:', error);
       return { rows: [] };
     });
   } catch (error) {
-    console.error('Ошибка трекинга события:', error);
+    logger.error('Ошибка трекинга события:', error);
     res.status(500).json({ message: 'Ошибка сохранения события' });
   }
 };
@@ -463,7 +463,7 @@ export const trackError = async (req, res) => {
 
     res.json({ success: true });
   } catch (error) {
-    console.error('Ошибка трекинга ошибки:', error);
+    logger.error('Ошибка трекинга ошибки:', error);
     res.status(500).json({ message: 'Ошибка сохранения ошибки' });
   }
 };

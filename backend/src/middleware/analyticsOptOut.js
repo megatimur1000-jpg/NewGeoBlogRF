@@ -5,6 +5,8 @@
  */
 
 import pool from '../../db.js';
+import logger from '../../logger.js';
+
 
 /**
  * Проверяет, разрешена ли аналитика для пользователя
@@ -31,7 +33,7 @@ export const isAnalyticsEnabled = async (userId) => {
     // Если analytics_opt_out = true, аналитика отключена
     return !result.rows[0].analytics_opt_out;
   } catch (error) {
-    console.error('Ошибка проверки флага аналитики:', error);
+    logger.error('Ошибка проверки флага аналитики:', error);
     // В случае ошибки разрешаем аналитику (fail-open)
     return true;
   }

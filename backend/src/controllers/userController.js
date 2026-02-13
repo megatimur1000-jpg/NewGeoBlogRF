@@ -4,6 +4,8 @@ import { hashPassword, comparePassword } from '../utils/password.js';
 import smsService from '../services/smsService.js';
 import { pool as smsPool } from '../database/smsCodes.js';
 import { checkSMSSendLimits, logSMSTry } from '../services/smsLimiter.js';
+import logger from '../../logger.js';
+
 
 // Обновляем функцию register
 export const register = async (req, res) => {
@@ -88,7 +90,7 @@ export const register = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Ошибка регистрации:', error);
+    logger.error('Ошибка регистрации:', error);
     res.status(500).json({ 
       message: 'Ошибка сервера при регистрации' 
     });
@@ -268,7 +270,7 @@ export const verifySMS = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Ошибка верификации SMS:', error);
+    logger.error('Ошибка верификации SMS:', error);
     res.status(500).json({
       message: 'Ошибка сервера при верификации SMS'
     });
@@ -337,7 +339,7 @@ export const resendSMS = async (req, res) => {
     }
 
   } catch (error) {
-    console.error('Ошибка повторной отправки SMS:', error);
+    logger.error('Ошибка повторной отправки SMS:', error);
     res.status(500).json({
       message: 'Ошибка сервера при повторной отправке SMS'
     });
@@ -400,7 +402,7 @@ export const requestPasswordReset = async (req, res) => {
     }
 
   } catch (error) {
-    console.error('Ошибка запроса восстановления пароля:', error);
+    logger.error('Ошибка запроса восстановления пароля:', error);
     res.status(500).json({
       message: 'Ошибка сервера при запросе восстановления пароля'
     });
@@ -463,7 +465,7 @@ export const confirmPasswordReset = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Ошибка подтверждения восстановления пароля:', error);
+    logger.error('Ошибка подтверждения восстановления пароля:', error);
     res.status(500).json({
       message: 'Ошибка сервера при подтверждении восстановления пароля'
     });

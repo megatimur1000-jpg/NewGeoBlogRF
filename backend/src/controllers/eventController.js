@@ -12,7 +12,7 @@ async function geocodeAddress(address) {
   try {
     const yandexApiKey = process.env.VITE_YANDEX_MAPS_API_KEY || process.env.YANDEX_MAPS_API_KEY;
     if (!yandexApiKey) {
-      console.warn('Yandex Maps API key not found, skipping geocoding');
+      logger.warn('Yandex Maps API key not found, skipping geocoding');
       return null;
     }
 
@@ -26,7 +26,7 @@ async function geocodeAddress(address) {
     });
 
     if (!response.ok) {
-      console.warn(`Yandex Geocoder error: ${response.status}`);
+      logger.warn(`Yandex Geocoder error: ${response.status}`);
       return null;
     }
 
@@ -45,7 +45,7 @@ async function geocodeAddress(address) {
 
     return null;
   } catch (error) {
-    console.error('Geocoding error:', error);
+    logger.error('Geocoding error:', error);
     return null;
   }
 }
@@ -135,7 +135,7 @@ export const createEvent = async (req, res) => {
         finalLongitude = geocoded.longitude;
         logger.info(`✅ Геокодирование успешно для "${location}": [${finalLatitude}, ${finalLongitude}]`);
       } else {
-        console.warn(`⚠️ Не удалось геокодировать адрес "${location}"`);
+        logger.warn(`⚠️ Не удалось геокодировать адрес "${location}"`);
         // Оставляем null - событие будет создано без координат
         finalLatitude = null;
         finalLongitude = null;
@@ -173,11 +173,11 @@ export const createEvent = async (req, res) => {
       try {
         const { autoAnalyzeContent } = await import('../middleware/autoModeration.js');
         autoAnalyzeContent('events', createdEvent.id, createdEvent).catch(err => {
-          console.error('Ошибка автоматического анализа события:', err);
+          logger.error('Ошибка автоматического анализа события:', err);
         });
       } catch (err) {
         // Игнорируем ошибки импорта/анализа
-        console.warn('Не удалось запустить автоматический анализ события:', err.message);
+        logger.warn('Не удалось запустить автоматический анализ события:', err.message);
       }
     } else {
       logger.info('✅ Событие создано админом, модерация не требуется');
@@ -236,7 +236,7 @@ export const getEvents = async (req, res) => {
 
     res.json(russiaEvents);
   } catch (error) {
-    console.error('Ошибка получения событий:', error);
+    logger.error('Ошибка получения событий:', error);
     res.status(500).json({ message: 'Ошибка сервера при получении событий.' });
   }
 };
@@ -275,7 +275,7 @@ export const getEventById = async (req, res) => {
 
     res.json(result.rows[0]);
   } catch (error) {
-    console.error('Ошибка получения события:', error);
+    logger.error('Ошибка получения события:', error);
     // Если ошибка связана с форматом UUID, возвращаем 400
     if (error.message && error.message.includes('invalid input syntax for type uuid')) {
       return res.status(400).json({
@@ -357,7 +357,7 @@ export const approveEvent = async (req, res) => {
       event: result.rows[0]
     });
   } catch (error) {
-    console.error('Ошибка одобрения события:', error);
+    logger.error('Ошибка одобрения события:', error);
     res.status(500).json({ message: 'Ошибка сервера при одобрении события.' });
   }
 };
@@ -397,7 +397,7 @@ export const rejectEvent = async (req, res) => {
       reason: reason || 'Не указана'
     });
   } catch (error) {
-    console.error('Ошибка отклонения события:', error);
+    logger.error('Ошибка отклонения события:', error);
     res.status(500).json({ message: 'Ошибка сервера при отклонении события.' });
   }
 };
@@ -475,7 +475,7 @@ export const updateEvent = async (req, res) => {
 
     res.json(result.rows[0]);
   } catch (error) {
-    console.error('Ошибка обновления события:', error);
+    logger.error('Ошибка обновления события:', error);
     res.status(500).json({ message: 'Ошибка сервера при обновлении события.' });
   }
 };
