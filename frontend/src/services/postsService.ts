@@ -170,17 +170,31 @@ export const listPosts = async (params: {
     const mockPosts: PostDTO[] = [
       {
         id: "1",
-        title: "Прогулка по Красной площади",
-        body: "Сегодня посетил Красную площадь. Погода была отличная, много туристов. Обязательно нужно вернуться сюда вечером, когда включается подсветка!",
+        title: "То что должно отображаться",
+        body: "Это тестовый пост для проверки отображения. Если вы видите этот текст — лента контента работает корректно, но бэкенд API недоступен.",
         author_id: "1",
-        author_name: "Алексей Петров",
+        author_name: "Тестовый пользователь",
         created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
         updated_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-        likes_count: 24,
-        comments_count: 8,
+        likes_count: 0,
+        comments_count: 0,
         is_liked: false,
         reactions: [],
-        marker_id: "0ace6a56-1dd3-45ad-b400-fed4399fdc8c",
+        content_type: 'post'
+      },
+      {
+        id: "2",
+        title: "Пост с фото",
+        body: "Пример поста с прикреплённым изображением. Подключите бэкенд для загрузки реальных данных.",
+        author_id: "1",
+        author_name: "Тестовый пользователь",
+        created_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+        updated_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+        likes_count: 0,
+        comments_count: 0,
+        is_liked: false,
+        reactions: [],
+        photo_urls: ["https://images.unsplash.com/photo-1513326738677-b964603b136d?w=800&q=80"],
         content_type: 'post'
       }
     ];
