@@ -84,10 +84,24 @@ const PageLayer: React.FC<PageLayerProps> = ({ side }) => {
         // пропускать клики, иначе невидимый div перекроет Leaflet.
         const isMapOnLeft = side === 'left' && pageId === 'map';
 
+        // КРИТИЧНО: Карта рендерит через Portal на body, но её контейнер #map
+        // должен быть "видимым" в DOM, иначе Leaflet не инициализируется
+        // (checkVisibility проверяет offsetWidth/Height). Используем
+        // visibility: hidden + position: absolute + size: 1px вместо display: none.
+        const shouldKeepMounted = isMapOnLeft && !isActive;
+
         return (
           <div
             key={`${side}-${pageId}`}
-            style={{
+            style={shouldKeepMounted ? {
+              // Карта скрыта визуально, но DOM остаётся для Portal-рендера
+              visibility: 'hidden',
+              position: 'absolute',
+              width: '1px',
+              height: '1px',
+              overflow: 'hidden',
+              pointerEvents: 'none',
+            } : {
               display: isActive ? 'block' : 'none',
               width: '100%',
               height: '100%',
