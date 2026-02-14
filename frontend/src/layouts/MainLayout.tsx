@@ -86,18 +86,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     const leftContentAlreadySet = store.leftContent !== null;
 
     // Если путь указывает на карту или планировщик - открываем соответствующую панель
-    // НО НЕ трогаем если уже установлено через Sidebar
+    // КРИТИЧНО: НЕ трогаем rightContent! Sidebar уже установил нужное состояние.
+    // Правая панель (posts/feed/friends) должна сохраняться при переключении карт.
     if (location.pathname === '/map') {
-      // Карта всегда однооконная — сбрасываем правую панель
       store.setLeftContent('map');
-      store.setRightContent(null);
+      // НЕ сбрасываем rightContent — посты/activity остаются
     } else if (location.pathname === '/planner') {
-      // Планировщик всегда однооконный — сбрасываем правую панель
       store.setLeftContent('planner');
-      store.setRightContent(null);
+      // НЕ сбрасываем rightContent — посты/activity остаются
     } else if (location.pathname === '/calendar') {
       store.setLeftContent('calendar');
-      store.setRightContent(null);
+      // НЕ сбрасываем rightContent
     } else if (location.pathname === '/' || location.pathname === '/posts') {
       // Главная страница или посты - открываем только посты (без карты)
       // Но только если явно перешли на / или /posts

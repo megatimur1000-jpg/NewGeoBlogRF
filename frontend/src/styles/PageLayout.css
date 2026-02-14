@@ -1395,7 +1395,7 @@
 
 /* ===== СТИЛИ ДЛЯ ACTIVITY-MODE - GLASSMORPHISM КОНТЕЙНЕР ===== */
 
-/* Основной контейнер activity - аналогично posts-mode */
+/* Основной контейнер activity - ЕДИНЫЙ UX с posts-mode */
 .page-layout-container.activity-map-background {
   padding: 0 !important;
   margin: 0 !important;
@@ -1405,41 +1405,53 @@
   overflow: hidden !important;
 }
 
+/* Однооконный режим activity — идентично posts-mode */
 .page-layout-container.activity-map-background .page-main-panel {
-  position: absolute !important;
-  /* Позиционирование как у posts */
+  position: fixed !important;
   top: calc(64px + 1cm) !important;
-  bottom: 5mm !important;
-  left: 10mm !important;
-  right: 10mm !important;
-  width: auto !important;
-  height: auto !important;
+  bottom: 0 !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: calc(100vw - 56px - 2cm) !important;
+  max-width: 1000px !important;
+  height: calc(100vh - 64px - 1cm) !important;
 
-  /* Glassmorphism эффект */
-  background: rgba(255, 255, 255, 0.18) !important;
+  /* Glassmorphism эффект — идентично posts */
+  background: rgba(255, 255, 255, 0.2) !important;
   -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
   backdrop-filter: blur(20px) saturate(180%) !important;
-
-  /* Скруглённые углы */
   border-radius: 20px !important;
   border: 1px solid rgba(255, 255, 255, 0.3) !important;
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.15),
-    0 2px 8px rgba(0, 0, 0, 0.1),
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
 
   overflow: hidden !important;
+  z-index: 1145 !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
-/* Двухоконный режим для activity — показываем правую панель справа, слева остаётся карта */
+/* Двухоконный режим для activity — идентично posts двухоконному */
 .has-left-panel .page-layout-container.activity-map-background .page-main-panel {
-  /* Позиционирование задаётся родительским контейнером в MainLayout */
-  position: absolute !important;
+  position: fixed !important;
   left: 50% !important;
   right: 0 !important;
-  top: 0 !important;
+  top: calc(64px + 1cm) !important;
   bottom: 0 !important;
-  width: 50% !important;
+  width: 50vw !important;
+  height: calc(100vh - 64px - 1cm) !important;
+  transform: none !important;
+  max-width: none !important;
+
+  /* Более тёмный glass для двухоконного режима — идентично posts */
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(10px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(160%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 14px 48px rgba(0, 0, 0, 0.25) !important;
 }
 
 /* Внутренний контейнер для activity */
