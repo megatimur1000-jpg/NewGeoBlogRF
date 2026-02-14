@@ -181,7 +181,9 @@ const Sidebar: React.FC = () => {
         // Открываем правую панель
         store.setRightContent(item.id as ContentType);
 
-        if (item.id === 'posts' && location.pathname !== '/' && location.pathname !== '/posts') {
+        // КРИТИЧНО: Навигация на /posts ТОЛЬКО если нет левой панели (карты/планировщика)
+        // Если карта открыта, navigate('/posts') вызовет MainLayout → setLeftContent(null) → карта исчезнет!
+        if (item.id === 'posts' && !store.leftContent && location.pathname !== '/' && location.pathname !== '/posts') {
           navigate('/posts');
         }
       }

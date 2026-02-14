@@ -98,9 +98,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       store.setLeftContent('calendar');
       // НЕ сбрасываем rightContent
     } else if (location.pathname === '/' || location.pathname === '/posts') {
-      // Главная страница или посты - открываем только посты (без карты)
-      // Но только если явно перешли на / или /posts
-      store.setLeftContent(null);
+      // Главная страница или посты
+      // КРИТИЧНО: Если карта/планировщик уже открыты (leftContent установлен),
+      // НЕ сбрасываем их! Это значит Sidebar переключил правую панель.
+      // Сбрасываем leftContent только при прямой навигации (leftContent ещё не установлен)
+      if (!store.leftContent) {
+        store.setLeftContent(null);
+      }
       store.setRightContent('posts');
     } else if (location.pathname === '/activity') {
       // Если есть открытая левая панель (map/planner/other), показываем Activity в правой панели

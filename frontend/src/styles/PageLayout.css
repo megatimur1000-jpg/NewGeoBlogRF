@@ -1214,13 +1214,13 @@
 .page-container.posts-mode {
   /* FIXED позиционирование - игнорируем все родительские контейнеры */
   position: fixed !important;
-  top: calc(64px + 1cm) !important;  /* под topbar + отступ */
-  bottom: 0 !important;
+  top: calc(64px + 1cm) !important;  /* под topbar + отступ сверху 1cm */
+  bottom: 1cm !important;            /* отступ снизу 1cm — ИДЕНТИЧНО сверху */
   left: 50% !important;
   transform: translateX(-50%) !important;
   width: calc(100vw - 56px - 2cm) !important;  /* вся ширина экрана - sidebar - отступы */
   max-width: 1000px !important;
-  height: calc(100vh - 64px - 1cm) !important;
+  height: auto !important;  /* top+bottom определяют высоту, не нужен явный height */
   
   /* GLASSMORPHISM эффект */
   background: rgba(255, 255, 255, 0.2) !important;
@@ -1245,14 +1245,14 @@
 /* Двухоконный режим - panel справа от карты */
 .has-left-panel .page-container.posts-mode,
 .activity-feed.has-left-panel .page-container.posts-mode {
-  /* FIXED позиционирование - от центра до правого края */
+  /* FIXED позиционирование - от центра до правого края с отступами */
   position: fixed !important;
   left: 50% !important;
-  right: 0 !important;  /* БЕЗ отступа - карта под панелью на весь экран */
-  top: calc(64px + 1cm) !important;
-  bottom: 0 !important;
-  width: 50vw !important;  /* ровно половина экрана */
-  height: calc(100vh - 64px - 1cm) !important;
+  right: 1cm !important;             /* отступ справа 1cm — полоска карты видна */
+  top: calc(64px + 1cm) !important;  /* отступ сверху 1cm */
+  bottom: 1cm !important;            /* отступ снизу 1cm — ИДЕНТИЧНО сверху */
+  width: auto !important;            /* left+right определяют ширину */
+  height: auto !important;           /* top+bottom определяют высоту */
   transform: none !important;
   max-width: none !important;
   
@@ -1408,13 +1408,13 @@
 /* Однооконный режим activity — идентично posts-mode */
 .page-layout-container.activity-map-background .page-main-panel {
   position: fixed !important;
-  top: calc(64px + 1cm) !important;
-  bottom: 0 !important;
+  top: calc(64px + 1cm) !important;  /* отступ сверху 1cm */
+  bottom: 1cm !important;            /* отступ снизу 1cm — ИДЕНТИЧНО сверху */
   left: 50% !important;
   transform: translateX(-50%) !important;
   width: calc(100vw - 56px - 2cm) !important;
   max-width: 1000px !important;
-  height: calc(100vh - 64px - 1cm) !important;
+  height: auto !important;  /* top+bottom определяют высоту */
 
   /* Glassmorphism эффект — идентично posts */
   background: rgba(255, 255, 255, 0.2) !important;
@@ -1437,11 +1437,11 @@
 .has-left-panel .page-layout-container.activity-map-background .page-main-panel {
   position: fixed !important;
   left: 50% !important;
-  right: 0 !important;
-  top: calc(64px + 1cm) !important;
-  bottom: 0 !important;
-  width: 50vw !important;
-  height: calc(100vh - 64px - 1cm) !important;
+  right: 1cm !important;             /* отступ справа 1cm — полоска карты видна */
+  top: calc(64px + 1cm) !important;  /* отступ сверху 1cm */
+  bottom: 1cm !important;            /* отступ снизу 1cm — ИДЕНТИЧНО сверху */
+  width: auto !important;            /* left+right определяют ширину */
+  height: auto !important;           /* top+bottom определяют высоту */
   transform: none !important;
   max-width: none !important;
 
