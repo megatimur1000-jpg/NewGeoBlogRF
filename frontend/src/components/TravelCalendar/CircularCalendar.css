@@ -1,292 +1,513 @@
-/* Круговой календарь - стили в матовом стекле */
-.circular-calendar {
+/* --- Жёсткое отключение overlay-эффектов для SVG-календаря --- */
+.ccal-wrapper,
+.ccal-container,
+.ccal-ring,
+.ccal-svg {
+  background: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+  z-index: 10;
+}
+/* ========================================
+   Круговой календарь — полноразмерное кольцо
+   ======================================== */
+
+/* Обёртка — заполняет всю панель */
+.ccal-wrapper {
   width: 100%;
   height: 100%;
   display: flex;
-  flex-direction: column;
-  font-family: 'Segoe UI', sans-serif;
-  color: #000000;
-  position: relative;
-  padding: 20px;
-}
-
-/* Заголовок с навигацией */
-.circular-calendar-header {
-  display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-  padding: 0 10px;
-}
-
-.circular-calendar-title {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 700;
-  color: #000000;
-  text-align: center;
-  flex: 1;
-}
-
-.circular-calendar-nav-btn {
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(10px) saturate(180%);
-  -webkit-backdrop-filter: blur(10px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  color: #000000;
-  padding: 8px 16px;
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 600;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  min-width: 40px;
-}
-
-.circular-calendar-nav-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.6);
-  border-color: rgba(255, 255, 255, 0.6);
-  transform: scale(1.05);
-}
-
-.circular-calendar-nav-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-/* Круговая карусель месяцев */
-.circular-calendar-carousel {
-  width: 100%;
-  height: 200px;
-  position: relative;
-  display: flex;
   justify-content: center;
-  align-items: center;
-  margin-bottom: 20px;
-  perspective: 1000px;
+  overflow: visible;
+  padding: 8px;
+  box-sizing: border-box;
 }
 
-.circular-calendar-carousel-inner {
-  width: 300px;
-  height: 200px;
+/* Контейнер — квадрат, вписанный в доступное пространство */
+.ccal-container {
   position: relative;
-  transform-style: preserve-3d;
+  /* Вписываем по меньшей из сторон, с учётом кнопок снизу */
+  width: min(100%, calc(100vh - 200px));
+  max-width: min(100%, calc(100vh - 200px));
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
 }
 
-/* Карточка месяца в карусели */
-.circular-calendar-month-card {
+.ccal-container.is-expanded .ccal-ring {
+  opacity: 0.28;
+  filter: blur(0.2px) saturate(0.9);
+}
+
+.ccal-container.is-expanded .ccal-center {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Вращающееся кольцо */
+.ccal-ring {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 120px;
-  height: 70px;
-  margin-left: -60px;
-  margin-top: -35px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(10px) saturate(180%);
-  -webkit-backdrop-filter: blur(10px) saturate(180%);
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  inset: 0;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+/* SVG заполняет кольцо */
+.ccal-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* по умолчанию не блокируем клики — интерактивность даём только целевым элементам */
+  pointer-events: none;
+}
+/* Разрешаем pointer-events только нашим интерактивным элементам */
+.ccal-segment,
+.ccal-mini,
+.ccal-mini-day,
+.ccal-expanded-day,
+.ccal-year-btn,
+.ccal-action-btn {
+  pointer-events: auto;
+}
+
+/* Сегмент */
+.ccal-segment {
+  transition: opacity 0.2s, filter 0.2s;
+  opacity: 0.88;
+}
+.ccal-segment:hover {
+  opacity: 1;
+  filter: brightness(1.08);
+}
+.ccal-segment.active {
+  opacity: 1;
+  filter: brightness(1.12) drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+}
+
+/* ---- Мини-календарь внутри сегмента ---- */
+.ccal-mini {
+  position: absolute;
+  width: 110px;
+  pointer-events: auto;
   cursor: pointer;
   user-select: none;
-  text-align: center;
-  font-weight: 600;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  color: #000000;
-}
-
-.circular-calendar-month-card:hover {
-  transform: scale(1.1) !important;
-  background: rgba(255, 255, 255, 0.6);
-  border-color: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
-  z-index: 20 !important;
-}
-
-.circular-calendar-month-card.active {
-  background: rgba(255, 255, 255, 0.7);
-  border-color: rgba(59, 130, 246, 0.6);
-  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.3);
-  z-index: 15 !important;
-  transform: scale(1.15) !important;
-}
-
-.circular-calendar-month-content {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 1px;
+  z-index: 10;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ccal-mini.active {
+  z-index: 20;
+}
+.ccal-mini.active .ccal-mini-header {
+  font-size: 11px;
+}
+
+.ccal-container.is-expanded .ccal-mini {
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+.ccal-container.is-expanded .ccal-mini.active {
+  opacity: 0.3;
+}
+
+/* Заголовок: номер + название */
+.ccal-mini-header {
+  display: flex;
+  align-items: baseline;
   gap: 4px;
+  white-space: nowrap;
 }
-
-.circular-calendar-month-name {
-  font-size: 16px;
+.ccal-mini-num {
+  font-size: 13px;
+  font-weight: 800;
+  color: #1a1a1a;
+  text-shadow: 0 1px 2px rgba(255,255,255,0.6);
+}
+.ccal-mini-name {
+  font-size: 8px;
   font-weight: 700;
-  color: #000000;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(255,255,255,0.5);
 }
 
-.circular-calendar-month-events {
-  font-size: 12px;
-  color: rgba(59, 130, 246, 1);
+/* Заголовки дней недели */
+.ccal-mini-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  width: 100%;
+}
+.ccal-mini-wd {
+  font-size: 7px;
   font-weight: 600;
-  background: rgba(59, 130, 246, 0.2);
-  padding: 2px 8px;
-  border-radius: 8px;
+  color: rgba(0,0,0,0.55);
+  text-align: center;
+  line-height: 10px;
+}
+.ccal-mini-wd.weekend {
+  color: rgba(200,50,50,0.7);
 }
 
 /* Сетка дней */
-.circular-calendar-days {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-.circular-calendar-weekdays {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  margin-bottom: 8px;
-  padding: 0 4px;
-}
-
-.circular-calendar-weekday {
-  text-align: center;
-  font-size: 14px;
-  font-weight: 600;
-  color: #000000;
-  padding: 8px 0;
-}
-
-.circular-calendar-days-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  flex: 1;
-  padding: 0 4px;
-  min-height: 0;
-}
-
-.circular-calendar-day-item {
-  min-height: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(10px) saturate(180%);
-  -webkit-backdrop-filter: blur(10px) saturate(180%);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 4px;
-  position: relative;
-  color: #000000;
-}
-
-.circular-calendar-day-item:hover:not(.empty) {
-  background: rgba(255, 255, 255, 0.5);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.circular-calendar-day-item.empty {
-  background: transparent;
-  border: none;
-  cursor: default;
-}
-
-.circular-calendar-day-item.empty:hover {
-  transform: none;
-  box-shadow: none;
-}
-
-.circular-calendar-day-item.has-events {
-  border-color: rgba(59, 130, 246, 0.4);
-  background: rgba(227, 242, 253, 0.4);
-}
-
-.circular-calendar-day-item.selected {
-  background: rgba(227, 242, 253, 0.8);
-  border: 2px solid rgba(59, 130, 246, 0.8);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-  font-weight: 700;
-}
-
-.circular-calendar-day-item.today {
-  background: rgba(255, 255, 255, 0.6);
-  border-color: rgba(34, 197, 94, 0.6);
-  font-weight: 700;
-}
-
-.circular-calendar-day-item.today::before {
-  content: '';
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 6px;
-  height: 6px;
-  background: rgba(34, 197, 94, 1);
-  border-radius: 50%;
-  box-shadow: 0 0 4px rgba(34, 197, 94, 0.6);
-}
-
-.circular-calendar-day-number {
-  font-size: 14px;
-  font-weight: 600;
-  color: #000000;
-  margin-bottom: 2px;
-}
-
-.circular-calendar-day-events {
-  display: flex;
-  gap: 2px;
-  justify-content: center;
-  flex-wrap: wrap;
+.ccal-mini-grid {
   width: 100%;
 }
+.ccal-mini-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+}
 
-.circular-calendar-day-event-dot {
+/* Ячейка дня */
+.ccal-mini-day {
+  height: 12px;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 500;
+  color: #1a1a1a;
+  background: transparent;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  line-height: 1;
+  transition: background 0.15s;
+}
+.ccal-mini-day:hover:not(.empty):not(:disabled) {
+  background: rgba(0,0,0,0.1);
+}
+.ccal-mini-day.empty {
+  cursor: default;
+  pointer-events: none;
+}
+.ccal-mini-day.weekend {
+  color: #c0392b;
+}
+.ccal-mini-day.today {
+  background: rgba(59,130,246,0.3);
+  font-weight: 800;
+  border-radius: 50%;
+  color: #1a1a1a;
+}
+.ccal-mini-day.selected {
+  background: rgba(59,130,246,0.85);
+  color: #fff;
+  font-weight: 700;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(59,130,246,0.5);
+}
+.ccal-mini-day.has-event {
+  position: relative;
+}
+.ccal-mini-day.has-event::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 3px;
+  background: #fbbf24;
+  border-radius: 50%;
+}
+
+/* Бейдж количества событий */
+.ccal-mini-badge {
+  font-size: 7px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(239,68,68,0.85);
+  border-radius: 6px;
+  padding: 1px 4px;
+  margin-top: 1px;
+  line-height: 1.2;
+}
+
+/* ---- Центральный круг с годом ---- */
+.ccal-center {
+  position: absolute;
+  /* Центрируем: R_INNER = 135 из 800 → 16.875% от SIZE */
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 30%;
+  height: 30%;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.15),
+    inset 0 2px 4px rgba(255,255,255,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  z-index: 50;
+}
+
+/* ---- Развёрнутый месяц ---- */
+.ccal-expanded {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 74%;
+  height: 74%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.35), rgba(255,255,255,0.05) 45%),
+    linear-gradient(135deg, color-mix(in srgb, var(--month-color) 88%, #ffffff 12%), var(--month-color));
+  box-shadow:
+    0 20px 50px rgba(0,0,0,0.25),
+    inset 0 2px 10px rgba(255,255,255,0.35);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 22px 26px 28px;
+  z-index: 70;
+  color: #0b0b0b;
+}
+
+.ccal-expanded-header {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.ccal-expanded-title {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  text-shadow: 0 1px 2px rgba(255,255,255,0.4);
+}
+
+.ccal-expanded-title-month,
+.ccal-expanded-title-year {
+  font-size: clamp(20px, 2.8vw, 34px);
+  font-weight: 900;
+  color: #101010;
+  letter-spacing: 0.2px;
+  font-family: 'Inter', 'Segoe UI', 'Arial', sans-serif;
+}
+
+.ccal-expanded-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  width: 88%;
+  margin-bottom: 12px;
+  margin-top: 12px;
+}
+
+.ccal-expanded-wd {
+  text-align: center;
+  font-size: clamp(10px, 1.2vw, 14px);
+  font-weight: 700;
+  color: rgba(0,0,0,0.75);
+}
+
+.ccal-expanded-wd.weekend {
+  color: rgba(160, 20, 20, 0.85);
+}
+
+.ccal-expanded-grid {
+  width: 88%;
+  display: grid;
+  gap: 10px;
+  margin-top: 0;
+}
+
+/* Для месяцев с 6 строками (например, ноябрь 2026) — уменьшить отступ сверху */
+.ccal-expanded.has-6-rows .ccal-expanded-grid {
+  margin-top: -12px;
+}
+
+.ccal-expanded-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+}
+
+.ccal-expanded-day {
+  height: clamp(26px, 3.4vw, 40px);
+  border-radius: 10px;
+  border: none;
+  background: rgba(255,255,255,0.85);
+  color: #181818;
+  font-size: clamp(15px, 2vw, 22px);
+  font-weight: 400;
+  font-family: 'Inter', 'Segoe UI', 'Arial', sans-serif;
+  letter-spacing: 0.1px;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ccal-expanded-day:hover:not(.empty):not(:disabled) {
+  background: rgba(255,255,255,0.98);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.ccal-expanded-day.empty {
+  background: transparent;
+  box-shadow: none;
+  cursor: default;
+  pointer-events: none;
+}
+
+.ccal-expanded-day.weekend {
+  color: #a11a1a;
+}
+
+.ccal-expanded-day.today {
+  background: rgba(255,255,255,0.98);
+  border: 2px solid rgba(0,0,0,0.35);
+  font-weight: 800;
+}
+
+.ccal-expanded-day.selected {
+  background: rgba(0,0,0,0.85);
+  color: #fff;
+  font-weight: 800;
+}
+
+.ccal-expanded-day.has-event {
+  position: relative;
+}
+
+.ccal-expanded-day.has-event::after {
+  content: '';
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+  background: #f59e0b;
+  box-shadow: 0 0 6px rgba(245,158,11,0.6);
 }
 
-/* Адаптивность */
-@media (max-width: 768px) {
-  .circular-calendar {
-    padding: 10px;
+.ccal-year {
+  font-size: clamp(24px, 4vw, 48px);
+  font-weight: 800;
+  color: #c0392b;
+  letter-spacing: -1px;
+}
+
+.ccal-year-btn {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: clamp(12px, 2vw, 20px);
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.2s;
+  line-height: 1;
+}
+.ccal-year-btn:hover {
+  color: #333;
+}
+
+/* Кнопки действий — сверху по бокам */
+.ccal-actions {
+  position: absolute;
+  top: 4px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 8px;
+  z-index: 60;
+}
+
+.ccal-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  background: rgba(255,255,255,0.85);
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  white-space: nowrap;
+}
+.ccal-action-btn:hover {
+  background: rgba(255,255,255,0.95);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  transform: translateY(-1px);
+}
+.ccal-action-btn-primary {
+  background: rgba(59,130,246,0.85);
+  color: #fff;
+  border-color: rgba(59,130,246,0.3);
+}
+.ccal-action-btn-primary:hover {
+  background: rgba(59,130,246,0.95);
+}
+
+/* ---- Адаптивность ---- */
+@media (max-width: 900px) {
+  .ccal-mini {
+    width: 90px;
+  }
+  .ccal-mini-num {
+    font-size: 11px;
+  }
+  .ccal-mini-name {
+    font-size: 7px;
+  }
+  .ccal-mini-day {
+    height: 10px;
+    font-size: 7px;
+  }
+  .ccal-mini-wd {
+    font-size: 6px;
+  }
+}
+
+@media (max-width: 600px) {
+  .ccal-wrapper {
+    padding: 4px;
+  }
+  .ccal-mini {
+    width: 70px;
+  }
+  .ccal-mini-num {
+    font-size: 9px;
+  }
+  .ccal-mini-name {
+    display: none;
+  }
+  .ccal-mini-day {
+    height: 8px;
+    font-size: 6px;
+  }
+  .ccal-mini-wd {
+    font-size: 5px;
+  }
+  .ccal-year {
+    font-size: 20px;
   }
 
-  .circular-calendar-carousel {
-    height: 150px;
-  }
-
-  .circular-calendar-month-card {
-    width: 100px;
-    height: 60px;
-    margin-left: -50px;
-    margin-top: -30px;
-  }
-
-  .circular-calendar-month-name {
-    font-size: 14px;
-  }
-
-  .circular-calendar-day-item {
-    min-height: 35px;
-    padding: 2px;
-  }
-
-  .circular-calendar-day-number {
-    font-size: 12px;
+  .ccal-expanded {
+    width: 86%;
+    height: 86%;
+    padding: 16px 18px 20px;
   }
 }
 

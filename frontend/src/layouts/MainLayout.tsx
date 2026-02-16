@@ -4,7 +4,7 @@ import Sidebar from '../components/Sidebar';
 import SideContentPanel from '../components/SideContentPanel';
 import GuestIndicator from '../components/GuestIndicator';
 import { useLayoutState } from '../contexts/LayoutContext';
-import { useContentStore } from '../stores/contentStore';
+import { useContentStore, ContentType } from '../stores/contentStore';
 import PageLayer from '../pages/PageLayer';
 import { usePreload } from '../hooks/usePreload';
 import Topbar from '../components/Topbar';
@@ -95,8 +95,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       store.setLeftContent('planner');
       // НЕ сбрасываем rightContent — посты/activity остаются
     } else if (location.pathname === '/calendar') {
-      store.setLeftContent('calendar');
-      // НЕ сбрасываем rightContent
+      // Календарь — универсальный контент: LEFT когда нет map/planner, RIGHT когда есть
+      if (store.leftContent === 'map' || store.leftContent === 'planner') {
+        store.setRightContent('calendar' as ContentType);
+      } else {
+        store.setLeftContent('calendar' as ContentType);
+        if (!store.rightContent) store.setRightContent('posts');
+      }
     } else if (location.pathname === '/' || location.pathname === '/posts') {
       // Главная страница или посты
       // КРИТИЧНО: Если карта/планировщик уже открыты (leftContent установлен),
@@ -171,21 +176,36 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       >
         {/* Статичный картографический SVG‑паттерн (fallback / decorative) */}
         <MapBackgroundExtension />
-        {/* Левая панель (карта/планировщик/календарь) - с самого верха до низа, с самого лева */}
-        {/* Карта и планировщик должны быть ПОД сайдбаром для эффекта стеклянного прозрачного сайдбара с морфизмом */}
+        {/* Левая панель — fullscreen для карты/планировщика, content panel для календаря */}
         <div
-          className="h-full absolute top-0 left-0 transition-all duration-300 ease-in-out left-panel-map"
-          style={{
-            // Карта всегда занимает весь экран когда активна
+          className={`transition-all duration-300 ease-in-out ${
+            leftContent === 'calendar'
+              ? 'left-panel-content'
+              : 'h-full absolute top-0 left-0 left-panel-map'
+          }`}
+          style={leftContent === 'calendar' ? {
+            // Календарь: контентная панель — выровнена с постами
+            position: 'fixed',
+            top: 'calc(64px + 1cm)',
+            bottom: '1cm',
+            left: 'calc(56px + 1cm)',
+            right: rightContent ? 'calc(50% + 0.5cm)' : '1cm',
+            zIndex: 1145,
+            overflow: 'hidden',
+            pointerEvents: 'auto',
+            background: 'rgba(255, 255, 255, 0.15)',
+            backdropFilter: 'blur(16px) saturate(170%)',
+            WebkitBackdropFilter: 'blur(16px) saturate(170%)',
+            border: '1px solid rgba(255, 255, 255, 0.25)',
+            borderRadius: '16px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.2)',
+            visibility: 'visible',
+          } : {
+            // Карта/планировщик: fullscreen background
             width: leftContent ? '100%' : '0%',
             visibility: leftContent ? 'visible' : 'hidden',
-            // Когда левая панель активна (map или planner), ставим её ПОД сайдбаром для эффекта стекла
-            // Сайдбар имеет zIndex = 1150, карта должна быть ниже для морфизма
-            zIndex: leftContent === 'map' || leftContent === 'planner' ? 1140 : (leftContent ? 1160 : 0),
+            zIndex: (leftContent === 'map' || leftContent === 'planner') ? 1140 : 0,
             overflow: 'visible',
-            // В map-mode карта рендерится через portal на body — этот контейнер
-            // должен пропускать клики (pointer-events: none), чтобы Leaflet получал события.
-            // Для planner и прочего контент рендерится внутри, поэтому auto.
             pointerEvents: leftContent === 'map' ? 'none' : (leftContent ? 'auto' : 'none'),
           }}
         >

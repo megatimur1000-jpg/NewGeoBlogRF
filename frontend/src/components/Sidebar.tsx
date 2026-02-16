@@ -30,7 +30,7 @@ const navGroups: NavGroup[] = [
     items: [
       { id: 'map', icon: 'fa-map-location-dot', label: 'Карта', type: 'left' },
       { id: 'planner', icon: 'fa-route', label: 'Планировщик', type: 'left' },
-      { id: 'calendar', icon: 'fa-calendar', label: 'Календарь', type: 'left' },
+      { id: 'calendar', icon: 'fa-calendar', label: 'Календарь', type: 'right' },
     ],
   },
   {
@@ -112,6 +112,50 @@ const Sidebar: React.FC = () => {
     } catch (e) { }
     // click handled
 
+    // ═══ КАЛЕНДАРЬ — универсальный компонент с 5 состояниями ═══
+    // 1. Solo: calendar один (leftContent=calendar, rightContent=null → но fallback posts)
+    // 2. calendar(left) + posts(right): calendar слева, посты справа
+    // 3. calendar(left) + activity(right): calendar слева, активность справа
+    // 4. map(left) + calendar(right): карта слева, calendar справа
+    // 5. planner(left) + calendar(right): планировщик слева, calendar справа
+    if (item.id === 'calendar') {
+      const calendarOnLeft = store.leftContent === 'calendar';
+      const calendarOnRight = store.rightContent === 'calendar';
+
+      // Toggle: если календарь уже активен — закрываем
+      if (calendarOnLeft || calendarOnRight) {
+        if (calendarOnLeft) {
+          store.setLeftContent(null);
+          // Правая панель остаётся (posts/activity)
+          if (!store.rightContent) {
+            store.setRightContent('posts');
+          }
+        }
+        if (calendarOnRight) {
+          // Восстанавливаем посты справа
+          store.setRightContent('posts');
+        }
+        setIsExpanded(false);
+        return;
+      }
+
+      // Открываем календарь:
+      // Если map/planner на левой → calendar идёт ВПРАВО
+      if (store.leftContent === 'map' || store.leftContent === 'planner') {
+        store.setRightContent('calendar');
+      } else {
+        // Нет map/planner → calendar идёт ВЛЕВО, правая панель сохраняется
+        store.setLeftContent('calendar');
+        if (!store.rightContent) {
+          store.setRightContent('posts');
+        }
+        // rightContent (posts/activity/feed) остаётся как есть!
+      }
+
+      setIsExpanded(false);
+      return;
+    }
+
     if (item.type === 'page') {
       if (item.path) {
         preloadRoute(item.path);
@@ -124,10 +168,20 @@ const Sidebar: React.FC = () => {
     if (item.type === 'left') {
       const leftRoute = item.id === 'map' ? '/map'
         : item.id === 'planner' ? '/planner'
-          : item.id === 'calendar' ? '/calendar'
-            : `/${item.id}`;
+          : `/${item.id}`;
 
       preloadRoute(leftRoute);
+
+      // Если calendar на левой → мигрируем его в правую панель, текущий элемент берёт левую
+      if (store.leftContent === 'calendar') {
+        store.setRightContent('calendar');
+        store.setLeftContent(item.id as ContentType);
+        if (location.pathname !== leftRoute) {
+          setTimeout(() => navigate(leftRoute), 0);
+        }
+        setIsExpanded(false);
+        return;
+      }
 
       // Проверяем, является ли текущая левая панель той же самой
       const isCurrentlyActive = store.leftContent === item.id;
@@ -141,10 +195,8 @@ const Sidebar: React.FC = () => {
         }
       } else {
         // КРИТИЧНО: СНАЧАЛА меняем store, потом navigate
-        // Это гарантирует что MainLayout увидит уже установленный leftContent
-        // и не будет его перезаписывать
         store.setLeftContent(item.id as ContentType);
-        // Для ЛЮБОЙ карты (map/planner/calendar): сохраняем правую панель если она уже есть,
+        // Для ЛЮБОЙ карты (map/planner): сохраняем правую панель если она уже есть,
         // если нет — открываем посты по умолчанию
         if (!store.rightContent) {
           store.setRightContent('posts');
@@ -152,7 +204,6 @@ const Sidebar: React.FC = () => {
 
         // Навигация на соответствующий маршрут (после изменения store)
         if (location.pathname !== leftRoute) {
-          // Используем setTimeout чтобы store успел обновиться до реакции MainLayout
           setTimeout(() => navigate(leftRoute), 0);
         }
       }
@@ -170,12 +221,16 @@ const Sidebar: React.FC = () => {
       const isCurrentlyActive = store.rightContent === item.id;
 
       if (isCurrentlyActive) {
-        // Закрываем правую панель
-        store.setRightContent(null);
-        // Если есть левая панель (карта/планировщик), она останется на полный экран
-        // Если нет левой панели, открываем посты
-        if (!store.leftContent) {
-          store.setRightContent('posts');
+        // Закрываем правую панель ТОЛЬКО если есть map/planner на левой (можно работать без правой)
+        // Если на левой calendar или ничего — переключаем на posts
+        if (store.leftContent === 'map' || store.leftContent === 'planner') {
+          store.setRightContent(null);
+        } else {
+          // Нет map/planner: нельзя оставить пустую правую панель
+          // Если это posts — не закрываем (нечего показать)
+          if (item.id !== 'posts') {
+            store.setRightContent('posts');
+          }
         }
       } else {
         // Открываем правую панель
@@ -194,6 +249,10 @@ const Sidebar: React.FC = () => {
   };
 
   const isItemActive = (item: NavGroup['items'][0]) => {
+    // Calendar — универсальный: может быть на любой стороне
+    if (item.id === 'calendar') {
+      return leftContent === 'calendar' || rightContent === 'calendar';
+    }
     if (item.type === 'page') {
       return location.pathname === item.path;
     }
@@ -207,7 +266,7 @@ const Sidebar: React.FC = () => {
         return true;
       }
 
-      const isPanelOpen = leftContent === item.id || (item.id === 'calendar' && (leftContent === 'calendar' || rightContent === 'calendar'));
+      const isPanelOpen = leftContent === item.id;
       return isPanelOpen;
     }
     if (item.type === 'right') {

@@ -310,3 +310,151 @@ body.disable-posts-blur .page-container.posts-mode * {
   transform: translateY(-1px);
 }
 .variant-btn:hover { background: rgba(255,255,255,0.08); }
+
+/* ===== CALENDAR MODE: GLASSMORPHISM STYLE AS IN POSTS ===== */
+/* Calendar mode - прозрачный контейнер для отображения на фоне карты Leaflet */
+.page-container.calendar-mode .page-main-panel {
+  position: absolute;
+  top: 0;
+  overflow: hidden;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+
+  /* GLASSMORPHISM — Точно как в posts.tsx и activity.tsx */
+  background: transparent !important;
+  backdrop-filter: blur(0) !important;
+  -webkit-backdrop-filter: blur(0) !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 20px;
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+
+  /* Плавные переходы */
+  transition: background 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+/* Calendar mode - полностью прозрачный для отображения карты на фоне */
+.page-container.calendar-mode {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100vh !important;
+}
+
+/* Заголовок календаря - glassmorphism эффект */
+.page-container.calendar-mode .map-content-header {
+  position: relative !important;
+  flex-shrink: 0 !important;
+  padding: 16px 20px 12px 20px !important;
+  margin: 0 !important;
+
+  /* Glassmorphism */
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(12px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+
+  color: rgba(255, 255, 255, 0.95);
+  z-index: 10 !important;
+  pointer-events: auto;
+}
+
+/* Область контента календаря - прозрачная */
+.page-container.calendar-mode .map-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  pointer-events: none; /* Пропускаем клики к карте */
+}
+
+/* TravelCalendar container - glassmorphism эффект */
+.page-container.calendar-mode .travel-calendar-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+
+  /* Glassmorphism */
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(12px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+
+  pointer-events: auto; /* Включаем клики для календаря */
+}
+
+/* Круговой календарь - полностью прозрачный для отображения карты */
+.page-container.calendar-mode .circular-calendar {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Стили для панелей календаря (GlassPanel) */
+.page-container.calendar-mode .calendar-panel.glass-panel {
+  width: 400px;
+
+  /* Glassmorphism */
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(12px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 20px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+.page-container.calendar-mode .calendar-panel .glass-panel-content {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 16px;
+}
+
+/* Текст в календаре */
+.page-container.calendar-mode .map-content-header h1 {
+  color: rgba(255, 255, 255, 0.95) !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Кнопки в календаре - glassmorphism эффект */
+.page-container.calendar-mode .calendar-panel button:not(.glass-panel-close):not(.calendar-panel-close):not([class*="px-4"]) {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  border-radius: 12px;
+  padding: 12px 24px;
+  color: rgba(255, 255, 255, 0.95) !important;
+  font-size: 16px !important;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.page-container.calendar-mode .calendar-panel button:not(.glass-panel-close):not(.calendar-panel-close):not([class*="px-4"]):hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}

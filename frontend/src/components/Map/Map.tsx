@@ -368,7 +368,7 @@ const Map: React.FC<MapProps> = ({
                 } catch (e) {}
             }, 350);
         }
-    }, [mapDisplayMode.shouldShowFullscreen, mapDisplayMode.isTwoPanelMode, mapDisplayMode.isOnlyPostsAndActivity, leftContent, isMapInteractive]);
+    }, [mapDisplayMode.shouldShowFullscreen, mapDisplayMode.isTwoPanelMode, leftContent, isMapInteractive]);
 
     useEffect(() => {
         // On resize, invalidate Leaflet size when map is visible — don't set CSS vars here (MainLayout manages --facade-map-top)

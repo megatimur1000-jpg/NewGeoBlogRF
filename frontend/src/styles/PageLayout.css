@@ -1005,11 +1005,37 @@
   Использует стандартные стили
 } */
 
-/* Для календаря - компактный режим */
+/* Для календаря — заполняет родительский контейнер (левую панель MainLayout) */
 .page-container.calendar-mode {
-  padding: 7mm;
-  padding-top: 15mm;
-  margin-left: 3rem;
+  /* НЕ используем position:fixed/left:50%/transform — календарь заполняет родительский div */
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  top: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+
+  /* Glassmorphism эффект */
+  background: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(16px) saturate(170%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(170%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  border-radius: 16px !important;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  z-index: auto !important; /* Наследует от родителя */
 }
 
 .page-container.calendar-mode .page-header {
@@ -1221,6 +1247,8 @@
   width: calc(100vw - 56px - 2cm) !important;  /* вся ширина экрана - sidebar - отступы */
   max-width: 1000px !important;
   height: auto !important;  /* top+bottom определяют высоту, не нужен явный height */
+  min-height: 0 !important;  /* Переопределяем min-height: 100vh из _layout.css */
+  max-height: none !important;  /* Переопределяем max-height: 100vh из _layout.css */
   
   /* GLASSMORPHISM эффект */
   background: rgba(255, 255, 255, 0.2) !important;
@@ -1253,6 +1281,8 @@
   bottom: 1cm !important;            /* отступ снизу 1cm — ИДЕНТИЧНО сверху */
   width: auto !important;            /* left+right определяют ширину */
   height: auto !important;           /* top+bottom определяют высоту */
+  min-height: 0 !important;          /* Переопределяем min-height из _layout.css */
+  max-height: none !important;       /* Переопределяем max-height из _layout.css */
   transform: none !important;
   max-width: none !important;
   
@@ -1415,6 +1445,8 @@
   width: calc(100vw - 56px - 2cm) !important;
   max-width: 1000px !important;
   height: auto !important;  /* top+bottom определяют высоту */
+  min-height: 0 !important;  /* Переопределяем min-height: 100% из _layout.css */
+  max-height: none !important;  /* Переопределяем max-height из _layout.css */
 
   /* Glassmorphism эффект — идентично posts */
   background: rgba(255, 255, 255, 0.2) !important;
@@ -1442,6 +1474,8 @@
   bottom: 1cm !important;            /* отступ снизу 1cm — ИДЕНТИЧНО сверху */
   width: auto !important;            /* left+right определяют ширину */
   height: auto !important;           /* top+bottom определяют высоту */
+  min-height: 0 !important;          /* Переопределяем min-height из _layout.css */
+  max-height: none !important;       /* Переопределяем max-height из _layout.css */
   transform: none !important;
   max-width: none !important;
 
@@ -1503,7 +1537,8 @@
   height: 100% !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
-  padding: 12px 16px !important;
+  /* padding-bottom 30px чтобы контент не доходил до нижнего края стекла */
+  padding: 12px 16px 30px 16px !important;
 }
 
 /* Стили для кнопок постов */

@@ -20,7 +20,6 @@ import EventLocationModal from '../components/Events/EventLocationModal';
 import storageService from '../services/storageService';
 import { GlassButton } from '../components/Glass';
 import GlassAccordion from '../components/Glass/GlassAccordion';
-import RegionSelector from '../components/Regions/RegionSelector';
 import { useGuest } from '../contexts/GuestContext';
 import { useAuth } from '../contexts/AuthContext';
 import AdminModerationModal from '../components/Moderation/AdminModerationModal';
@@ -53,8 +52,6 @@ const CalendarPage: React.FC = () => {
   const [showEventPreview, setShowEventPreview] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
   
-  // Режим отображения календаря (всегда начинаем с месяца)
-  const [calendarViewMode, setCalendarViewMode] = useState<'day' | 'week' | 'month' | 'year'>('month');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   // Состояние конструктора событий
@@ -150,6 +147,10 @@ const CalendarPage: React.FC = () => {
       unregisterPanel();
     };
   }, [registerPanel, unregisterPanel]);
+
+  // MainLayout синхронизирует URL -> store автоматически при переходе на /calendar
+  // НЕ нужно вручную вызывать setLeftContent — PageLayer монтирует ВСЕ компоненты,
+  // и вызов setLeftContent при mount сломает начальную загрузку постов.
 
   // Обработчики для дополнительных блоков
   const handleToggleBlock = (blockId: string) => {
@@ -572,44 +573,26 @@ const CalendarPage: React.FC = () => {
 
   return (
     <MirrorGradientContainer className="page-layout-container page-container calendar-mode">
-      <div className="page-main-area">
-        <div className="page-content-wrapper">
-          <div className="page-main-panel relative">
-            {/* Основной контент - растянутый на весь контейнер */}
-            <div className="h-full w-full relative">
-              <div className="map-content-container h-full w-full">
-                {/* Заголовок контента */}
-                <div className="map-content-header">
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center space-x-2">
-                      <_FaCalendar className="w-5 h-5 text-slate-400" />
-                      <h1 className="text-lg font-semibold" style={{ color: '#333333' }}>Календарь событий</h1>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      {/* Селектор регионов */}
-                      <RegionSelector />
-                    </div>
-                  </div>
-                </div>
-                {/* Область контента - растянута на максимум */}
-                <div className="map-area h-full w-full">
-                  <div className="full-height-content h-full w-full">
-                    <div className="h-full w-full flex items-center justify-center">
-                      <TravelCalendar 
-                        viewMode={calendarViewMode} 
-                        onViewModeChange={(mode) => {
-                          setCalendarViewMode(mode);
-                        }}
-                        selectedDate={selectedDate}
-                        onSelectedDateChange={setSelectedDate}
-                        onAddEventClick={() => setLeftPanelOpen(true)}
-                        onSearchClick={() => setRightPanelOpen(true)}
-                        onLegendClick={() => setShowLegend(true)}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
+      <div className="page-main-area" style={{ height: '100%' }}>
+        <div className="page-content-wrapper" style={{ height: '100%' }}>
+          <div className="page-main-panel relative" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            {/* Заголовок */}
+            <div style={{ textAlign: 'center', padding: '12px 16px 0' }}>
+              <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#1a1a1a', margin: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <_FaCalendar style={{ width: '18px', height: '18px', color: '#6366f1' }} />
+                Календарь событий
+              </h1>
+            </div>
+
+            {/* Круговой календарь — заполняет всю панель */}
+            <div className="flex-1 overflow-hidden relative" style={{ minHeight: 0 }}>
+              <TravelCalendar 
+                selectedDate={selectedDate}
+                onSelectedDateChange={setSelectedDate}
+                onAddEventClick={() => setLeftPanelOpen(true)}
+                onSearchClick={() => setRightPanelOpen(true)}
+                onLegendClick={() => setShowLegend(true)}
+              />
             </div>
             {/* Правая выдвигающаяся панель — умный поиск событий */}
             <GlassPanel
@@ -1297,7 +1280,7 @@ const CalendarPage: React.FC = () => {
                   <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '16px', color: 'rgba(0, 0, 0, 0.9)' }}>Категории событий</h3>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
                     {categories.map((category) => {
-                      const Icon = category.icon;
+                      const Icon = (category as any).icon;
                       const colorMap: { [key: string]: string } = {
                         'bg-red-500': '#ef4444', 'bg-orange-500': '#f97316', 'bg-sky-500': '#0ea5e9',
                         'bg-emerald-500': '#10b981', 'bg-violet-500': '#8b5cf6', 'bg-amber-500': '#f59e0b',

@@ -19,18 +19,10 @@ export const useMapDisplayMode = () => {
     // Двухоконный режим - когда открыта правая панель
     const isTwoPanelMode = rightContent !== null;
 
-    // Карта на полном экране по умолчанию, но может быть скрыта специальным флагом
-    // Прежняя логика скрывала карту если открыты только posts + activity — это ломало фон.
-    const isOnlyPostsAndActivity = 
-      rightContent === 'posts' && 
-      leftContent !== 'map' && 
-      leftContent !== 'planner' &&
-      !isMapActive;
-
-    // ИСПРАВЛЕНО: Карта должна быть видна и интерактивна всегда когда
-    // leftContent === 'map' или isPlannerActive, независимо от showBackgroundMap.
-    // showBackgroundMap влияет только на фоновый режим (когда карта НЕ является активным контентом).
-    const shouldShowFullscreen = isMapActive || isPlannerActive || (showBackgroundMap && !isOnlyPostsAndActivity);
+    // ИСПРАВЛЕНО: Leaflet карта ВСЕГДА видна как декоративный фон
+    // Пользователь явно требует: фон статичен, не должен перезагружаться при смене контента
+    // showBackgroundMap — единственный способ скрыть фон (через настройки)
+    const shouldShowFullscreen = isMapActive || isPlannerActive || showBackgroundMap;
 
     return {
       // Использовать Leaflet карту (не Яндекс)
@@ -43,7 +35,6 @@ export const useMapDisplayMode = () => {
       isPlannerActive,
       isMapActive,
       isTwoPanelMode,
-      isOnlyPostsAndActivity,
       
       // Текущий тип карты
       mapProvider: isPlannerActive ? 'yandex' : 'leaflet',

@@ -8,6 +8,7 @@ export type ContentType =
   | 'planner'
   | 'calendar'
   | 'posts'
+  | 'activity'
   | 'chat'
   | 'feed'
   | 'friends'

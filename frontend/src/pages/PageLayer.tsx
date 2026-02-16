@@ -34,7 +34,7 @@ const PAGES = {
 const leftPages = ['map', 'planner', 'calendar'];
 const rightPages = [
   ...(FEATURES.CHAT_ENABLED ? ['chat'] as const : []),
-  'feed', 'posts', 'friends', 'test'
+  'feed', 'posts', 'friends', 'test', 'calendar'
 ];
 
 // КРИТИЧНО: Кэш для загруженных компонентов - предотвращает повторную загрузку

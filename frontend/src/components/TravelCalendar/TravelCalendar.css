@@ -1,318 +1,89 @@
-/* Стили для календаря - суперреалистичный градиентный фон и стеклянные ячейки */
+/* Стили для календаря - Glassmorphism стиль как в posts.tsx и activity.tsx */
 
-/* Контейнер календаря - мега крутой градиентный фон с абстракцией */
+/* Корневая оболочка календаря — обеспечивает единообразный glass-вид в любых контекстах */
+.travel-calendar-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  isolation: isolate;
+
+  /* Единообразный glass фон */
+  background: rgba(255,255,255,0.12) !important;
+  backdrop-filter: blur(12px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.10), inset 0 1px rgba(255,255,255,0.04);
+}
+
+/* Контейнер календаря - внутренний блок остаётся прозрачным (фон берёт внешний wrapper) */
 .travel-calendar-container {
   position: relative;
   overflow: hidden;
-  border-radius: 24px;
+  border-radius: 20px;
   isolation: isolate;
   
-  /* Основной градиентный фон - фиолетовый-синий */
-  background: linear-gradient(135deg, 
-    #667eea 0%,      /* Фиолетово-синий */
-    #764ba2 25%,     /* Фиолетовый */
-    #667eea 50%,      /* Фиолетово-синий */
-    #4facfe 75%,     /* Синий */
-    #00f2fe 100%      /* Голубой */
-  ) !important;
-  
-  /* Дополнительные слои для глубины */
-  background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
-  
-  /* Тень и границы */
-  box-shadow: 
-    0 20px 60px rgba(102, 126, 234, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
+  /* Внутренний фон — прозрачный, внешний wrapper отвечает за glass */
+  background: transparent !important;
 
-/* Анимация градиента */
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
+  /* Отключаем backdrop внутри, чтобы не дублировать эффект */
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 
-/* Абстрактные декоративные элементы на фоне */
-.travel-calendar-container::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: 
-    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
-  animation: float 20s ease-in-out infinite;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.travel-calendar-container::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: 
-    radial-gradient(ellipse at top left, rgba(102, 126, 234, 0.3) 0%, transparent 50%),
-    radial-gradient(ellipse at bottom right, rgba(79, 172, 254, 0.3) 0%, transparent 50%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-@keyframes float {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  33% { transform: translate(30px, -30px) rotate(120deg); }
-  66% { transform: translate(-20px, 20px) rotate(240deg); }
-}
-
-/* Стеклянные ячейки дней - glassmorphism эффект */
-.travel-calendar-day-cell {
-  /* Стеклянный эффект */
-  background: rgba(255, 255, 255, 0.15) !important;
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  
-  /* Границы и тени */
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
-  border-radius: 16px;
-  
-  /* Тени для глубины */
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
-  
-  /* Плавные переходы */
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-  z-index: 1;
-  
-  /* Цвет текста */
-  color: rgba(255, 255, 255, 0.95);
-}
-
-/* Эффект свечения для ячеек с событиями */
-.travel-calendar-day-cell.has-events::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.2) 0%, 
-    rgba(255, 255, 255, 0.1) 100%
-  );
-  border-radius: 16px;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Стиль для цифр дат - крупные и читаемые */
-.travel-calendar-day-cell .day-number {
-  color: rgba(255, 255, 255, 0.95);
-  font-weight: 800;
-  font-size: 1.1rem;
-  line-height: 1.4;
-  text-shadow: 
-    0 2px 6px rgba(0, 0, 0, 0.4),
-    0 0 12px rgba(255, 255, 255, 0.3);
-  position: relative;
-  z-index: 2;
-  margin-bottom: 4px;
-  display: block;
-  text-align: left;
-  padding-left: 4px;
-}
-
-/* Эффект при наведении - усиление стеклянного эффекта */
-.travel-calendar-day-cell:hover:not(.empty):not(.selected) {
-  background: rgba(255, 255, 255, 0.25) !important;
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-3px) scale(1.03);
-  box-shadow: 
-    0 12px 40px rgba(0, 0, 0, 0.2),
-    0 0 0 2px rgba(255, 255, 255, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
-}
-
-/* Выделенный день - яркий стеклянный эффект */
-.travel-calendar-day-cell.selected {
-  background: rgba(255, 255, 255, 0.3) !important;
-  border: 2px solid rgba(255, 255, 255, 0.6);
-  color: rgba(255, 255, 255, 1);
-  font-weight: 800;
-  box-shadow: 
-    0 16px 48px rgba(0, 0, 0, 0.3),
-    0 0 0 3px rgba(255, 255, 255, 0.4),
-    inset 0 2px 0 rgba(255, 255, 255, 0.6),
-    inset 0 -2px 0 rgba(0, 0, 0, 0.1);
-  transform: scale(1.05);
-}
-
-/* Акцентная метка для выделенного дня */
-.travel-calendar-day-cell.selected::after {
-  content: '';
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 8px;
-  height: 8px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 50%;
-  box-shadow: 
-    0 0 8px rgba(255, 255, 255, 0.8),
-    0 0 16px rgba(255, 255, 255, 0.4);
-  z-index: 3;
-}
-
-/* Квадраты с событиями - дополнительное свечение */
-.travel-calendar-day-cell.has-events:not(.selected) {
-  background: rgba(255, 255, 255, 0.2) !important;
-  border-color: rgba(255, 255, 255, 0.4);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
-}
-
-/* Пустые ячейки (дни вне месяца) */
-.travel-calendar-day-cell.empty {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  cursor: default;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.travel-calendar-day-cell.empty:hover {
-  background: rgba(255, 255, 255, 0.05) !important;
-  transform: none;
+  /* Минимальные границы */
   box-shadow: none;
+  border: none;
+}
+/* Если календарь показывают вместе с картой (двухпанельный режим),
+   принудительно используем тот же glass-фон, что и в posts/activity
+   — это делает визуал насыщеннее и предотвращает «выцветание» SVG. */
+.activity-feed.has-left-panel .page-container.calendar-mode .travel-calendar-container,
+.activity-feed.has-left-panel .travel-calendar-root .travel-calendar-container {
+  backdrop-filter: blur(12px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
+  background: #ffffff1a !important; /* matches posts/activity look */
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12), inset 0 1px rgba(255,255,255,0.04) !important;
 }
 
-/* Стили для режима просмотра года */
-.travel-calendar-day-cell-year {
-  min-height: 20px;
-  background: rgba(255, 255, 255, 0.12) !important;
-  backdrop-filter: blur(10px) saturate(150%);
-  -webkit-backdrop-filter: blur(10px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 
-    0 4px 16px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+/* Защитные правила для SVG — изолируем композитинг и снимаем любые фильтры */
+.travel-calendar-root .ccal-ring,
+.travel-calendar-root .ccal-svg,
+.activity-feed.has-left-panel .travel-calendar-root .ccal-ring,
+.activity-feed.has-left-panel .travel-calendar-root .ccal-svg {
+  isolation: isolate !important;
+  mix-blend-mode: normal !important;
+  filter: none !important;
+  -webkit-filter: none !important;
 }
 
-.travel-calendar-day-cell-year.empty {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  cursor: default;
+.travel-calendar-root .ccal-segment,
+.activity-feed.has-left-panel .travel-calendar-root .ccal-segment {
+  mix-blend-mode: normal !important;
+  opacity: 1 !important; /* ensure visible */
+}
+/* Внутренний контент - всё прозрачно для карты */
+.travel-calendar-container > div {
+  background: transparent !important;
 }
 
-.travel-calendar-day-cell-year.has-events {
-  background: rgba(255, 255, 255, 0.18) !important;
-  border-color: rgba(255, 255, 255, 0.35);
-  box-shadow: 
-    0 6px 20px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+/* Удаляем все градиентные фоны и анимации */
+@keyframes gradientShift {
+  0% {
+    display: none;
+  }
 }
 
-.travel-calendar-day-cell-year.weekend {
-  border-color: rgba(255, 200, 200, 0.3);
+.travel-calendar-container::before,
+.travel-calendar-container::after {
+  display: none;
 }
 
-.travel-calendar-day-cell-year:hover:not(.empty) {
-  background: rgba(255, 255, 255, 0.25) !important;
-  transform: scale(1.05);
-  z-index: 10;
-  box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
-}
-
-/* Улучшенные стили для событий внутри ячеек */
-.travel-calendar-day-cell .space-y-1 > div {
-  position: relative;
-  z-index: 2;
-}
-
-/* Адаптивность - убеждаемся что все помещается */
-.travel-calendar-container {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.travel-calendar-day-cell {
-  min-height: 70px;
-  max-height: 70px;
-  display: flex;
-  flex-direction: column;
-  padding: 8px;
-  font-size: 0.75rem;
-}
-
-/* Сетка календаря - правильное отображение */
-.travel-calendar-container .grid.grid-cols-7 {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-}
-
-/* Улучшенная читаемость текста на градиентном фоне */
-.travel-calendar-container * {
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-}
-
-/* Улучшенная резкость иконок событий */
-.travel-calendar-day-cell .event-icon-wrapper svg,
-.travel-calendar-day-cell .event-icon-wrapper i {
-  filter: contrast(1.2) brightness(1.05) saturate(1.1);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
-}
-
-/* Стили для заголовков дней недели */
-.calendar-weekday-header {
-  color: rgba(255, 255, 255, 0.95) !important;
-  font-weight: 700 !important;
-  font-size: 0.75rem;
-  text-shadow: 
-    0 2px 4px rgba(0, 0, 0, 0.3),
-    0 0 8px rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.15) !important;
-  backdrop-filter: blur(15px) saturate(180%);
-  -webkit-backdrop-filter: blur(15px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 10px;
-  padding: 6px 4px;
-  transition: all 0.3s ease;
-}
-
-.calendar-weekday-header:hover {
-  background: rgba(255, 255, 255, 0.25) !important;
-  border-color: rgba(255, 255, 255, 0.4);
-  transform: translateY(-2px);
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
-}
-
-/* Сетка календаря */
-.travel-calendar-container .calendar-grid {
-  position: relative;
-  z-index: 1;
+/* Удаляем стили для старого grid layout - теперь только circular */
+.travel-calendar-day-cell,
+.travel-calendar-day-cell-year,
+.calendar-weekday-header,
+.calendar-grid {
+  display: none;
 }
