@@ -125,8 +125,11 @@ export const listPosts = async (params: {
   content_type?: 'post' | 'guide' | 'all'; // Фильтр по типу контента
   status?: string; // Фильтр по статусу (для админа)
 }): Promise<ListPostsResponse> => {
+  console.log('📥 listPosts вызван с параметрами:', params);
+  
   try {
     // Загружаем только посты (блоги удалены)
+    console.log('🔗 Отправляем запрос к /api/posts...');
     const postsResponse = await apiClient.get('/posts', {
       params: {
         limit: params.limit || 50,
@@ -136,6 +139,8 @@ export const listPosts = async (params: {
         status: params.status // Передаём статус для админа
       }
     });
+
+    console.log('✅ Ответ от API получен:', postsResponse.status, postsResponse.data);
 
     // Собираем посты
     const posts: PostDTO[] = (postsResponse.data?.data || postsResponse.data || []).map((post: any) => ({
@@ -161,11 +166,14 @@ export const listPosts = async (params: {
     // Применяем лимит
     const limitedContent = allContent.slice(0, params.limit || 50);
 
+    console.log('✅ Посты успешно загружены:', limitedContent.length, 'постов');
     return {
       data: limitedContent,
       total: allContent.length
     };
   } catch (error) {
+    console.warn('⚠️ Ошибка при загрузке постов, используем fallback:', error);
+    
     // Fallback к моковым данным если API недоступен
     const mockPosts: PostDTO[] = [
       {
@@ -199,6 +207,7 @@ export const listPosts = async (params: {
       }
     ];
     
+    console.log('📋 Возвращаем моковые данные:', mockPosts.length, 'постов');
     return {
       data: mockPosts,
       total: mockPosts.length

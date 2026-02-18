@@ -10,8 +10,8 @@
   padding: 0;
 }
 
-/* Исключение для chat-container, planner-mode, map-mode и posts-mode - там отступы не нужны */
-.page-container:not(.chat-container):not(.planner-mode):not(.map-mode):not(.posts-mode) {
+/* Исключение для chat-container, planner-mode, map-mode, posts-mode и calendar-mode - отступы не нужны */
+.page-container:not(.chat-container):not(.planner-mode):not(.map-mode):not(.posts-mode):not(.calendar-mode) {
   padding: 24px;
 }
 
@@ -470,16 +470,15 @@ html, body, #root {
 
 /* End overrides */
 
-/* Glass style specifically for posts panel */
+/* Glass style specifically for posts panel — UNIFIED GLASS */
 .posts-glass {
-  /* lighter glass so map gradient shows through */
-  background: rgba(255, 255, 255, 0.06) !important;
-  background-image: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)) !important;
-  backdrop-filter: blur(14px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(14px) saturate(160%) !important;
-  border-radius: 14px !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
-  box-shadow: 0 12px 34px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.03) !important;
+  /* UNIFIED: единый glass стиль для всех контентных панелей */
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(10px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(160%) !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  box-shadow: 0 14px 48px rgba(0,0,0,0.25) !important;
   padding: 14px !important;
 }
 

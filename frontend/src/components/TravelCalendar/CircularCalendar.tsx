@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useId } from 'react';
 import { MockEvent } from './mockEvents';
 import './CircularCalendar.css';
 
@@ -57,6 +57,9 @@ const CircularCalendar: React.FC<CircularCalendarProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rotationAngle = -activeMonth * 30;
+  // Уникальный ID экземпляра — предотвращает коллизию SVG gradient ID
+  // при одновременном монтировании двух Calendar (leftPages + rightPages)
+  const instanceId = useId().replace(/:/g, '');
 
   const getDaysInMonth = useCallback((monthIdx: number, yr: number) => {
     const daysCount = new Date(yr, monthIdx + 1, 0).getDate();
@@ -192,7 +195,7 @@ const CircularCalendar: React.FC<CircularCalendarProps> = ({
             <circle cx={CX} cy={CY} r={R_OUTER + 8} fill="#fff" opacity={1} />
             <defs>
               {segments.map(seg => (
-                <linearGradient key={`grad-${seg.index}`} id={`seg-grad-${seg.index}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                <linearGradient key={`grad-${seg.index}`} id={`seg-grad-${instanceId}-${seg.index}`} x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor={seg.color} />
                   <stop offset="100%" stopColor={seg.colorDark} />
                 </linearGradient>
@@ -202,7 +205,7 @@ const CircularCalendar: React.FC<CircularCalendarProps> = ({
               <path
                 key={seg.index}
                 d={seg.d}
-                fill={`url(#seg-grad-${seg.index})`}
+                fill={`url(#seg-grad-${instanceId}-${seg.index})`}
                 stroke="rgba(255,255,255,0.25)"
                 strokeWidth={1.5}
                 className={`ccal-segment ${seg.index === activeMonth ? 'active' : ''}`}

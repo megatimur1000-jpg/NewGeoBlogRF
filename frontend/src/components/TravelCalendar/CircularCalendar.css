@@ -38,7 +38,7 @@
 
 .ccal-container.is-expanded .ccal-ring {
   opacity: 0.28;
-  filter: blur(0.2px) saturate(0.9);
+  filter: blur(0.2px); /* Убрали saturate(0.9) — причина обесцвечивания SVG */
 }
 
 .ccal-container.is-expanded .ccal-center {

@@ -185,6 +185,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           }`}
           style={leftContent === 'calendar' ? {
             // Календарь: контентная панель — выровнена с постами
+            // UNIFIED GLASS — единственный слой glass на этом wrapper
             position: 'fixed',
             top: 'calc(64px + 1cm)',
             bottom: '1cm',
@@ -193,12 +194,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             zIndex: 1145,
             overflow: 'hidden',
             pointerEvents: 'auto',
-            background: 'rgba(255, 255, 255, 0.15)',
-            backdropFilter: 'blur(16px) saturate(170%)',
-            WebkitBackdropFilter: 'blur(16px) saturate(170%)',
-            border: '1px solid rgba(255, 255, 255, 0.25)',
-            borderRadius: '16px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.2)',
+            // Единый glass стиль (идентично posts/activity dual-mode)
+            background: 'rgba(255, 255, 255, 0.08)',
+            backdropFilter: 'blur(10px) saturate(160%)',
+            WebkitBackdropFilter: 'blur(10px) saturate(160%)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            borderRadius: '12px',
+            boxShadow: '0 14px 48px rgba(0,0,0,0.25)',
             visibility: 'visible',
           } : {
             // Карта/планировщик: fullscreen background

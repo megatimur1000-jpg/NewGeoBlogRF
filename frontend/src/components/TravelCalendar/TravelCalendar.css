@@ -1,65 +1,48 @@
 /* Стили для календаря - Glassmorphism стиль как в posts.tsx и activity.tsx */
 
-/* Корневая оболочка календаря — обеспечивает единообразный glass-вид в любых контекстах */
+/* Корневая оболочка календаря — прозрачная, glass обеспечивает MainLayout wrapper */
 .travel-calendar-root {
   position: relative;
   width: 100%;
   height: 100%;
-  border-radius: 20px;
+  border-radius: 12px;
   overflow: hidden;
   isolation: isolate;
 
-  /* Единообразный glass фон */
-  background: rgba(255,255,255,0.12) !important;
-  backdrop-filter: blur(12px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
-  border: 1px solid rgba(255,255,255,0.12) !important;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.10), inset 0 1px rgba(255,255,255,0.04);
+  /* Без собственного glass — один слой на MainLayout */
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none;
 }
 
-/* Контейнер календаря - внутренний блок остаётся прозрачным (фон берёт внешний wrapper) */
+/* Контейнер календаря - внутренний блок прозрачный */
 .travel-calendar-container {
   position: relative;
   overflow: hidden;
-  border-radius: 20px;
+  border-radius: 12px;
   isolation: isolate;
   
-  /* Внутренний фон — прозрачный, внешний wrapper отвечает за glass */
+  /* Прозрачный — glass на родительском wrapper */
   background: transparent !important;
-
-  /* Отключаем backdrop внутри, чтобы не дублировать эффект */
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 
-  /* Минимальные границы */
   box-shadow: none;
   border: none;
-}
-/* Если календарь показывают вместе с картой (двухпанельный режим),
-   принудительно используем тот же glass-фон, что и в posts/activity
-   — это делает визуал насыщеннее и предотвращает «выцветание» SVG. */
-.activity-feed.has-left-panel .page-container.calendar-mode .travel-calendar-container,
-.activity-feed.has-left-panel .travel-calendar-root .travel-calendar-container {
-  backdrop-filter: blur(12px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
-  background: #ffffff1a !important; /* matches posts/activity look */
-  border: 1px solid rgba(255,255,255,0.12) !important;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.12), inset 0 1px rgba(255,255,255,0.04) !important;
 }
 
 /* Защитные правила для SVG — изолируем композитинг и снимаем любые фильтры */
 .travel-calendar-root .ccal-ring,
-.travel-calendar-root .ccal-svg,
-.activity-feed.has-left-panel .travel-calendar-root .ccal-ring,
-.activity-feed.has-left-panel .travel-calendar-root .ccal-svg {
+.travel-calendar-root .ccal-svg {
   isolation: isolate !important;
   mix-blend-mode: normal !important;
   filter: none !important;
   -webkit-filter: none !important;
 }
 
-.travel-calendar-root .ccal-segment,
-.activity-feed.has-left-panel .travel-calendar-root .ccal-segment {
+.travel-calendar-root .ccal-segment {
   mix-blend-mode: normal !important;
   opacity: 1 !important; /* ensure visible */
 }
